@@ -1,0 +1,64 @@
+---
+title: "Lung single cell"
+output: html_document
+date: "2022-09-15"
+---
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+source("R_functions/pretty_plots.R")
+```
+
+
+## Load data
+```{r}
+#tar_load(d10x)
+tar_load(d10x_QC)
+tar_load(d10x_MT)
+```
+
+
+
+
+## cell counts
+```{r}
+cell_count<-function(d10x, filename){
+  plt_count<-as.data.frame(tapply(rownames(d10x@meta.data), d10x@meta.data$Subject_Identity, length))
+  plt_count$individual<-rownames(plt_count)
+  colnames(plt_count)<-c("cell_count","individual")
+  
+  meta_disease<-d10x@meta.data[,c("Subject_Identity","Disease_Identity")]
+  meta_disease$Subject_Identity<-as.character(meta_disease$Subject_Identity)
+  meta_disease$Disease_Identity<-as.character(meta_disease$Disease_Identity)
+  rownames(meta_disease)<-NULL
+  meta_disease<-meta_disease[!duplicated(meta_disease),]
+  plt_count<-merge(plt_count,meta_disease , by.x="individual",by.y="Subject_Identity")
+  
+  print(ggplot(plt_count, aes(Disease_Identity, cell_count))+
+    geom_boxplot(fill="lightgrey")+geom_point()+
+    theme_bw()+ylab("Total Cell Number")+th)
+  ggsave(file=paste(here("figures"),"/cell_count_plot_",filename,".pdf", sep=""))
+}
+
+cell_count(d10x_MT, "raw")
+cell_count(d10x_QC, "QCed")
+
+```
+
+
+##   Visualize QC metrics
+Low-quality cells or empty droplets will often have very few genes
+Cell doublets or multiplets may exhibit an aberrantly high gene count
+nFeature number of unique genes
+nCount number of total molecules: already filtered at min 1000 unique genes
+from geo page
+Cells filtered with > 12% of transcriptome from intron-spanning reads; < 20% mitochondrial origin; at least 1000 unique genes
+
+```{r}
+ggplot(d10x_MT@meta.data, aes(nCount_RNA,nFeature_RNA,colour=percent.mt)) + 
+    geom_point() + 
+    scale_color_gradientn(colors=c("black","blue","green2","red","yellow"),name="Percent\nMitochondrial") +
+    geom_hline(yintercept = 500) + xlab("Number of Total Molecules\n(nCount) ")+ylab("Number of Unique Genes\n(nFeature)")+
+    geom_hline(yintercept = 6000) +theme_bw()+th
+  ggsave(file=here("figures/QC_plot.pdf"))
+```
