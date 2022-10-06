@@ -4,6 +4,25 @@ load_d10x <- function(file){
   d10x.copd.mini
 }
 
+#load raw data
+load_d10x_raw <- function(dataset_loc){
+  #dataset_loc <- here("../../../projects/macparland/RE/PediatricAdult")
+  
+  samples<-list.files(dataset_loc)
+  
+  d10x.data <- sapply(samples, function(y){
+    d10x <- Read10X(file.path(dataset_loc,paste(samples[y], sep=""),"filtered_feature_bc_matrix"))
+    colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),i,sep="-")
+    d10x
+  })
+  d10x.data<-do.call("cbind",d10x.data)
+    
+  #' Initialize the Seurat object with the raw (non-normalized data).
+  d10x <- CreateSeuratObject(counts = d10x.data, project = "ped_adult_map", min.cells = 3, min.features = 0)
+  d10x
+}
+
+
 
 ## QC
 #'The percentage of reads that map to the mitochondrial genome
