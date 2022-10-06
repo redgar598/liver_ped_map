@@ -5,9 +5,9 @@
 #SBATCH -p all 
 #SBATCH -c 1 
 #SBATCH -N 1 
-#SBATCH --output=%x-%j.out
+#SBATCH --output=%x.out
 
 
 module load R/4.2.1
 
-Rscript R_functions/test.R
+Rscript tar_make()
