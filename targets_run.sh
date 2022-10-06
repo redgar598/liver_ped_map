@@ -8,6 +8,6 @@
 #SBATCH --output=%x-%j.out
 
 
-module load r/4.2.1
+module load R/4.2.1
 
 Rscript R_functions/test.R
