@@ -10,4 +10,9 @@
 
 module load R/4.2.1
 
-Rscript tar_make()
+
+
+
+
+
+##Rscript R_functions/test.R
