@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --mem=5G
+#SBATCH --mem=20G
 #SBATCH -J test 
 #SBATCH -p all 
 #SBATCH -c 8 
