@@ -2,7 +2,7 @@
 #SBATCH --mem=5G
 #SBATCH -J test 
 #SBATCH -p all 
-#SBATCH -c 1 
+#SBATCH -c 8 
 #SBATCH -N 1 
 #SBATCH --output=%x.out
 
