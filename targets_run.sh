@@ -1,5 +1,4 @@
 #!/bin/bash
-#SBATCH -t 55:00 
 #SBATCH --mem=5G
 #SBATCH -J test 
 #SBATCH -p all 
