@@ -12,6 +12,6 @@ module load R/4.2.1
 
 
 
-##Rscript R_functions/test.R
+Rscript R_functions/test.R
 
-Rscript R_functions/test_notarget.R
+##Rscript R_functions/test_notarget.R
