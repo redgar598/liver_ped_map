@@ -7,7 +7,7 @@ tar_option_set(packages = c("here","dplyr", "ggplot2","scales","Seurat"))
 
 
 list(
-  tar_target(load_d10x_raw, load_d10x_raw(here("../../../projects/macparland/RE/PediatricAdult"))),
+  tar_target(d10x_raw, load_d10x_raw(here("../../../projects/macparland/RE/PediatricAdult"))),
   tar_render(report, "R_functions/visualize_functions.Rmd")
   )
 

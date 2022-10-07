@@ -12,13 +12,13 @@ source("R_functions/pretty_plots.R")
 
 ## Load data
 ```{r}
-tar_load(load_d10x_raw)
+tar_load(d10x_raw)
 ```
 
 
 ## Dim of data
 ```{r}
-print(load_d10x_raw)
+print(d10x_raw)
 ```
 
 
