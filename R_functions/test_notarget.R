@@ -5,6 +5,7 @@ library(Seurat)
 dataset_loc <- here("../../../projects/macparland/RE/PediatricAdult")
 
 samples<-list.files(dataset_loc)
+print(samples)
 
 d10x.data <- sapply(samples, function(y){
   print(file.path(dataset_loc,paste(samples[y], sep=""),"filtered_feature_bc_matrix"))
