@@ -11,7 +11,7 @@ load_d10x_raw <- function(dataset_loc){
   samples<-list.files(dataset_loc)
   print(samples)
   
-  d10x.data <- sapply(1:length(samples), function(y){
+  d10x.data <- lapply(1:length(samples), function(y){
     print(file.path(dataset_loc,paste(samples[y], sep=""),"filtered_feature_bc_matrix"))
     d10x <- Read10X(file.path(dataset_loc,paste(samples[y], sep=""),"filtered_feature_bc_matrix"))
     #colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),i,sep="-")
