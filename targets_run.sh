@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --mem=60G
+#SBATCH --mem=100G
 #SBATCH -J test 
 #SBATCH -p veryhimem 
 #SBATCH -c 32 
