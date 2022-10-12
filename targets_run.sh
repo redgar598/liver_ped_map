@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --mem=20G
+#SBATCH --mem=60G
 #SBATCH -J test 
-#SBATCH -p all 
+#SBATCH -p veryhimem 
 #SBATCH -c 32 
 #SBATCH -N 1 
 #SBATCH --output=%x.out
