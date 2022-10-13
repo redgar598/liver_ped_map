@@ -1,3 +1,10 @@
+# load meta
+load_meta <- function(file){
+  meta<-read.table(file, header=T)
+  meta$Sample_ID[which(meta$Sample_ID=="C85_caud3pr")]<-"C85_caud5pr"
+  meta
+}
+
 # load seurat object
 load_d10x <- function(file){
   load(here(file))
@@ -5,7 +12,7 @@ load_d10x <- function(file){
 }
 
 #load raw data
-load_d10x_raw <- function(dataset_loc){
+load_d10x_raw <- function(dataset_loc, meta){
   #dataset_loc <- here("../../../projects/macparland/RE/PediatricAdult")
   
   samples<-list.files(dataset_loc)
@@ -42,14 +49,15 @@ load_d10x_raw <- function(dataset_loc){
 #'We use the set of all genes starting with MT- as a set of mitochondrial genes
 # The [[ operator can add columns to object metadata. This is a great place to stash QC stats
 MT <- function(d10x.list){
-  lapply(1:length(d10x.list), function(x){d10x.list[[x]][["percent.mt"]] <<- PercentageFeatureSet(d10x.list[[x]], pattern = "^MT-")})
+  d10x.list.mt<-lapply(1:length(d10x.list), function(x){d10x.list[[x]][["percent.mt"]] <<- PercentageFeatureSet(d10x.list[[x]], pattern = "^MT-")})
   d10x.list.mt
 }
 
 
-
-
-QC <- function(d10x){
-  d10x_QC <- subset(d10x, subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 50)# & predicted_doublet=="False")
-  d10x_QC
+QC <- function(d10x.list){
+  d10x.list.QC<-lapply(1:length(d10x.list), function(x){d10x.list[[x]] <<- subset(d10x.list[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 50)})
+  d10x.list.QC
 }
+
+
+

@@ -12,7 +12,9 @@ source("R_functions/pretty_plots.R")
 
 ## Load data
 ```{r}
+tar_load(meta)
 tar_load(d10x.list.mt)
+tar_load(d10x.list.QC)
 ```
 
 
@@ -23,14 +25,6 @@ print(d10x_raw)
 
 
 
-## cell counts
-```{r}
-plt_count_raw<-lapply(1:length(d10x.list.mt), function(x) {
-  df<-data.frame(raw_cell_count=nrow(d10x.list.mt[[x]]@meta.data),individual=unique(d10x.list.mt[[x]]@meta.data$individual))
-  df})
-plt_count_raw<-do.call(rbind, plt_count_raw)
-print(plt_count_raw)
-```
 
 
 ##   Visualize QC metrics
@@ -42,7 +36,7 @@ from geo page
 Cells filtered with > 12% of transcriptome from intron-spanning reads; < 20% mitochondrial origin; at least 1000 unique genes
 
 ```{r}
-plt_QC_data<-do.call(rbind, lapply(1:length(d10x.list), function(x) d10x.list[[x]]@meta.data))
+plt_QC_data<-do.call(rbind, lapply(1:length(d10x.list.mt), function(x) d10x.list.mt[[x]]@meta.data))
 
 qc_plts<-ggplot(plt_QC_data, aes(nCount_RNA,nFeature_RNA,colour=percent.mt)) + 
   geom_point() + 
@@ -79,3 +73,35 @@ MT_plt_individual<-ggplot(plt_QC_data,aes(percent.mt)) + geom_histogram(binwidth
 MT_plt_individual
 save_plts(MT_plt_individual, "percentMT_plt_individual", w=6,h=4)
 ```
+
+#'Cell counts
+```{r}
+plt_count_raw<-lapply(1:length(d10x.list.mt), function(x) {
+  df<-data.frame(raw_cell_count=nrow(d10x.list.mt[[x]]@meta.data),individual=unique(d10x.list.mt[[x]]@meta.data$individual))
+  df})
+plt_count_raw<-do.call(rbind, plt_count_raw)
+print(plt_count_raw)
+
+plt_count_QC<-lapply(1:length(d10x.list.QC), function(x) {
+  df<-data.frame(qc_cell_count=nrow(d10x.list.QC[[x]]@meta.data),individual=unique(d10x.list.QC[[x]]@meta.data$individual))
+  df})
+plt_count_QC<-do.call(rbind, plt_count_QC)
+print(plt_count_QC)
+
+counts<-merge(plt_count_raw, plt_count_QC, by="individual")
+meta<-merge(meta,counts,by.x="Sample_ID", by.y="individual")
+
+cell_count<-grid.arrange(ggplot(meta, aes(AgeGroup, raw_cell_count,fill=AgeGroup))+
+                           geom_boxplot()+geom_point()+
+                           theme_bw()+geom_text(aes(label=Sample_ID), hjust=-0.25, size=3)+xlab("Age Group")+
+                           ylab("Total Cell Number")+th+fillscale_age+
+                           theme(legend.position = "none")+ggtitle("Before Quality Control"),
+                         ggplot(meta, aes(AgeGroup, qc_cell_count,fill=AgeGroup))+
+                           geom_boxplot()+geom_point()+
+                           theme_bw()+geom_text(aes(label=Sample_ID), hjust=-0.25, size=3)+xlab("Age Group")+
+                           ylab("Total Cell Number")+th+fillscale_age+
+                           theme(legend.position = "none")+ggtitle("After Quality Control"), ncol=2)
+
+save_plts(cell_count, "QC_cellcount_age", w=8,h=4)
+```
+
