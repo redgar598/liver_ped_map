@@ -45,10 +45,10 @@ print(head(d10x.list[[1]]@meta.data))
 
 ## cell counts
 plt_count_raw<-do.call(rbind,lapply(1:length(d10x.list), function(x) {
-  df<-as.data.frame(tapply(rownames(d10x.list[[x]]@meta.data), list(d10x.list[[x]]@meta.data$individual, d10x.list[[x]]@meta.data$Chemistry), length))
+  df<-as.data.frame(tapply(rownames(d10x.list[[x]]@meta.data), list(d10x.list[[x]]@meta.data$individual, d10x.list[[x]]@meta.data$AgeGroup), length))
   df$individual<-rownames(df)
-  df$condition<-names(d10x.list)[x]
-  colnames(df)<-c("cell_count","individual","Chemistry")
+  df$AgeGroup<-names(d10x.list)[x]
+  colnames(df)<-c("cell_count","individual","AgeGroup")
   df}))
 print(plt_count_raw)
 
@@ -110,14 +110,14 @@ d10x.list
 
 ## cell counts after QC
 plt_count_QC<-do.call(rbind,lapply(1:length(d10x.list), function(x) {
-  df<-as.data.frame(tapply(rownames(d10x.list[[x]]@meta.data), list(d10x.list[[x]]@meta.data$individual, d10x.list[[x]]@meta.data$orig.ident), length))
+  df<-as.data.frame(tapply(rownames(d10x.list[[x]]@meta.data), list(d10x.list[[x]]@meta.data$individual, d10x.list[[x]]@meta.data$AgeGroup), length))
   df$individual<-rownames(df)
-  df$condition<-names(d10x.list)[x]
-  colnames(df)<-c("cell_count","individual","condition")
+  df$AgeGroup<-names(d10x.list)[x]
+  colnames(df)<-c("cell_count","individual","AgeGroup")
   df}))
 print(plt_count_QC)
 
-QC_count<-ggplot(plt_count_QC, aes(condition, cell_count))+
+QC_count<-ggplot(plt_count_QC, aes(AgeGroup, cell_count))+
   geom_boxplot(fill="lightgrey")+geom_point()+
   theme_bw()+geom_text(aes(label=individual), hjust=-0.25)+ylab("Total Cell Number")
 save_plts(QC_count, "QC_cellcount", w=6,h=4)
