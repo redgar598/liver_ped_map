@@ -41,8 +41,6 @@ d10x.list <- sapply(1:length(samples), function(y){
 d10x.list
 
 
-print(head(d10x.list[[1]]@meta.data))
-print(data.frame(raw_cell_count=nrow(d10x.list[[1]]@meta.data),individual=unique(d10x.list[[1]]@meta.data$individual)))
 
 ## cell counts
 plt_count_raw<-lapply(1:length(d10x.list), function(x) {
@@ -97,7 +95,7 @@ save_plts(qc_plts, "percentMT_plt", w=6,h=4)
 d10x.list.raw<-d10x.list
 
 invisible(lapply(1:length(d10x.list), function(x){
-  d10x.list[[x]] <<- subset(d10x.list[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 10 & predicted_doublet=="False")
+  d10x.list[[x]] <<- subset(d10x.list[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 10)
 }))
 
 d10x.list
