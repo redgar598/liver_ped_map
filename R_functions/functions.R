@@ -11,17 +11,26 @@ load_d10x_raw <- function(dataset_loc){
   samples<-list.files(dataset_loc)
   print(samples)
   
-  d10x.data <- lapply(1:length(samples), function(y){
+  d10x.list <- sapply(1:length(samples), function(y){
     print(file.path(dataset_loc,paste(samples[y], sep=""),"filtered_feature_bc_matrix"))
     d10x <- Read10X(file.path(dataset_loc,paste(samples[y], sep=""),"filtered_feature_bc_matrix"))
     colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),samples[y],sep="-")
+    # print(dim(d10x))
+    #' Initialize the Seurat object with the raw (non-normalized data).
+    d10x<-CreateSeuratObject(counts = d10x, project = "ped_adult_map", min.cells = 3, min.features = 0)
+    
+    #add meta data to each seurat object
+    meta_cell<-data.frame(cell=colnames(d10x), individual=sapply(colnames(d10x), function(x) strsplit(x,"-")[[1]][2]))
+    # print(head(meta_cell))
+    meta_cell_add<-merge(meta_cell, meta, by.x="individual", by.y="Sample_ID")
+    meta_cell_add<-meta_cell_add[match(colnames(d10x), meta_cell_add$cell),]
+    # print(identical(meta_cell_add$cell, colnames(d10x)))
+    rownames(meta_cell_add)<-meta_cell_add$cell
+    d10x<- AddMetaData(d10x, meta_cell_add)
     d10x
   })
-  d10x.data<-do.call("cbind",d10x.data)
   
-  #' Initialize the Seurat object with the raw (non-normalized data).
-  d10x <- CreateSeuratObject(counts = d10x.data, project = "ped_adult_map", min.cells = 3, min.features = 0)
-  d10x
+  d10x.list
 }
 
 
@@ -32,13 +41,15 @@ load_d10x_raw <- function(dataset_loc){
 #'We calculate mitochondrial QC metrics with the PercentageFeatureSet function, which calculates the percentage of counts originating from a set of features
 #'We use the set of all genes starting with MT- as a set of mitochondrial genes
 # The [[ operator can add columns to object metadata. This is a great place to stash QC stats
-MT <- function(d10x){
-  d10x[["percent.mt"]] <- PercentageFeatureSet(d10x, pattern = "^MT-")
-  d10x
+MT <- function(d10x.list){
+  lapply(1:length(d10x.list), function(x){d10x.list[[x]][["percent.mt"]] <<- PercentageFeatureSet(d10x.list[[x]], pattern = "^MT-")})
+  d10x.list.mt
 }
 
 
+
+
 QC <- function(d10x){
-  d10x_QC <- subset(d10x, subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 10)# & predicted_doublet=="False")
+  d10x_QC <- subset(d10x, subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 50)# & predicted_doublet=="False")
   d10x_QC
 }

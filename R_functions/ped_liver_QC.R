@@ -195,7 +195,7 @@ d10x <- RunTSNE(d10x, dims = 1:30)
 
 # cluster
 d10x <- FindNeighbors(d10x, reduction = "pca", dims = 1:20)
-d10x <- FindClusters(d10x, resolution = 0.6)
+d10x <- FindClusters(d10x, resolution = 1)
 
 
 #saveRDS(d10x.primary, file = here("data","d10x_primary_normalized.rds"))
@@ -220,10 +220,10 @@ save_plts(nFeature_UMAP_SCT, "nfeature_UMAP_afterSCT", w=6,h=4)
 
 
 
-chem_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "Chemistry", pt.size=0.25)+colscale_diagnosis
+chem_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "Chemistry", pt.size=0.25)
 save_plts(chem_umap_sct, "chem_SCT_umap", w=6,h=4)
 
-age_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)+colscale_diagnosis
+age_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)
 save_plts(age_umap_sct, "age_SCT_umap", w=6,h=4)
 
 individual_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "individual", pt.size=1)

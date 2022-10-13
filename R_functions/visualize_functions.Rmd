@@ -12,7 +12,7 @@ source("R_functions/pretty_plots.R")
 
 ## Load data
 ```{r}
-tar_load(d10x_raw)
+tar_load(d10x.list.mt)
 ```
 
 
@@ -23,45 +23,59 @@ print(d10x_raw)
 
 
 
-<!-- ## cell counts -->
-<!-- ```{r} -->
-<!-- cell_count<-function(d10x, filename){ -->
-<!--   plt_count<-as.data.frame(tapply(rownames(d10x@meta.data), d10x@meta.data$Subject_Identity, length)) -->
-<!--   plt_count$individual<-rownames(plt_count) -->
-<!--   colnames(plt_count)<-c("cell_count","individual") -->
-
-<!--   meta_disease<-d10x@meta.data[,c("Subject_Identity","Disease_Identity")] -->
-<!--   meta_disease$Subject_Identity<-as.character(meta_disease$Subject_Identity) -->
-<!--   meta_disease$Disease_Identity<-as.character(meta_disease$Disease_Identity) -->
-<!--   rownames(meta_disease)<-NULL -->
-<!--   meta_disease<-meta_disease[!duplicated(meta_disease),] -->
-<!--   plt_count<-merge(plt_count,meta_disease , by.x="individual",by.y="Subject_Identity") -->
-
-<!--   print(ggplot(plt_count, aes(Disease_Identity, cell_count))+ -->
-<!--     geom_boxplot(fill="lightgrey")+geom_point()+ -->
-<!--     theme_bw()+ylab("Total Cell Number")+th) -->
-<!--   ggsave(file=paste(here("figures"),"/cell_count_plot_",filename,".pdf", sep="")) -->
-<!-- } -->
-
-<!-- cell_count(d10x_MT, "raw") -->
-<!-- cell_count(d10x_QC, "QCed") -->
-
-<!-- ``` -->
+## cell counts
+```{r}
+plt_count_raw<-lapply(1:length(d10x.list.mt), function(x) {
+  df<-data.frame(raw_cell_count=nrow(d10x.list.mt[[x]]@meta.data),individual=unique(d10x.list.mt[[x]]@meta.data$individual))
+  df})
+plt_count_raw<-do.call(rbind, plt_count_raw)
+print(plt_count_raw)
+```
 
 
-<!-- ##   Visualize QC metrics -->
-<!-- Low-quality cells or empty droplets will often have very few genes -->
-<!-- Cell doublets or multiplets may exhibit an aberrantly high gene count -->
-<!-- nFeature number of unique genes -->
-<!-- nCount number of total molecules: already filtered at min 1000 unique genes -->
-<!-- from geo page -->
-<!-- Cells filtered with > 12% of transcriptome from intron-spanning reads; < 20% mitochondrial origin; at least 1000 unique genes -->
+##   Visualize QC metrics
+Low-quality cells or empty droplets will often have very few genes
+Cell doublets or multiplets may exhibit an aberrantly high gene count
+nFeature number of unique genes
+nCount number of total molecules: already filtered at min 1000 unique genes
+from geo page
+Cells filtered with > 12% of transcriptome from intron-spanning reads; < 20% mitochondrial origin; at least 1000 unique genes
 
-<!-- ```{r} -->
-<!-- ggplot(d10x_MT@meta.data, aes(nCount_RNA,nFeature_RNA,colour=percent.mt)) +  -->
-<!--     geom_point() +  -->
-<!--     scale_color_gradientn(colors=c("black","blue","green2","red","yellow"),name="Percent\nMitochondrial") + -->
-<!--     geom_hline(yintercept = 500) + xlab("Number of Total Molecules\n(nCount) ")+ylab("Number of Unique Genes\n(nFeature)")+ -->
-<!--     geom_hline(yintercept = 6000) +theme_bw()+th -->
-<!--   ggsave(file=here("figures/QC_plot.pdf")) -->
-<!-- ``` -->
+```{r}
+plt_QC_data<-do.call(rbind, lapply(1:length(d10x.list), function(x) d10x.list[[x]]@meta.data))
+
+qc_plts<-ggplot(plt_QC_data, aes(nCount_RNA,nFeature_RNA,colour=percent.mt)) + 
+  geom_point() + 
+  scale_color_gradientn(colors=c("black","blue","green2","red","yellow"),name="Percent\nMitochondrial") +
+  geom_hline(yintercept = 500) + xlab("Number of Total Molecules\n(nCount) ")+ylab("Number of Unique Genes\n(nFeature)")+
+  geom_hline(yintercept = 6000) +theme_bw()+th
+qc_plts
+save_plts(qc_plts, "intital_QC_plts", w=6,h=4)
+
+qc_plts_chem<-ggplot(plt_QC_data, aes(nCount_RNA,nFeature_RNA,colour=percent.mt)) + 
+  geom_point() + facet_wrap(~Chemistry)+
+  scale_color_gradientn(colors=c("black","blue","green2","red","yellow"),name="Percent\nMitochondrial") +
+  geom_hline(yintercept = 500) + xlab("Number of Total Molecules\n(nCount) ")+ylab("Number of Unique Genes\n(nFeature)")+
+  geom_hline(yintercept = 6000) +theme_bw()+th
+qc_plts_chem
+save_plts(qc_plts_chem, "intital_QC_plts_chemistry", w=12,h=4)
+
+qc_plts_individual<-ggplot(plt_QC_data, aes(nCount_RNA,nFeature_RNA,colour=percent.mt)) + 
+  geom_point() + facet_wrap(~individual)+
+  scale_color_gradientn(colors=c("black","blue","green2","red","yellow"),name="Percent\nMitochondrial") +
+  geom_hline(yintercept = 500) + xlab("Number of Total Molecules\n(nCount) ")+ylab("Number of Unique Genes\n(nFeature)")+
+  geom_hline(yintercept = 6000) +theme_bw()+th
+qc_plts_individual
+save_plts(qc_plts_chem, "intital_QC_plts_individual", w=12,h=4)
+
+MT_plt<-ggplot(plt_QC_data,aes(percent.mt)) + geom_histogram(binwidth = 0.5) +
+  geom_vline(xintercept = 10)+ theme_bw()+xlab("Percent Mitochondrial")+th
+MT_plt
+save_plts(MT_plt, "percentMT_plt", w=6,h=4)
+
+MT_plt_individual<-ggplot(plt_QC_data,aes(percent.mt)) + geom_histogram(binwidth = 0.5) +
+  facet_wrap(~individual, scales="free_y")+
+  geom_vline(xintercept = 10)+ theme_bw()+xlab("Percent Mitochondrial")+th
+MT_plt_individual
+save_plts(MT_plt_individual, "percentMT_plt_individual", w=6,h=4)
+```
