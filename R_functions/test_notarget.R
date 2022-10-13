@@ -29,7 +29,7 @@ d10x.list <- sapply(1:length(samples), function(y){
   print(identical(meta_cell_add$cell, colnames(d10x)))
   print(head(meta_cell_add))
   
-  d10x<- AddMetaData(d10x, meta_cell_add$donor, col.name = "individual")
+  d10x<- AddMetaData(d10x, meta_cell_add)
   d10x
   })
 
