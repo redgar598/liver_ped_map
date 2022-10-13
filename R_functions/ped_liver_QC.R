@@ -41,6 +41,7 @@ d10x.list <- sapply(1:length(samples), function(y){
 d10x.list
 
 
+print(head(d10x.list[[1]]@meta.data))
 
 ## cell counts
 plt_count_raw<-do.call(rbind,lapply(1:length(d10x.list), function(x) {
