@@ -84,7 +84,7 @@ save_plts(qc_plts, "intital_QC_plts", w=6,h=4)
 
 MT_plt<-ggplot(plt_QC_data,aes(percent.mt)) + geom_histogram(binwidth = 0.5) +
   geom_vline(xintercept = 10)+ theme_bw()+xlab("Percent Mitochondrial")+th
-save_plts(qc_plts, "percentMT_plt", w=6,h=4)
+save_plts(MT_plt, "percentMT_plt", w=6,h=4)
 
 
 
@@ -113,12 +113,12 @@ meta<-merge(meta,counts,by.x="Sample_ID", by.y="individual")
 
 cell_count<-grid.arrange(ggplot(meta, aes(AgeGroup, raw_cell_count,fill=AgeGroup))+
                            geom_boxplot()+geom_point()+
-                           theme_bw()+geom_text(aes(label=Sample_ID), hjust=-0.25, size=3)+ylim(0, 15000)+xlab("Age Group")+
+                           theme_bw()+geom_text(aes(label=Sample_ID), hjust=-0.25, size=3)+xlab("Age Group")+
                            ylab("Total Cell Number")+th+fillscale_age+
                            theme(legend.position = "none")+ggtitle("Before Quality Control"),
                          ggplot(meta, aes(AgeGroup, qc_cell_count,fill=AgeGroup))+
                            geom_boxplot()+geom_point()+
-                           theme_bw()+geom_text(aes(label=Sample_ID), hjust=-0.25, size=3)+ylim(0, 15000)+xlab("Age Group")+
+                           theme_bw()+geom_text(aes(label=Sample_ID), hjust=-0.25, size=3)+xlab("Age Group")+
                            ylab("Total Cell Number")+th+fillscale_age+
                            theme(legend.position = "none")+ggtitle("After Quality Control"), ncol=2)
 
