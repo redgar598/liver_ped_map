@@ -33,8 +33,7 @@ d10x.list <- sapply(1:length(samples), function(y){
   meta_cell_add<-meta_cell_add[match(colnames(d10x), meta_cell_add$cell),]
   # print(identical(meta_cell_add$cell, colnames(d10x)))
   print(head(meta_cell_add))
-  print(length(unique(meta_cell_add$cell)))
-  print(nrow(meta_cell_add))
+  print(head(d10x@meta.data))
   rownames(meta_cell_add)<-meta_cell_add$cell
   
   d10x<- AddMetaData(d10x, meta_cell_add)
