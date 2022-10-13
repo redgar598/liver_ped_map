@@ -75,6 +75,8 @@ print(head(d10x.list[[2]]@meta.data, 5))
 plt_QC_data<-do.call(rbind, lapply(1:length(d10x.list), function(x) d10x.list[[x]]@meta.data))
 save(plt_QC_data, file=here("data","QC_metrics.Rdata"))
 
+#load(here("data","QC_metrics.Rdata"))
+
 qc_plts<-ggplot(plt_QC_data, aes(nCount_RNA,nFeature_RNA,colour=percent.mt)) + 
   geom_point() + 
   scale_color_gradientn(colors=c("black","blue","green2","red","yellow"),name="Percent\nMitochondrial") +
@@ -82,12 +84,28 @@ qc_plts<-ggplot(plt_QC_data, aes(nCount_RNA,nFeature_RNA,colour=percent.mt)) +
   geom_hline(yintercept = 6000) +theme_bw()+th
 save_plts(qc_plts, "intital_QC_plts", w=6,h=4)
 
+qc_plts_chem<-ggplot(plt_QC_data, aes(nCount_RNA,nFeature_RNA,colour=percent.mt)) + 
+  geom_point() + facet_wrap(~Chemistry)+
+  scale_color_gradientn(colors=c("black","blue","green2","red","yellow"),name="Percent\nMitochondrial") +
+  geom_hline(yintercept = 500) + xlab("Number of Total Molecules\n(nCount) ")+ylab("Number of Unique Genes\n(nFeature)")+
+  geom_hline(yintercept = 6000) +theme_bw()+th
+save_plts(qc_plts_chem, "intital_QC_plts_chemistry", w=12,h=4)
+
+qc_plts_individual<-ggplot(plt_QC_data, aes(nCount_RNA,nFeature_RNA,colour=percent.mt)) + 
+  geom_point() + facet_wrap(~individual)+
+  scale_color_gradientn(colors=c("black","blue","green2","red","yellow"),name="Percent\nMitochondrial") +
+  geom_hline(yintercept = 500) + xlab("Number of Total Molecules\n(nCount) ")+ylab("Number of Unique Genes\n(nFeature)")+
+  geom_hline(yintercept = 6000) +theme_bw()+th
+save_plts(qc_plts_chem, "intital_QC_plts_individual", w=12,h=4)
 
 MT_plt<-ggplot(plt_QC_data,aes(percent.mt)) + geom_histogram(binwidth = 0.5) +
   geom_vline(xintercept = 10)+ theme_bw()+xlab("Percent Mitochondrial")+th
 save_plts(MT_plt, "percentMT_plt", w=6,h=4)
 
-
+MT_plt_individual<-ggplot(plt_QC_data,aes(percent.mt)) + geom_histogram(binwidth = 0.5) +
+  facet_wrap(~individual, scales="free_y")+
+  geom_vline(xintercept = 10)+ theme_bw()+xlab("Percent Mitochondrial")+th
+save_plts(MT_plt_individual, "percentMT_plt_individual", w=6,h=4)
 
 
 
@@ -97,7 +115,7 @@ save_plts(MT_plt, "percentMT_plt", w=6,h=4)
 d10x.list.raw<-d10x.list
 
 invisible(lapply(1:length(d10x.list), function(x){
-  d10x.list[[x]] <<- subset(d10x.list[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 10)
+  d10x.list[[x]] <<- subset(d10x.list[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 50)
 }))
 
 d10x.list
@@ -126,18 +144,12 @@ cell_count<-grid.arrange(ggplot(meta, aes(AgeGroup, raw_cell_count,fill=AgeGroup
 save_plts(cell_count, "QC_cellcount_age", w=8,h=4)
 
 
-# d10x.primary <- merge(d10x.list_primary[[1]], d10x.list_primary[[2]])
-# d10x.primary <- merge(d10x.primary, d10x.list_primary[[3]])
-# d10x.primary <- merge(d10x.primary, d10x.list_primary[[4]])
-# 
-# # An object of class Seurat 
-# # 24939 features across 59320 samples within 1 assay 
-# # Active assay: RNA (24939 features, 0 variable features)
-# 
-# d10x.primary.raw<-d10x.primary
-# 
+d10x <- merge(d10x.list[[1]], y= d10x.list[2:length(d10x.list)], merge.data=TRUE, project = "adult_ped_map")#add.cell.ids = alldata_names2, 
+
+d10x
+
 # saveRDS(d10x.primary.raw, file = here("data","d10x_primary_raw_merged.rds"))
-# 
+
 
 
 
