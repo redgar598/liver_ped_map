@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --mem=100G
-#SBATCH -J test_notargets
+#SBATCH -J test_notargets_onesample
 #SBATCH -p veryhimem 
 #SBATCH -c 32 
 #SBATCH -N 1 
@@ -13,4 +13,4 @@ module load R/4.2.1
 
 ##Rscript R_functions/test.R
 
-Rscript R_functions/test_notarget.R
+Rscript R_functions/test_notarget_onesample.R
