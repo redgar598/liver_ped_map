@@ -148,7 +148,99 @@ d10x <- merge(d10x.list[[1]], y= d10x.list[2:length(d10x.list)], merge.data=TRUE
 
 d10x
 
-# saveRDS(d10x.primary.raw, file = here("data","d10x_primary_raw_merged.rds"))
+
+
+
+################
+## Normalize scale and UMAP
+################
+d10x <- NormalizeData(d10x)
+d10x <- FindVariableFeatures(d10x, selection.method = "vst", nfeatures = 2000)
+d10x <- ScaleData(d10x) #ScaleData(cells, vars.to.regress = c("nUMI","percent.mito","donor.id","S.Score","G2M.Score","batch_10X"))
+
+# dimension reduction
+d10x <- RunPCA(d10x, ndims.print = 1:10, nfeatures.print = 10)
+d10x <- RunUMAP(d10x, dims = 1:30)
+d10x <- RunTSNE(d10x, dims = 1:30)
+
+
+
+######################
+## cell cycle gene expression
+######################
+# A list of cell cycle markers, from Tirosh et al, 2015, is loaded with Seurat.  We can
+# segregate this list into markers of G2/M phase and markers of S phase
+s.genes <- cc.genes$s.genes
+g2m.genes <- cc.genes$g2m.genes
+
+d10x <- CellCycleScoring(d10x, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
+
+pca_cellcycle<-DimPlot(d10x, reduction="pca",  group.by = "Phase")
+save_plts(pca_cellcycle, "pca_cellcycle", w=6,h=4)
+
+pca_nfeature<-FeaturePlot(d10x, features = "nFeature_RNA",reduction = "pca", min.cutoff = "q9", pt.size=1)
+save_plts(pca_nfeature, "pca_nfeature", w=6,h=4)
+
+
+
+## regress out cell cycle and other covariates
+#Transformed data will be available in the SCT assay, which is set as the default after running sctransform
+#By default, sctransform accounts for cellular sequencing depth, or nUMIs.
+d10x <- SCTransform(d10x, vars.to.regress = c("nFeature_RNA","S.Score", "G2M.Score"), verbose = FALSE)
+
+# dimension reduction
+d10x <- RunPCA(d10x, verbose = FALSE)
+d10x <- RunUMAP(d10x, dims = 1:30)
+d10x <- RunTSNE(d10x, dims = 1:30)
+
+# cluster
+d10x <- FindNeighbors(d10x, reduction = "pca", dims = 1:20)
+d10x <- FindClusters(d10x, resolution = 0.6)
+
+
+#saveRDS(d10x.primary, file = here("data","d10x_primary_normalized.rds"))
+
+#d10x.primary<-readRDS(here("data","d10x_primary_normalized.rds"))
+
+###############
+## visualize
+###############
+SCT_cluster_umap<-DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T)
+save_plts(SCT_cluster_umap, "SCT_cluster_umap", w=6,h=4)
+
+SCT_cluster_tsne<-DimPlot(d10x, reduction = "tsne", pt.size=0.25, label=T)
+save_plts(SCT_cluster_tsne, "SCT_cluster_tsne", w=6,h=4)
+
+
+cell_pca_SCT<-DimPlot(d10x, reduction="pca", group.by="Phase")
+save_plts(cell_pca_SCT, "cell_PCA_afterSCT", w=6,h=4)
+
+nFeature_UMAP_SCT<-FeaturePlot(d10x, features = "nFeature_RNA",reduction = "pca", min.cutoff = "q9", pt.size=1)
+save_plts(nFeature_UMAP_SCT, "nfeature_UMAP_afterSCT", w=6,h=4)
+
+
+
+chem_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "Chemistry", pt.size=0.25)+colscale_diagnosis
+save_plts(chem_umap_sct, "chem_SCT_umap", w=6,h=4)
+
+age_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)+colscale_diagnosis
+save_plts(age_umap_sct, "age_SCT_umap", w=6,h=4)
+
+individual_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "individual", pt.size=1)
+save_plts(individual_umap_sct, "individual_SCT_UMAP", w=6,h=4)
+
+
+## Low quality cluster?
+MT_umap_SCT<-FeaturePlot(d10x, features = "percent.mt", min.cutoff = "q9", pt.size=1)
+save_plts(pca_nfeature, "pca_nfeature", w=6,h=4)
+
+ncount_umap_SCT<-FeaturePlot(d10x, features = "nCount_RNA", min.cutoff = "q9", pt.size=1)
+save_plts(ncount_umap_SCT, "ncount_umap_SCT", w=6,h=4)
+
+nfeature_umap_SCT<-FeaturePlot(d10x, features = "nFeature_RNA", min.cutoff = "q9", pt.size=1)
+save_plts(nfeature_umap_SCT, "nfeature_umap_SCT", w=6,h=4)
+
+
 
 
 
