@@ -1,4 +1,7 @@
 #library(scales)
+save_plts<-function(plt, name, w,h){
+  ggsave(plt, file=paste(here("figures/"),name,".pdf", sep=""), w=w, h=h)
+  ggsave(plt, file=paste(here("figures/jpeg/"),name,".jpeg", sep=""), w=w, h=h)}
 
 
 myColors_diagnosis <- c("lightgrey","darkgoldenrod1","dodgerblue3","lightskyblue","khaki1","#819377","#993399","darkgrey")
@@ -8,6 +11,16 @@ fillscale_diagnosis <- scale_fill_manual(name="Diagnosis",
                                values = myColors_diagnosis, drop = T)
 colscale_diagnosis <- scale_color_manual(name="Diagnosis",
                                          values = myColors_diagnosis, drop = T)
+
+
+myColors_age <- c("#348595","#d6604d")
+color_possibilities_age<-c( "Adult","Ped")
+names(myColors_age) <- color_possibilities_age
+fillscale_age <- scale_fill_manual(name="Age\nGroup",
+                                         values = myColors_age, drop = T)
+colscale_age <- scale_color_manual(name="Age\nGroup",
+                                         values = myColors_age, drop = T)
+
 
 
 

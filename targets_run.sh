@@ -9,10 +9,13 @@
 
 module load R/4.2.1
 
+module load gcc/9.3.0 r/4.1.2 geos jags hdf5/1.12.1
+
+
 
 
 ##Rscript R_functions/test.R
 ##Rscript R_functions/test_notarget.R
 
-Rscript R_functions/ped_liver_render.R
+Rscript R_functions/ped_liver_QC.R
 
