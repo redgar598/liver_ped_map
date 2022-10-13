@@ -113,12 +113,12 @@ meta<-merge(meta,counts,by.x="Sample_ID", by.y="individual")
 
 cell_count<-grid.arrange(ggplot(meta, aes(AgeGroup, raw_cell_count,fill=AgeGroup))+
                            geom_boxplot()+geom_point()+
-                           theme_bw()+geom_text(aes(label=individual), hjust=-0.25, size=3)+ylim(0, 15000)+xlab("Age Group")+
+                           theme_bw()+geom_text(aes(label=Sample_ID), hjust=-0.25, size=3)+ylim(0, 15000)+xlab("Age Group")+
                            ylab("Total Cell Number")+th+fillscale_age+
                            theme(legend.position = "none")+ggtitle("Before Quality Control"),
                          ggplot(meta, aes(AgeGroup, qc_cell_count,fill=AgeGroup))+
                            geom_boxplot()+geom_point()+
-                           theme_bw()+geom_text(aes(label=individual), hjust=-0.25, size=3)+ylim(0, 15000)+xlab("Age Group")+
+                           theme_bw()+geom_text(aes(label=Sample_ID), hjust=-0.25, size=3)+ylim(0, 15000)+xlab("Age Group")+
                            ylab("Total Cell Number")+th+fillscale_age+
                            theme(legend.position = "none")+ggtitle("After Quality Control"), ncol=2)
 
