@@ -72,7 +72,8 @@ print(head(d10x.list[[2]]@meta.data, 5))
 # Visualize QC metrics
 #nFeature number of unique genes
 #nCount number of total molecules
-plt_QC_data<-do.call(rbind, lapply(1:4, function(x) d10x.list[[x]]@meta.data))
+plt_QC_data<-do.call(rbind, lapply(1:length(d10x.list), function(x) d10x.list[[x]]@meta.data))
+save(plt_QC_data, file=here("data","QC_metrics.Rdata"))
 
 qc_plts<-ggplot(plt_QC_data, aes(nCount_RNA,nFeature_RNA,colour=percent.mt)) + 
   geom_point() + 
