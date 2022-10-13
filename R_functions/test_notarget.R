@@ -11,7 +11,7 @@ d10x.data <- sapply(1:length(samples), function(y){
   print(file.path(dataset_loc,paste(samples[y], sep=""),"filtered_feature_bc_matrix"))
   d10x <- Read10X(file.path(dataset_loc,paste(samples[y], sep=""),"filtered_feature_bc_matrix"))
   colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),samples[y],sep="-")
-  dim(d10x)
+  print(dim(d10x))
   d10x
 })
 d10x.data<-do.call("cbind",d10x.data)
