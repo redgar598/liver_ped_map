@@ -42,6 +42,7 @@ d10x.list
 
 
 print(head(d10x.list[[1]]@meta.data))
+print(as.data.frame(raw_cell_count=nrow(d10x.list[[1]]@meta.data),individual=unique(d10x.list[[1]]@meta.data$individual)))
 
 ## cell counts
 plt_count_raw<-lapply(1:length(d10x.list), function(x) {
