@@ -13,7 +13,7 @@ d10x.list <- sapply(1:length(samples), function(y){
   colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),samples[y],sep="-")
   print(dim(d10x))
   #' Initialize the Seurat object with the raw (non-normalized data).
-  CreateSeuratObject(counts = d10x.data, project = "ped_adult_map", min.cells = 3, min.features = 0)
+  CreateSeuratObject(counts = d10x, project = "ped_adult_map", min.cells = 3, min.features = 0)
 })
 
 d10x.list
