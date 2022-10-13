@@ -4,6 +4,7 @@ library(Seurat)
 library(ggplot2)
 library(dplyr)
 library(scales)
+library(gridExtra)
 
 source("R_functions/pretty_plots.R")
 
