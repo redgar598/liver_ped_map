@@ -44,18 +44,11 @@ d10x.list
 print(head(d10x.list[[1]]@meta.data))
 
 ## cell counts
-plt_count_raw<-do.call(rbind,lapply(1:length(d10x.list), function(x) {
-  df<-as.data.frame(tapply(rownames(d10x.list[[x]]@meta.data), list(d10x.list[[x]]@meta.data$individual, d10x.list[[x]]@meta.data$AgeGroup), length))
-  df$individual<-rownames(df)
-  df$AgeGroup<-names(d10x.list)[x]
-  colnames(df)<-c("cell_count","individual","AgeGroup")
-  df}))
+plt_count_raw<-lapply(1:length(d10x.list), function(x) {
+  df<-as.data.frame(raw_cell_count=nrow(d10x.list[[1]]@meta.data),individual=unique(d10x.list[[1]]@meta.data$individual))
+  df})
+plt_count_raw<-do.call(rbind, plt_count_raw)
 print(plt_count_raw)
-
-raw_count<-ggplot(plt_count_raw, aes(condition, cell_count))+
-  geom_boxplot(fill="lightgrey")+geom_point()+
-  theme_bw()+geom_text(aes(label=individual), hjust=-0.25)+ylab("Total Cell Number")
-save_plts(raw_count, "raw_cellcount", w=6,h=4)
 
 
 
@@ -109,26 +102,21 @@ invisible(lapply(1:length(d10x.list), function(x){
 d10x.list
 
 ## cell counts after QC
-plt_count_QC<-do.call(rbind,lapply(1:length(d10x.list), function(x) {
-  df<-as.data.frame(tapply(rownames(d10x.list[[x]]@meta.data), list(d10x.list[[x]]@meta.data$individual, d10x.list[[x]]@meta.data$AgeGroup), length))
-  df$individual<-rownames(df)
-  df$AgeGroup<-names(d10x.list)[x]
-  colnames(df)<-c("cell_count","individual","AgeGroup")
-  df}))
+plt_count_QC<-lapply(1:length(d10x.list), function(x) {
+  df<-as.data.frame(qc_cell_count=nrow(d10x.list[[1]]@meta.data),individual=unique(d10x.list[[1]]@meta.data$individual))
+  df})
+plt_count_QC<-do.call(rbind, plt_count_QC)
 print(plt_count_QC)
 
-QC_count<-ggplot(plt_count_QC, aes(AgeGroup, cell_count))+
-  geom_boxplot(fill="lightgrey")+geom_point()+
-  theme_bw()+geom_text(aes(label=individual), hjust=-0.25)+ylab("Total Cell Number")
-save_plts(QC_count, "QC_cellcount", w=6,h=4)
+counts<-merge(plt_count_raw, plt_count_QC, by="individual")
+meta<-merge(meta,counts,by.x="Sample_ID", by.y="individual")
 
-
-cell_count<-grid.arrange(ggplot(plt_count_raw, aes(AgeGroup, cell_count,fill=AgeGroup))+
+cell_count<-grid.arrange(ggplot(meta, aes(AgeGroup, raw_cell_count,fill=AgeGroup))+
                            geom_boxplot()+geom_point()+
                            theme_bw()+geom_text(aes(label=individual), hjust=-0.25, size=3)+ylim(0, 15000)+xlab("Age Group")+
                            ylab("Total Cell Number")+th+fillscale_age+
                            theme(legend.position = "none")+ggtitle("Before Quality Control"),
-                         ggplot(plt_count_QC, aes(AgeGroup, cell_count,fill=AgeGroup))+
+                         ggplot(meta, aes(AgeGroup, qc_cell_count,fill=AgeGroup))+
                            geom_boxplot()+geom_point()+
                            theme_bw()+geom_text(aes(label=individual), hjust=-0.25, size=3)+ylim(0, 15000)+xlab("Age Group")+
                            ylab("Total Cell Number")+th+fillscale_age+
