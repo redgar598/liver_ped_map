@@ -20,16 +20,14 @@ d10x.list <- sapply(1:length(samples), function(y){
   #' Initialize the Seurat object with the raw (non-normalized data).
   d10x<-CreateSeuratObject(counts = d10x, project = "ped_adult_map", min.cells = 3, min.features = 0)
   
-  head(colnames(d10x))
+  #add meta data to each seurat object
+  meta_cell<-data.frame(cell=colnames(d10x), individual=sapply(colnames(d10x), function(x) strsplit(x,"-")[[1]][2]))
+  meta_cell_add<-merge(meta_cell, meta, by.x="individual", by.y="Sample_ID")
+  meta_cell_add<-meta_cell_add[match(colnames(d10x), meta_cell_add$cell),]
+  print(identical(meta_cell_add$cell, colnames(d10x)))
   
-  # meta_cell<-data.frame(cell=colnames(d10x), individual=sapply(colnames(d10x), function(x) strsplit(x,"-")[[1]][2]))
-  # meta_cell_add<-merge(meta_cell, meta, by.x="individual", by.y="Sanger.Sample.ID")
-  # meta_cell_add<-meta_cell_add[match(colnames(d10x), meta_cell_add$cell),]
-  #print(identical(meta_cell_add$cell, colnames(d10x)))
-  
-  #d10x<- AddMetaData(d10x, meta_cell_add$donor, col.name = "individual")})
-  
-  
-})
+  d10x<- AddMetaData(d10x, meta_cell_add$donor, col.name = "individual")
+  d10x
+  })
 
 d10x.list
