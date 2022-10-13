@@ -42,11 +42,11 @@ d10x.list
 
 
 print(head(d10x.list[[1]]@meta.data))
-print(as.data.frame(raw_cell_count=nrow(d10x.list[[1]]@meta.data),individual=unique(d10x.list[[1]]@meta.data$individual)))
+print(data.frame(raw_cell_count=nrow(d10x.list[[1]]@meta.data),individual=unique(d10x.list[[1]]@meta.data$individual)))
 
 ## cell counts
 plt_count_raw<-lapply(1:length(d10x.list), function(x) {
-  df<-as.data.frame(raw_cell_count=nrow(d10x.list[[x]]@meta.data),individual=unique(d10x.list[[x]]@meta.data$individual))
+  df<-data.frame(raw_cell_count=nrow(d10x.list[[x]]@meta.data),individual=unique(d10x.list[[x]]@meta.data$individual))
   df})
 plt_count_raw<-do.call(rbind, plt_count_raw)
 print(plt_count_raw)
@@ -104,7 +104,7 @@ d10x.list
 
 ## cell counts after QC
 plt_count_QC<-lapply(1:length(d10x.list), function(x) {
-  df<-as.data.frame(qc_cell_count=nrow(d10x.list[[x]]@meta.data),individual=unique(d10x.list[[x]]@meta.data$individual))
+  df<-data.frame(qc_cell_count=nrow(d10x.list[[x]]@meta.data),individual=unique(d10x.list[[x]]@meta.data$individual))
   df})
 plt_count_QC<-do.call(rbind, plt_count_QC)
 print(plt_count_QC)
