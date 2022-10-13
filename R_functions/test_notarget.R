@@ -27,6 +27,7 @@ d10x.list <- sapply(1:length(samples), function(y){
   meta_cell_add<-merge(meta_cell, meta, by.x="individual", by.y="Sample_ID")
   meta_cell_add<-meta_cell_add[match(colnames(d10x), meta_cell_add$cell),]
   print(identical(meta_cell_add$cell, colnames(d10x)))
+  print(head(meta_cell_add))
   
   d10x<- AddMetaData(d10x, meta_cell_add$donor, col.name = "individual")
   d10x
