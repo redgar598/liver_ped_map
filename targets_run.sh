@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --mem=100G
-#SBATCH -J test_notargets
+#SBATCH -J targets
 #SBATCH -p veryhimem 
 #SBATCH -c 32 
 #SBATCH -N 1 

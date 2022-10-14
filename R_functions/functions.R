@@ -16,6 +16,7 @@ load_d10x_raw <- function(dataset_loc, meta){
   #dataset_loc <- here("../../../projects/macparland/RE/PediatricAdult")
   
   samples<-list.files(dataset_loc)
+  samples<-samples[-grep("meta",samples)]
   print(samples)
   
   d10x.list <- sapply(1:length(samples), function(y){
@@ -25,7 +26,8 @@ load_d10x_raw <- function(dataset_loc, meta){
     # print(dim(d10x))
     #' Initialize the Seurat object with the raw (non-normalized data).
     d10x<-CreateSeuratObject(counts = d10x, project = "ped_adult_map", min.cells = 3, min.features = 0)
-    
+    d10x
+    print(head(meta))
     #add meta data to each seurat object
     meta_cell<-data.frame(cell=colnames(d10x), individual=sapply(colnames(d10x), function(x) strsplit(x,"-")[[1]][2]))
     # print(head(meta_cell))

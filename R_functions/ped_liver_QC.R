@@ -248,7 +248,7 @@ save_plts(nfeature_umap_SCT, "nfeature_umap_SCT", w=6,h=4)
 ## Integration
 ###############
 #https://satijalab.org/seurat/articles/integration_rpca.html
-
+print("RUNNING INTEGRATION")
 ## Start back with raw data
 d10x <- merge(d10x.list[[1]], y= d10x.list[2:length(d10x.list)], merge.data=TRUE, project = "adult_ped_map")#add.cell.ids = alldata_names2, 
 d10x
@@ -276,12 +276,16 @@ d10x.combined <- IntegrateData(anchorset = chem.anchors)
 
 DefaultAssay(d10x.combined) <- "integrated"
 
+print("INTEGRATED")
+
 # Run the standard workflow for visualization and clustering
 d10x.combined <- ScaleData(d10x.combined, verbose = FALSE)
 d10x.combined <- RunPCA(d10x.combined, npcs = 30, verbose = FALSE)
 d10x.combined <- RunUMAP(d10x.combined, reduction = "pca", dims = 1:30)
 d10x.combined <- FindNeighbors(d10x.combined, reduction = "pca", dims = 1:30)
 d10x.combined <- FindClusters(d10x.combined, resolution = 0.5)
+
+d10x.combined
 
 ###########
 ## Visualize integration
