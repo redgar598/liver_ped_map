@@ -15,9 +15,9 @@ samples<-list.files(dataset_loc)
 samples<-samples[-grep("meta",samples)]
 print(samples)
 
+#meta<-read.table(here("data/input_metadata.txt"), header=T)
 meta<-read.table(here(dataset_loc,"input_metadata.txt"), header=T)
 meta$Sample_ID[which(meta$Sample_ID=="C85_caud3pr")]<-"C85_caud5pr"
-#meta<-read.table(here("data/input_metadata.txt"), header=T)
 
 
 d10x.list <- sapply(1:length(samples), function(y){
@@ -133,12 +133,12 @@ meta<-merge(meta,counts,by.x="Sample_ID", by.y="individual")
 cell_count<-grid.arrange(ggplot(meta, aes(AgeGroup, raw_cell_count,fill=AgeGroup))+
                            geom_boxplot()+geom_point()+
                            theme_bw()+geom_text(aes(label=Sample_ID), hjust=-0.25, size=3)+xlab("Age Group")+
-                           ylab("Total Cell Number")+th+fillscale_age+
+                           ylab("Total Cell Number")+th+fillscale_age+ylim(0,60000)+
                            theme(legend.position = "none")+ggtitle("Before Quality Control"),
                          ggplot(meta, aes(AgeGroup, qc_cell_count,fill=AgeGroup))+
                            geom_boxplot()+geom_point()+
                            theme_bw()+geom_text(aes(label=Sample_ID), hjust=-0.25, size=3)+xlab("Age Group")+
-                           ylab("Total Cell Number")+th+fillscale_age+
+                           ylab("Total Cell Number")+th+fillscale_age+ylim(0,60000)+
                            theme(legend.position = "none")+ggtitle("After Quality Control"), ncol=2)
 
 save_plts(cell_count, "QC_cellcount_age", w=8,h=4)
@@ -195,7 +195,7 @@ d10x <- RunTSNE(d10x, dims = 1:30)
 
 # cluster
 d10x <- FindNeighbors(d10x, reduction = "pca", dims = 1:20)
-d10x <- FindClusters(d10x, resolution = 1)
+d10x <- FindClusters(d10x, resolution = 0.5)
 
 
 #saveRDS(d10x.primary, file = here("data","d10x_primary_normalized.rds"))
@@ -223,7 +223,7 @@ save_plts(nFeature_UMAP_SCT, "nfeature_UMAP_afterSCT", w=6,h=4)
 chem_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "Chemistry", pt.size=0.25)
 save_plts(chem_umap_sct, "chem_SCT_umap", w=6,h=4)
 
-age_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)
+age_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)+fillscale_age
 save_plts(age_umap_sct, "age_SCT_umap", w=6,h=4)
 
 individual_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "individual", pt.size=1)
@@ -244,6 +244,62 @@ save_plts(nfeature_umap_SCT, "nfeature_umap_SCT", w=6,h=4)
 
 
 
+###############
+## Integration
+###############
+#https://satijalab.org/seurat/articles/integration_rpca.html
+
+## Start back with raw data
+d10x <- merge(d10x.list[[1]], y= d10x.list[2:length(d10x.list)], merge.data=TRUE, project = "adult_ped_map")#add.cell.ids = alldata_names2, 
+d10x
+
+# split the dataset into a list of two seurat objects (3' and 5')
+d10x.list.chem <- SplitObject(d10x, split.by = "Chemistry")
+
+# normalize and identify variable features for each dataset independently
+d10x.list.chem <- lapply(X = d10x.list.chem, FUN = function(x) {
+  x <- NormalizeData(x)
+  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
+})
+
+# select features that are repeatedly variable across datasets for integration run PCA on each
+# dataset using these features
+features <- SelectIntegrationFeatures(object.list = d10x.list.chem)
+d10x.list.chem <- lapply(X = d10x.list.chem, FUN = function(x) {
+  x <- ScaleData(x, features = features, verbose = FALSE)
+  x <- RunPCA(x, features = features, verbose = FALSE)
+})
+
+## Identify anchors
+chem.anchors <- FindIntegrationAnchors(object.list = d10x.list.chem, anchor.features = features, reduction = "rpca")
+d10x.combined <- IntegrateData(anchorset = chem.anchors)
+
+DefaultAssay(d10x.combined) <- "integrated"
+
+# Run the standard workflow for visualization and clustering
+d10x.combined <- ScaleData(d10x.combined, verbose = FALSE)
+d10x.combined <- RunPCA(d10x.combined, npcs = 30, verbose = FALSE)
+d10x.combined <- RunUMAP(d10x.combined, reduction = "pca", dims = 1:30)
+d10x.combined <- FindNeighbors(d10x.combined, reduction = "pca", dims = 1:30)
+d10x.combined <- FindClusters(d10x.combined, resolution = 0.5)
+
+###########
+## Visualize integration
+###########
+SCT_cluster_umap<-DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T)
+save_plts(SCT_cluster_umap, "rPCA_cluster_umap", w=6,h=4)
+
+SCT_cluster_tsne<-DimPlot(d10x, reduction = "tsne", pt.size=0.25, label=T)
+save_plts(SCT_cluster_tsne, "rPCA_cluster_tsne", w=6,h=4)
+
+chem_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "Chemistry", pt.size=0.25)
+save_plts(chem_umap_sct, "chem_rPCA_umap", w=6,h=4)
+
+age_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)+fillscale_age
+save_plts(age_umap_sct, "age_rPCA_umap", w=6,h=4)
+
+individual_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "individual", pt.size=1)
+save_plts(individual_umap_sct, "individual_rPCA_UMAP", w=6,h=4)
 
 
 print(sessionInfo())
