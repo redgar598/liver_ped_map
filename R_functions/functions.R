@@ -12,8 +12,9 @@ load_d10x <- function(file){
 }
 
 #load raw data
-load_d10x_raw <- function(dataset_loc, meta){
+load_d10x_raw <- function(dataset_loc){
   #dataset_loc <- here("../../../projects/macparland/RE/PediatricAdult")
+  tar_load(meta)
   
   samples<-list.files(dataset_loc)
   samples<-samples[-grep("meta",samples)]
