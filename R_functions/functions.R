@@ -56,9 +56,9 @@ MT <- function(d10x.list){
 }
 
 
-QC <- function(d10x.list){
-  lapply(1:length(d10x.list), function(x){d10x.list[[x]] <<- subset(d10x.list[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 50)})
-  d10x.list
+QC <- function(d10x.list.mt){
+  lapply(1:length(d10x.list.mt), function(x){d10x.list.mt[[x]] <<- subset(d10x.list.mt[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 50)})
+  d10x.list.mt
 }
 
 
