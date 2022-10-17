@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --mem=50G
-#SBATCH -J exploratory
+#SBATCH --mem=100G
+#SBATCH -J veryhimem
 #SBATCH -p all 
 #SBATCH -c 32 
 #SBATCH -N 1 
