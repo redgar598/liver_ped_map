@@ -290,19 +290,19 @@ d10x.combined
 ###########
 ## Visualize integration
 ###########
-SCT_cluster_umap<-DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T)
+SCT_cluster_umap<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, label=T)
 save_plts(SCT_cluster_umap, "rPCA_cluster_umap", w=6,h=4)
 
-SCT_cluster_tsne<-DimPlot(d10x, reduction = "tsne", pt.size=0.25, label=T)
+SCT_cluster_tsne<-DimPlot(d10x.combined, reduction = "tsne", pt.size=0.25, label=T)
 save_plts(SCT_cluster_tsne, "rPCA_cluster_tsne", w=6,h=4)
 
-chem_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "Chemistry", pt.size=0.25)
+chem_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "Chemistry", pt.size=0.25)
 save_plts(chem_umap_sct, "chem_rPCA_umap", w=6,h=4)
 
-age_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)+fillscale_age
+age_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)+fillscale_age
 save_plts(age_umap_sct, "age_rPCA_umap", w=6,h=4)
 
-individual_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "individual", pt.size=1)
+individual_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "individual", pt.size=1)
 save_plts(individual_umap_sct, "individual_rPCA_UMAP", w=6,h=4)
 
 
