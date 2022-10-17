@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --mem=50G
 #SBATCH -J exploratory
-#SBATCH -p himem 
+#SBATCH -p all 
 #SBATCH -c 32 
 #SBATCH -N 1 
 #SBATCH --output=%x.out
