@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --mem=20G
-#SBATCH -J all
+#SBATCH --mem=100G
+#SBATCH -J veryhimem
 #SBATCH -p QC_adult_ped 
 #SBATCH -c 32 
 #SBATCH -N 1 
