@@ -289,6 +289,8 @@ d10x.combined <- FindClusters(d10x.combined, resolution = 0.5)
 
 d10x.combined
 
+save(d10x.combined, files=here("data/adult_ped_integrated.rds"))
+
 ###########
 ## Visualize integration
 ###########
