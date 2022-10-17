@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --mem=20G
 #SBATCH -J all
-#SBATCH -p all 
+#SBATCH -p QC_adult_ped 
 #SBATCH -c 32 
 #SBATCH -N 1 
 #SBATCH --output=%x.out
