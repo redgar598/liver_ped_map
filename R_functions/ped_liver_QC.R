@@ -289,7 +289,7 @@ d10x.combined <- FindClusters(d10x.combined, resolution = 0.5)
 
 d10x.combined
 
-save(d10x.combined, files=here("data/adult_ped_integrated.rds"))
+save(d10x.combined, file=here("data/adult_ped_integrated.rds"))
 
 ###########
 ## Visualize integration
@@ -309,7 +309,63 @@ save_plts(age_umap_sct, "age_rPCA_umap", w=6,h=4)
 individual_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "individual", pt.size=1)
 save_plts(individual_umap_sct, "individual_rPCA_UMAP", w=6,h=4)
 
+############################
+##### Example markers to plot for the liver [From Diana]
+############################
+# 
+# ######
+# #Immune cells
+# ######
+# 
+# ## Macrophages
+# DotPlot(seurat_harmony, features = c( "PTPRC", "CD68", "MARCO","CD5L","VSIG4", "MAF", "LYZ", "CSTA", "S100A8", "S10049", "CD14", "CD74", "GPBAR1", "ID3"), cols=c("blue", "red")) + RotatedAxis()
+# 
+# ## NK/T/B cells
+# DotPlot(seurat_harmony, features = c("PTPRC", "CD2", "CD3E", "IL7R", "KLRB1", 
+#                                      "NKG7", "GZMA", "GZMB", "GZMK" , "PRF1","CD4", "CD8A","CD247", "TRAC","TRDC", "TRGC1", "TRGC2", "TRBC1", 
+#                                      "TRBC2", "S1PR1", "CD28", "CD27", "SELL", "CCR7", "CXCR4","CCR4","FAS", 
+#                                      "FOXP3", "CTLA4", "LAG3", "TNFRSF4","TNFRSF18", "ICOS" ,"CD69", "CD79A", "CD79B", "IGHG1", "MS4A1",
+#                                      "LTB", "CD52", "IGHD", "CD19", "ID3"), cols=c("blue", "red")) + RotatedAxis()
+# 
+# # LEC and LSEC 
+# DotPlot(seurat_harmony, features = c("CALCRL", "VWF", "RAMP2", "STAB2", "LYVE1", "PECAM1", "ENG", "FCGR2B", "F8", "SPARCL1", "ID1", "SOX18", "CD32B", "ID3"), cols=c("blue", "red")) + RotatedAxis()
+# 
+# ######
+# #Hepatocytes
+# ######
+# DotPlot(seurat_harmony, features=c("ALB", "HAMP", "ARG1", "PCK1", "AFP", "BCHE", "HAL", "SCD", "CPS1", "CYP3A4", 
+#                                    "ELF3", "CRP", "GSTA2", "AKR1C1", "MGST1", "CYP3A5", "ALDH1A1", "ADH1A", "CYP2E1",
+#                                    "GLS2", "SDS", "GLUL", "AKR1D1", "HPR",
+#                                    "HMGCS1", "IGSF23", "ACSS2", "G6PC", "ID3"),
+#         cols=c("blue", "red")) + RotatedAxis()
+# ######
+# #Cholangiocytes
+# ######
+# DotPlot(seurat_harmony,features = c( "EPCAM", "SOX9", "KRT1", "KRT7", "ANXA4", "KRT18", "ID3"), cols=c("blue", "red")) + RotatedAxis()
+# 
+# ######
+# #HSCs
+# ######
+# DotPlot(seurat_harmony,features = c( "RBP1", "LRAT", "PDE3B", "ACTA2", "AOX1", "PDE3D", "PDE4D", "SPARC", "TAGLN", "COL1A1", "COL1A2", "COL3A1", "TIMP1", "DCN", "MYL9", "TPM2", "MEG3", "BGN", "IGFBP7", "IGFBP3", "CYR61", "IGFBP6", "CCL2", "COLEC11", "CTGF", "HGF", "ID3"), cols=c("blue", "red")) + RotatedAxis()
+# FeaturePlot(seurat_harmony, reduction = "umap", features = c("PTPRC", "CD3D", "CD68", "CD79A","TRDC", "NKG7", "KRT7", "CALCRL", "ACTA2", "MS4A1", "CYP3A4", "SCD", "FCN2", "CD4", "CD8A", "FCER1A", "MARCO", "LYZ", "VSIG4", "FOLR2", "ID3"), ncol = 4)
+# 
+# ######
+# #Average expression by cluster
+# ######
+# AvgEx<- AverageExpression(seurat_harmony, return.seurat = FALSE, slot = "data", use.scale = FALSE, verbose = FALSE, add.ident="orig.ident")
+# 
+# write.table(AvgEx, file =paste0(dataPath, "/Avg_exprn_by_cluster.txt"), sep="\t", row.names = TRUE, quote=FALSE)
+# 
+# 
+# 
+# 
+# 
+
+
+
 
 print(sessionInfo())
+
+
 
 
