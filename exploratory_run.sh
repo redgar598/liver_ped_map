@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --mem=100G
-#SBATCH -J veryhimem
-#SBATCH -p QC_adult_ped 
+#SBATCH -J QC_adult_ped
+#SBATCH -p veryhimem
 #SBATCH -c 32 
 #SBATCH -N 1 
 #SBATCH --output=%x.out

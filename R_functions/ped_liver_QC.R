@@ -5,6 +5,7 @@ library(ggplot2)
 library(dplyr)
 library(scales)
 library(gridExtra)
+library(reshape2)
 
 source("R_functions/pretty_plots.R")
 
@@ -361,8 +362,78 @@ save_plts(individual_umap_sct, "individual_rPCA_UMAP", w=6,h=4)
 # 
 # 
 
+#################
+## Rough annotation
+#################
+Macrophage_genes<-c( "PTPRC", "CD68", "MARCO","CD5L","VSIG4", "MAF", "LYZ", "CSTA", "S100A8", "S10049", 
+                     "CD14", "CD74", "GPBAR1", "ID3")
+NK_T_B_genes<-c("PTPRC", "CD2", "CD3E", "IL7R", "KLRB1","NKG7", "GZMA", "GZMB", "GZMK" , "PRF1","CD4",
+                "CD8A","CD247", "TRAC","TRDC", "TRGC1", "TRGC2", "TRBC1","TRBC2", "S1PR1", "CD28", "CD27",
+                "SELL", "CCR7", "CXCR4","CCR4","FAS",  "FOXP3", "CTLA4", "LAG3", "TNFRSF4","TNFRSF18", 
+                "ICOS" ,"CD69", "CD79A", "CD79B", "IGHG1", "MS4A1","LTB", "CD52", "IGHD", "CD19", "ID3")
+LEC_genes<-c("CALCRL", "VWF", "RAMP2", "STAB2", "LYVE1", "PECAM1", "ENG", "FCGR2B", "F8", "SPARCL1", 
+             "ID1", "SOX18", "CD32B", "ID3")
+Hepatocyte_genes<-c("ALB", "HAMP", "ARG1", "PCK1", "AFP", "BCHE", "HAL", "SCD", "CPS1", "CYP3A4",
+                    "ELF3", "CRP", "GSTA2", "AKR1C1", "MGST1", "CYP3A5", "ALDH1A1", "ADH1A", "CYP2E1",
+                    "GLS2", "SDS", "GLUL", "AKR1D1", "HPR",
+                    "HMGCS1", "IGSF23", "ACSS2", "G6PC", "ID3")
+Cholangiocytes_genes<-c( "EPCAM", "SOX9", "KRT1", "KRT7", "ANXA4", "KRT18", "ID3")
+
+HSCs_genes<-c( "RBP1", "LRAT", "PDE3B", "ACTA2", "AOX1", "PDE3D", "PDE4D", "SPARC", "TAGLN", "COL1A1", "COL1A2", "COL3A1",
+               "TIMP1", "DCN", "MYL9", "TPM2", "MEG3", "BGN", "IGFBP7", "IGFBP3", "CYR61", "IGFBP6", "CCL2", "COLEC11", 
+               "CTGF", "HGF", "ID3")
 
 
+d10x.exp<-as.data.frame(d10x.combined[["RNA"]]@data)
+
+genes<-unique(c(Macrophage_genes, NK_T_B_genes,LEC_genes,Hepatocyte_genes,Cholangiocytes_genes,HSCs_genes))
+
+d10x.exp.GOI<-d10x.exp[genes,]
+d10x.exp.GOI$gene<-rownames(d10x.exp.GOI)
+d10x.exp.GOI<-melt(d10x.exp.GOI)#
+
+meta<-d10x.combined@meta.data
+meta$cell<-rownames(meta)
+
+plt<-merge(d10x.exp.GOI, meta,by.x="variable", by.y="cell")
+
+plt$variable<-as.character(plt$variable)
+
+## possible cells types
+cluster_marker_mean<-function(gene_list, type){
+  plt_epi<-plt[which(plt$gene%in%gene_list),]
+  mean_type<-as.data.frame(tapply(plt_epi$value, plt_epi$seurat_clusters, mean))
+  colnames(mean_type)<-type
+  mean_type
+}
+
+cell_rough<-cbind(cluster_marker_mean(Macrophage_genes, "macrophage"),
+      cluster_marker_mean(NK_T_B_genes, "NK_T_B"),
+      cluster_marker_mean(LEC_genes, "LEC"),
+      cluster_marker_mean(Hepatocyte_genes, "Hepatocyte"),
+      cluster_marker_mean(Cholangiocytes_genes, "Cholangiocytes"),
+      cluster_marker_mean(HSCs_genes, "HSC"))
+
+
+cell_rough$CellType_rough<-sapply(1:nrow(cell_rough), function(x) {
+  compart<-colnames(cell_rough)[which(cell_rough[x,] == max(cell_rough[x,]))]
+  if(length(compart)==1){compart}else{"Unclear"}
+})
+
+cell_rough$seurat_clusters<-rownames(cell_rough)
+
+meta<-d10x.combined@meta.data
+meta$cell<-rownames(meta)
+plt_summary<-merge(meta, cell_rough[,c("seurat_clusters","CellType_rough")], by="seurat_clusters")
+plt_summary<-plt_summary[match(rownames(d10x.combined@meta.data),plt_summary$cell),]
+identical(plt_summary$cell, rownames(d10x.combined@meta.data))
+
+rownames(plt_summary)<-plt_summary$cell
+
+d10x.combined<- AddMetaData(d10x.combined, plt_summary)
+
+roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.25, label=T)
+save_plts(roughcell_cluster_umap, "rPCA_roughcellType_cluster_umap", w=6,h=4)
 
 print(sessionInfo())
 
