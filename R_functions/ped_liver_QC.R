@@ -282,6 +282,8 @@ print("INTEGRATED")
 d10x.combined <- ScaleData(d10x.combined, verbose = FALSE)
 d10x.combined <- RunPCA(d10x.combined, npcs = 30, verbose = FALSE)
 d10x.combined <- RunUMAP(d10x.combined, reduction = "pca", dims = 1:30)
+d10x.combined <- RunTSNE(d10x.combined, dims = 1:30)
+
 d10x.combined <- FindNeighbors(d10x.combined, reduction = "pca", dims = 1:30)
 d10x.combined <- FindClusters(d10x.combined, resolution = 0.5)
 
