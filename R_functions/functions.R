@@ -51,14 +51,12 @@ load_d10x_raw <- function(dataset_loc){
 #'We use the set of all genes starting with MT- as a set of mitochondrial genes
 # The [[ operator can add columns to object metadata. This is a great place to stash QC stats
 MT <- function(d10x.list){
-  d10x.list.mt<-lapply(1:length(d10x.list), function(x){d10x.list[[x]][["percent.mt"]] <<- PercentageFeatureSet(d10x.list[[x]], pattern = "^MT-")})
-  d10x.list.mt
+  lapply(1:length(d10x.list), function(x){d10x.list[[x]][["percent.mt"]] <<- PercentageFeatureSet(d10x.list[[x]], pattern = "^MT-")})
 }
 
 
 QC <- function(d10x.list){
-  d10x.list.QC<-lapply(1:length(d10x.list), function(x){d10x.list[[x]] <<- subset(d10x.list[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 50)})
-  d10x.list.QC
+  lapply(1:length(d10x.list), function(x){d10x.list[[x]] <<- subset(d10x.list[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 50)})
 }
 
 
