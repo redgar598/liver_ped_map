@@ -52,11 +52,13 @@ load_d10x_raw <- function(dataset_loc){
 # The [[ operator can add columns to object metadata. This is a great place to stash QC stats
 MT <- function(d10x.list){
   lapply(1:length(d10x.list), function(x){d10x.list[[x]][["percent.mt"]] <<- PercentageFeatureSet(d10x.list[[x]], pattern = "^MT-")})
+  d10x.list
 }
 
 
 QC <- function(d10x.list){
   lapply(1:length(d10x.list), function(x){d10x.list[[x]] <<- subset(d10x.list[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 50)})
+  d10x.list
 }
 
 
