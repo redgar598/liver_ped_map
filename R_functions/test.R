@@ -5,5 +5,12 @@
 
 library(targets)
 library(tarchetypes)
+#tar_make()
+
+
+
 tar_load(d10x.list.mt)
-print(head(d10x.list.mt@meta.data))
+print(d10x.list.mt)
+
+
+
