@@ -464,9 +464,46 @@ save_plts(age_split, "age_roughCell_facet_rPCA_UMAP", w=10,h=5)
 ## Save integrated to look local
 ##############
 save(d10x.combined, file=paste(here("data/"),"adult_ped_integrated.rds", sep=""))
-save(d10x.combined@meta.data, file=paste(here("data/"),"adult_ped_cellRough.rds", sep=""))
+cell_label<-d10x.combined@meta.data
+save(cell_label, file=paste(here("data/"),"adult_ped_cellRough.rds", sep=""))
 
 
+load(here("data","adult_ped_integrated.rds"))
+
+######
+#TRM interesting markers
+######
+
+#klrg1/cd57
+#cd69/cd103
+
+#CD57 is encoded by  B3GAT1
+#CD103 is encoded by ITGAE
+
+
+
+FeaturePlot(d10x.combined, reduction = "umap", features = c("KLRG1", "B3GAT1", "CD69","ITGAE"), ncol = 2)
+
+d10x.combined_NK_T_B<-subset(d10x.combined, subset = seurat_clusters %in% c(5,11,16))
+d10x.combined_NK_T_B <- RunPCA(d10x.combined_NK_T_B, npcs = 30, verbose = FALSE)
+d10x.combined_NK_T_B <- RunUMAP(d10x.combined_NK_T_B, reduction = "pca", dims = 1:30)
+
+
+FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = c("KLRG1", "B3GAT1", "CD69","ITGAE"), ncol = 2)
+FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = c("KLRG1", "B3GAT1", "CD69","ITGAE"), split="AgeGroup", ncol = 2)
+
+d10x.exp<-as.data.frame(d10x.combined_NK_T_B[["RNA"]]@data)
+d10x.exp.GOI<-d10x.exp[c("KLRG1", "B3GAT1", "CD69","ITGAE"),]
+
+d10x.exp.GOI$gene<-rownames(d10x.exp.GOI)
+d10x.exp.GOI<-melt(d10x.exp.GOI)#
+
+meta<-d10x.combined_NK_T_B@meta.data
+meta$cell<-rownames(meta)
+
+plt<-merge(d10x.exp.GOI, meta,by.x="variable", by.y="cell")
+
+ggplot(plt, aes(AgeGroup, value))+geom_violin(aes(fill=AgeGroup))+geom_point()+facet_wrap(~gene)+fillscale_age+theme_bw()+th
 
 print(sessionInfo())
 

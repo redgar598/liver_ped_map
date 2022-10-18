@@ -32,14 +32,10 @@ d10x<-readRDS(file = here("data","d10x_adult_ped_raw.rds"))
 
 
 ######
-## add cell type labels from split analysis
+## add cell type labels
 ######
-#immune
-load(here("output","immune_iterative_label.Rdata"))
-#stromal
-load(here("output","strom_celltype_label.Rdata"))
-#epithelial
-load(here("output","epi_celltype_label.Rdata"))
+load(here("data","adult_ped_cellRough.rds"))
+cell_label<-
 
 cell_label<-rbind(epi_cell_labels, immune_cell_labels, stromal_cell_labels)
 cell_label$cluster_ID<-as.character(cell_label$cluster_ID)
