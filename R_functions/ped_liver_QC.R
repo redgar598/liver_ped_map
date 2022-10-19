@@ -372,13 +372,13 @@ load(here("data","adult_ped_integrated.rds"))
 #################
 ## Rough annotation
 #################
-Macrophage_genes<-c( "PTPRC", "CD68", "MARCO","CD5L","VSIG4", "MAF", "LYZ", "CSTA", "S100A8", "S10049", 
+Macrophage_genes<-c( "PTPRC", "CD68", "MARCO","CD5L","VSIG4", "MAF", "LYZ", "CSTA", "S100A8", "S10049",
                      "CD14", "CD74", "GPBAR1", "ID3")
 NK_T_B_genes<-c("PTPRC", "CD2", "CD3E", "IL7R", "KLRB1","NKG7", "GZMA", "GZMB", "GZMK" , "PRF1","CD4",
                 "CD8A","CD247", "TRAC","TRDC", "TRGC1", "TRGC2", "TRBC1","TRBC2", "S1PR1", "CD28", "CD27",
-                "SELL", "CCR7", "CXCR4","CCR4","FAS",  "FOXP3", "CTLA4", "LAG3", "TNFRSF4","TNFRSF18", 
+                "SELL", "CCR7", "CXCR4","CCR4","FAS",  "FOXP3", "CTLA4", "LAG3", "TNFRSF4","TNFRSF18",
                 "ICOS" ,"CD69", "CD79A", "CD79B", "IGHG1", "MS4A1","LTB", "CD52", "IGHD", "CD19", "ID3")
-LEC_genes<-c("CALCRL", "VWF", "RAMP2", "STAB2", "LYVE1", "PECAM1", "ENG", "FCGR2B", "F8", "SPARCL1", 
+LEC_genes<-c("CALCRL", "VWF", "RAMP2", "STAB2", "LYVE1", "PECAM1", "ENG", "FCGR2B", "F8", "SPARCL1",
              "ID1", "SOX18", "CD32B", "ID3")
 Hepatocyte_genes<-c("ALB", "HAMP", "ARG1", "PCK1", "AFP", "BCHE", "HAL", "SCD", "CPS1", "CYP3A4",
                     "ELF3", "CRP", "GSTA2", "AKR1C1", "MGST1", "CYP3A5", "ALDH1A1", "ADH1A", "CYP2E1",
@@ -387,7 +387,7 @@ Hepatocyte_genes<-c("ALB", "HAMP", "ARG1", "PCK1", "AFP", "BCHE", "HAL", "SCD", 
 Cholangiocytes_genes<-c( "EPCAM", "SOX9", "KRT1", "KRT7", "ANXA4", "KRT18", "ID3")
 
 HSCs_genes<-c( "RBP1", "LRAT", "PDE3B", "ACTA2", "AOX1", "PDE3D", "PDE4D", "SPARC", "TAGLN", "COL1A1", "COL1A2", "COL3A1",
-               "TIMP1", "DCN", "MYL9", "TPM2", "MEG3", "BGN", "IGFBP7", "IGFBP3", "CYR61", "IGFBP6", "CCL2", "COLEC11", 
+               "TIMP1", "DCN", "MYL9", "TPM2", "MEG3", "BGN", "IGFBP7", "IGFBP3", "CYR61", "IGFBP6", "CCL2", "COLEC11",
                "CTGF", "HGF", "ID3")
 
 genes<-unique(c(Macrophage_genes, NK_T_B_genes,LEC_genes,Hepatocyte_genes,Cholangiocytes_genes,HSCs_genes))
@@ -398,9 +398,9 @@ d10x.exp.GOI<-d10x.exp[genes,]
 
 # GENES<-rownames(d10x.combined)
 # indMyGene<-which(GENES%in%genes)
-# 
+#
 # CountMyGeneMyCell<-GetAssayData(object = d10x.combined, slot = 'counts', assay='RNA')[which(rownames(d10x.combined)%in%genes), ]
-# d10x.exp.GOI<-as.data.frame(as.matrix(CountMyGeneMyCell)) 
+# d10x.exp.GOI<-as.data.frame(as.matrix(CountMyGeneMyCell))
 
 d10x.exp.GOI$gene<-rownames(d10x.exp.GOI)
 d10x.exp.GOI<-melt(d10x.exp.GOI)#
@@ -458,11 +458,11 @@ d10x.combined$age_id<-as.factor(d10x.combined$age_id)
 d10x.combined$age_id<-factor(d10x.combined$age_id, c("C86_caud3pr Adult","C85_caud5pr Ped (Frozen)",
                                                      "C96_caud3pr Ped", "C63_caud5pr Adult","C70_caud5pr Adult",
                                                      "C61_caud5pr Adult","C93_caud3pr Ped", "C82_caud3pr Adult",
-                                                     "C64_caud5pr Ped"))
+                                                     "C64_caud5pr Ped","C92_caud3pr Adult"))
 levels(d10x.combined$age_id)<-gsub(" ","\n", levels(d10x.combined$age_id))
 
 individual_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_rough", split.by="age_id",pt.size=0.25)
-save_plts(individual_split, "individual_roughCell_facet_rPCA_UMAP", w=20,h=4)
+save_plts(individual_split, "individual_roughCell_facet_rPCA_UMAP", w=22,h=4)
 
 age_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_rough", split.by="AgeGroup",pt.size=0.25)
 save_plts(age_split, "age_roughCell_facet_rPCA_UMAP", w=10,h=5)
