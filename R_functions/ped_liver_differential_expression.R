@@ -86,10 +86,61 @@ diff_exp_all<-lapply(1:nrow(contrasts_celltype_age), function(x){
 diff_exp_all<-do.call(rbind, diff_exp_all)
 
 save(diff_exp_all, file=here("data","adult_ped_diff_genes.RData"))
-#load(file=here("../../../codon/scRNAseq_codon/data","primary_diff_genes.RData"))
+#load(file=here("data","adult_ped_diff_genes.RData"))
 
 #################
 ## Look at some interesting markers
 #################
 diff_exp_all[which(diff_exp_all$gene%in%c("KLRG1", "B3GAT1", "CD69","ITGAE")),]
+diff_exp_all[which(diff_exp_all$gene%in%c("LYZ", "MARCO", "MRC1","PTPRC")),]
+
+keygenes<-c("KLRG1", "B3GAT1", "CD69","ITGAE","LYZ", "MARCO", "MRC1","PTPRC")
+diff_exp_all[which(diff_exp_all$gene%in%keygenes),]
+
+Idents(d10x) <- "AgeGroup"
+
+all_plots<-lapply(1:length(keygenes), function(y){
+plots<-lapply(1:length(cell_types),function(x){
+p<-VlnPlot(subset(d10x, subset = CellType_rough == cell_types[x]) , features = keygenes[y], pt.size = 0, log=T)
+p<-if(length(grep(cell_types[x], diff_exp_all[which(diff_exp_all$gene==keygenes[y]),]$cell.1))!=0){
+  p+theme(plot.background = element_rect(color = "black",size = 2)) +fillscale_age +xlab("") + ylab("")+ theme(legend.position="none")}else{  
+    p+fillscale_age +xlab("") + ylab("")+ theme(legend.position="none")
+}
+p})
+plot_grid(plotlist = plots, ncol=1)})
+
+
+label_blank<-lapply(1:length(cell_types), function(x){
+  ggplot()+geom_blank()+theme_void()+ggtitle(cell_types[x])+ theme(plot.title = element_text(hjust = 0.5,vjust = -30))  })
+label_blank<-plot_grid(plotlist = label_blank, ncol=1)
+
+plot_grid(label_blank, plot_grid(plotlist=all_plots, ncol=length(keygenes)), rel_widths=c(0.1,1))
+ggsave2(here("figures", "keyGenes_adult_ped.pdf"), w=20,h=20)
+ggsave2(here("figures/jpeg", "keyGenes_adult_ped.jpeg"), w=20,h=20,bg="white")
+
+
+
+# ### Top DE genes
+diff_exp_all %>%
+  group_by(cell.1) %>%
+  top_n(n = 10, wt = abs(avg_log2FC)) -> top10
+
+top_DE<-as.data.frame(top10)
+
+Idents(d10x) <- d10x$AgeGroup
+
+label_blank<-lapply(1:length(cell_types), function(x){
+  ggplot()+geom_blank()+theme_void()+ggtitle(cell_types[x])+ theme(plot.title = element_text(hjust = 0.5,vjust = -30))  })
+label_blank<-plot_grid(plotlist = label_blank, ncol=1)
+
+plot_list_top<-lapply(1:length(cell_types), function(x){
+  plots <- VlnPlot(subset(d10x, subset = CellType_rough == cell_types[x]) , features = top_DE[grep(cell_types[x],top_DE$cell.1),"gene"], pt.size = 0, log=T)
+  plots <- lapply(X = plots, FUN = function(p) p + fillscale_age +xlab("")+ theme(plot.title = element_text(size = 15)))
+  plot_grid(plotlist = plots, nrow=1)})
+top_DE_plot<-plot_grid(plotlist = plot_list_top, nrow=length(cell_types))
+
+plot_grid(label_blank, top_DE_plot, rel_widths=c(0.1,1))
+
+ggsave2(here("figures", "TopDE_adult_ped.pdf"), w=20,h=20)
+ggsave2(here("figures/jpeg", "TopDE_adult_ped.jpeg"), w=20,h=20,bg="white")
 
