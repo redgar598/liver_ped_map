@@ -199,9 +199,6 @@ d10x <- FindNeighbors(d10x, reduction = "pca", dims = 1:20)
 d10x <- FindClusters(d10x, resolution = 0.5)
 
 
-#saveRDS(d10x.primary, file = here("data","d10x_primary_normalized.rds"))
-
-#d10x.primary<-readRDS(here("data","d10x_primary_normalized.rds"))
 
 ###############
 ## visualize
@@ -366,7 +363,7 @@ save_plts(key_markers, "markers_rPCA_UMAP", w=25,h=20)
 
 
 #####################################################################################################
-load(here("data","adult_ped_integrated.rds"))
+# load(here("data","adult_ped_integrated.rds"))
 
 
 #################
@@ -378,6 +375,12 @@ NK_T_B_genes<-c("PTPRC", "CD2", "CD3E", "IL7R", "KLRB1","NKG7", "GZMA", "GZMB", 
                 "CD8A","CD247", "TRAC","TRDC", "TRGC1", "TRGC2", "TRBC1","TRBC2", "S1PR1", "CD28", "CD27",
                 "SELL", "CCR7", "CXCR4","CCR4","FAS",  "FOXP3", "CTLA4", "LAG3", "TNFRSF4","TNFRSF18",
                 "ICOS" ,"CD69", "CD79A", "CD79B", "IGHG1", "MS4A1","LTB", "CD52", "IGHD", "CD19", "ID3")
+
+B_genes<-c("POU2F2","FCER2","MS4A1")
+T_genes<-c("CD3D","TRDC","SELL","IL7R","CCR7","S100A4","CD8A")
+NK_genes<-c("GNLY","NKG7")
+
+
 LEC_genes<-c("CALCRL", "VWF", "RAMP2", "STAB2", "LYVE1", "PECAM1", "ENG", "FCGR2B", "F8", "SPARCL1",
              "ID1", "SOX18", "CD32B", "ID3")
 Hepatocyte_genes<-c("ALB", "HAMP", "ARG1", "PCK1", "AFP", "BCHE", "HAL", "SCD", "CPS1", "CYP3A4",
@@ -420,7 +423,7 @@ cluster_marker_mean<-function(gene_list, type){
   mean_type
 }
 
-cell_rough<-cbind(cluster_marker_mean(Macrophage_genes, "macrophage"),
+cell_rough<-cbind(cluster_marker_mean(Macrophage_genes, "Myeloid"),
       cluster_marker_mean(NK_T_B_genes, "NK_T_B"),
       cluster_marker_mean(LEC_genes, "LEC"),
       cluster_marker_mean(Hepatocyte_genes, "Hepatocyte"),
@@ -492,7 +495,7 @@ load(here("data","adult_ped_integrated.rds"))
 TRM_markers_all<-FeaturePlot(d10x.combined, reduction = "umap", features = c("KLRG1", "B3GAT1", "CD69","ITGAE"), ncol = 2)
 save_plts(TRM_markers_all, "TRM_markers", w=5,h=4)
 
-d10x.combined_NK_T_B<-subset(d10x.combined, subset = seurat_clusters %in% c(5,11,16))
+d10x.combined_NK_T_B<-subset(d10x.combined, subset = CellType_rough %in% c("NK_T_B"))
 d10x.combined_NK_T_B <- RunPCA(d10x.combined_NK_T_B, npcs = 30, verbose = FALSE)
 d10x.combined_NK_T_B <- RunUMAP(d10x.combined_NK_T_B, reduction = "pca", dims = 1:30)
 
