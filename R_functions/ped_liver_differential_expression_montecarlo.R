@@ -82,7 +82,7 @@ ncol(d10x_ped)
 
 
 
-samp_num=3
+samp_num=10000
 
 
 DE_monte_carlo<-lapply(cell_types, function(cell_type){
@@ -130,7 +130,10 @@ DE_monte_carlo<-lapply(cell_types, function(cell_type){
   sig_gene_count$cell<-cell_type
   sig_gene_count}})
 
+DE_monte_carlo<-do.call(rbind, DE_monte_carlo)
+DE_monte_carlo<-DE_monte_carlo[which(!(is.na(DE_monte_carlo$gene))),]
 
+save(diff_exp_all, file=here("data","adult_ped_diff_motecarlo.RData"))
 
 
 # 
