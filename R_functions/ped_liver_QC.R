@@ -531,11 +531,11 @@ levels(d10x.combined@meta.data$CellType_rough)<-c("CD3+ T-cells","Cholangiocytes
                                                   "HSC","LSEC","Myeloid cells","NK-like cells")
 
 roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15, label=T)+colscale_cellType+ggtitle("")+
-  annotate("text", x = -10, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
+  annotate("text", x = -6, y = -11, label = paste0("n = ",comma(ncol(d10x.combined))))
 roughcell_cluster_umap
 save_plts(roughcell_cluster_umap, "rPCA_roughcellType_cluster_umap", w=6,h=4)
 roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15)+colscale_cellType+ggtitle("")+
-  annotate("text", x = -10, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
+  annotate("text", x = -6, y = -11, label = paste0("n = ",comma(ncol(d10x.combined))))
 roughcell_cluster_umap
 save_plts(roughcell_cluster_umap, "rPCA_roughcellType_cluster_umap_nolab", w=6,h=4)
 
@@ -543,17 +543,19 @@ d10x.combined$age_id<-paste(d10x.combined$individual, d10x.combined$AgeGroup)
 d10x.combined$age_id[which(d10x.combined$age_id=="C85_caud5pr Ped")]<-"C85_caud5pr Ped (Frozen)"
 d10x.combined$age_id<-as.factor(d10x.combined$age_id)
 #order by % cell passing QC
-d10x.combined$age_id<-factor(d10x.combined$age_id, c("C86_caud3pr Adult","C85_caud5pr Ped (Frozen)",
+d10x.combined$age_id<-factor(d10x.combined$age_id, c("C86_caud3pr Adult","C92_caud3pr Adult","C85_caud5pr Ped (Frozen)",
                                                      "C96_caud3pr Ped", "C63_caud5pr Adult","C70_caud5pr Adult",
                                                      "C61_caud5pr Adult","C93_caud3pr Ped", "C82_caud3pr Adult",
-                                                     "C64_caud5pr Ped","C92_caud3pr Adult"))
+                                                     "C64_caud5pr Ped"))
 levels(d10x.combined$age_id)<-gsub(" ","\n", levels(d10x.combined$age_id))
 
 individual_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_rough", split.by="age_id",pt.size=0.25)+colscale_cellType+ggtitle("")
 save_plts(individual_split, "individual_roughCell_facet_rPCA_UMAP", w=22,h=4)
 
-
-age_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_rough", split.by="AgeGroup",pt.size=0.25)+colscale_cellType+ggtitle("")
+cell_num_all<-as.data.frame(table(d10x.combined@meta.data$AgeGroup))
+colnames(cell_num_all)<-c("AgeGroup","CellCount")
+age_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_rough", split.by="AgeGroup",pt.size=0.25)+colscale_cellType+ggtitle("")+
+  geom_text(aes(x=-6, y=-11, label=paste0("n = ",comma(CellCount))), cell_num_all)
 save_plts(age_split, "age_roughCell_facet_rPCA_UMAP", w=10,h=5)
 
 
