@@ -4,13 +4,14 @@ save_plts<-function(plt, name, w,h){
   ggsave(plt, file=paste(here("figures/jpeg/"),name,".jpeg", sep=""), w=w, h=h)}
 
 
-myColors_diagnosis <- c("lightgrey","darkgoldenrod1","dodgerblue3","lightskyblue","khaki1","#819377","#993399","darkgrey")
-color_possibilities_diagnosis<-c( "Control","UC","CD","IBD-U (CD-like)","IBD-U (UC-like)", "IBD-U", "Other.GI","Neonatal")
-names(myColors_diagnosis) <- color_possibilities_diagnosis
-fillscale_diagnosis <- scale_fill_manual(name="Diagnosis",
-                               values = myColors_diagnosis, drop = T)
-colscale_diagnosis <- scale_color_manual(name="Diagnosis",
-                                         values = myColors_diagnosis, drop = T)
+myColors_celltype <- c("#4b911d","#b83b3b","#006d2c","#6bbce8","#3469ad","#d17906","#b01e87","#60ba5d")
+color_possibilities_celltype<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","LSEC","Myeloid cells","NK-like cells")
+names(myColors_celltype) <- color_possibilities_celltype
+fillscale_cellType <- scale_fill_manual(name="Cell Type",
+                                        values = myColors_celltype, drop = T)
+colscale_cellType <- scale_color_manual(name="Cell Type",
+                                        values = myColors_celltype, drop = T)
+
 
 
 myColors_age <- c("#348595","#d6604d")
