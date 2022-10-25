@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --mem=100G
+#SBATCH --mem=50G
 #SBATCH -J monte_carlo_DE
-#SBATCH -p veryhimem
+#SBATCH -p all
 #SBATCH -c 32 
 #SBATCH -N 1 
 #SBATCH --output=%x.out
