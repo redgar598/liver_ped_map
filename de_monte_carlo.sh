@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --mem=50G
+#SBATCH --mem=20G
 #SBATCH -J monte_carlo_DE
 #SBATCH -p all
 #SBATCH -c 32 
