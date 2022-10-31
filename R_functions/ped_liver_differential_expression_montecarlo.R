@@ -82,7 +82,7 @@ ncol(d10x_ped)
 
 
 
-samp_num=10000
+samp_num=10
 
 
 DE_monte_carlo<-lapply(cell_types, function(cell_type){

@@ -1,4 +1,5 @@
 #!/bin/bash
+#SBATCH -t 5-00:00:00
 #SBATCH --mem=20G
 #SBATCH -J monte_carlo_DE
 #SBATCH -p all
