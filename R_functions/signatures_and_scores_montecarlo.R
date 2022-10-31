@@ -62,6 +62,12 @@ myeloid_immune_supressive<-c("CTSB","CD163","MS4A7","FOLR2","GPNMB","VSIG4","HMO
 inflammatory_macs<-c("CD74","HLA-DRA","TYROBP","C1QC","HLA-DPA1","HLA-DPB1","LYZ","S100A6")
 exhausted_tcells<-c("TOX","PDCD1","LAG3","TNFRSF9","CXCL13","ENTPD1","HAVCR2","CD38")
 
+recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
+kuffer_signature<-c("VSIG4","MARCO","CD5L","HMOX1")
+#kuffer_signature<-c("CD74","HLA-DRA","TYROBP","C1QC","HLA-DPA1","HLA-DPB1","S100A6","MARCO","CD5L")
+
+
+
 ######
 ## Score Signatures
 ######
@@ -86,7 +92,22 @@ d10x <- AddModuleScore(
   name = 'exhausted_tcells_score'
 )
 
-score_data<-d10x@meta.data[,c("myeloid_immune_supressive_score1","inflammatory_macs_score1","exhausted_tcells_score1")]
+d10x <- AddModuleScore(
+  object = d10x,
+  features = list(recent_recruit_myeloid),
+  ctrl = 5,
+  name = 'recently_recruited_myeloid'
+)
+
+d10x <- AddModuleScore(
+  object = d10x,
+  features = list(kuffer_signature),
+  ctrl = 5,
+  name = 'kuffer_like_score'
+)
+
+
+score_data<-d10x@meta.data[,c("myeloid_immune_supressive_score1","inflammatory_macs_score1","exhausted_tcells_score1","recently_recruited_myeloid1","kuffer_like_score1")]
 
 
 ### load integrate for UMAP etc
@@ -176,7 +197,10 @@ myeloid_pval_montecarlo<-do.call(rbind, lapply(1:samp_num, function(x){
 
 supressive<-t.test(plt_myeloid_ped_random$myeloid_immune_supressive_score1, plt_myeloid_adult$myeloid_immune_supressive_score1)$p.value
 inflammatory<-t.test(plt_myeloid_ped_random$inflammatory_macs_score1, plt_myeloid_adult$inflammatory_macs_score1)$p.value
-data.frame(supressive=supressive, inflammatory=inflammatory)
+recruit<-t.test(plt_myeloid_ped_random$recently_recruited_myeloid1, plt_myeloid_adult$recently_recruited_myeloid1)$p.value
+kuffer<-t.test(plt_myeloid_ped_random$kuffer_like_score1, plt_myeloid_adult$kuffer_like_score1)$p.value
+
+data.frame(supressive=supressive, inflammatory=inflammatory, recruit=recruit ,kuffer=kuffer)
 }))
 
 print(paste("Comparing the myeloid immune supressive score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
@@ -185,6 +209,12 @@ print(paste("Comparing the myeloid immune supressive score in myeloid cells, the
 print(paste("Comparing the inflammatory macs score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
             ") in ", samp_num, " random samples at a p value of ",
             round((length(myeloid_pval_montecarlo$inflammatory[which(myeloid_pval_montecarlo$inflammatory>pval)])+1)/(samp_num+1), 3), sep=""))
+print(paste("Comparing the recently recruited myeloid score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+            ") in ", samp_num, " random samples at a p value of ",
+            round((length(myeloid_pval_montecarlo$recruit[which(myeloid_pval_montecarlo$recruit>pval)])+1)/(samp_num+1), 3), sep=""))
+print(paste("Comparing the kuffer-like score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+            ") in ", samp_num, " random samples at a p value of ",
+            round((length(myeloid_pval_montecarlo$kuffer[which(myeloid_pval_montecarlo$kuffer>pval)])+1)/(samp_num+1), 3), sep=""))
 
 
 ########## 
@@ -395,8 +425,120 @@ tcellexhaust_box_tcell<-ggplot(plt_Tcell, aes(AgeGroup,exhausted_tcells_score1))
 save_plts(tcellexhaust_box_tcell, "tcell_exhaust_box_tcell", w=8,h=4)
   
   
-  
-  
+
+####
+## recently_recruited_myeloid1
+####
+## UMAPs
+recruit_all<-ggplot(plt, aes(UMAP_1,UMAP_2, color=recently_recruited_myeloid1))+
+  geom_point(size=1.5)+
+  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  annotate("text", x = -6, y = -11, label = paste0("n = ",comma(nrow(plt))))+
+  scale_color_continuous_sequential(palette = "Mako") + 
+  guides(color=guide_legend(title="Recently\nRecruited\nMyeloid\nSignature Score"))
+save_plts(recruit_all, "recruit_umap_all", w=7,h=5)
+
+recruit_all_agesplit<-ggplot(plt, aes(UMAP_1,UMAP_2))+
+  geom_point(aes(color=recently_recruited_myeloid1),size=1.5)+
+  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  facet_wrap(~AgeGroup)+
+  geom_text(aes(x = -6, y = -11, label=paste0("n = ",comma(CellCount))), cell_num_all)+
+  scale_color_continuous_sequential(palette = "Mako") + 
+  guides(color=guide_legend(title="Recently\nRecruited\nMyeloid\nSignature Score"))
+save_plts(recruit_all_agesplit, "recruit_umap_all_agesplit", w=12,h=5)
+
+recruit_all_myeloid<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2, color=recently_recruited_myeloid1))+
+  geom_point(size=1.5)+
+  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  annotate("text", x = -12, y = -16, label = paste0("n = ",comma(nrow(plt_myeloid))))+
+  scale_color_continuous_sequential(palette = "Mako") + 
+  guides(color=guide_legend(title="Recently\nRecruited\nMyeloid\nSignature Score"))
+save_plts(recruit_all_myeloid, "recruit_umap_myeloid", w=7,h=5)
+
+recruit_all_myeloid_agesplit<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
+  geom_point(aes(color=recently_recruited_myeloid1), size=1.5)+
+  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  facet_wrap(~AgeGroup)+
+  geom_text(aes(x = -12, y = -16, label=paste0("n = ",comma(CellCount))), cell_num_myeloid)+
+  scale_color_continuous_sequential(palette = "Mako") + 
+  guides(color=guide_legend(title="Recently\nRecruited\nMyeloid\nSignature Score"))
+save_plts(recruit_all_myeloid_agesplit, "recruit_umap_myeloid_agesplit", w=12,h=5)
+
+# BOX PLOT
+plt_max<-ceiling(max(plt_myeloid$recently_recruited_myeloid1))
+plt_min<-floor(min(plt_myeloid$recently_recruited_myeloid1))+0.5
+
+myeloid_recruit_box<-
+  ggplot(plt_myeloid, aes(AgeGroup,recently_recruited_myeloid1))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=AgeGroup))+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  facet_grid(.~CellType_rough)+fillscale_age+
+  geom_signif(stat="identity",
+              data=data.frame(x=c(1, 1, 2), xend=c(1, 2, 2),
+                              y=c(plt_max, plt_max+0.25, plt_max+0.25), yend=c(plt_max+0.25, plt_max+0.25, plt_max),
+                              annotation=c("*")),
+              aes(x=x,xend=xend, y=y, yend=yend, annotation=annotation), color="grey50")+ylim(plt_min, plt_max+1)+
+  xlab("Age Group")+ylab("Recently Recruited Myeloid Signature Score")+
+  geom_text(aes(y=-1, x=AgeGroup,label=paste0("n = ",comma(CellCount))),cell_num_myeloid, hjust=-0.1, size=3)
+save_plts(myeloid_recruit_box, "recruit_box_myeloid", w=4,h=4)
+
+
+####
+## kuffer_like_score1
+####
+## UMAPs
+kuffer_all<-ggplot(plt, aes(UMAP_1,UMAP_2, color=kuffer_like_score1))+
+  geom_point(size=1.5)+
+  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  annotate("text", x = -6, y = -11, label = paste0("n = ",comma(nrow(plt))))+
+  scale_color_continuous_sequential(palette = "Mako") +
+  guides(color=guide_legend(title="Kuffer-like\nSignature Score"))
+save_plts(kuffer_all, "kuffer_umap_all", w=7,h=5)
+
+kuffer_all_agesplit<-ggplot(plt, aes(UMAP_1,UMAP_2))+
+  geom_point(aes(color=kuffer_like_score1),size=1.5)+
+  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  facet_wrap(~AgeGroup)+
+  geom_text(aes(x = -6, y = -11, label=paste0("n = ",comma(CellCount))), cell_num_all)+
+  scale_color_continuous_sequential(palette = "Mako") +
+  guides(color=guide_legend(title="Kuffer-like\nSignature Score"))
+save_plts(kuffer_all_agesplit, "kuffer_umap_all_agesplit", w=12,h=5)
+
+kuffer_all_myeloid<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2, color=kuffer_like_score1))+
+  geom_point(size=1.5)+
+  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  annotate("text", x = -12, y = -16, label = paste0("n = ",comma(nrow(plt_myeloid))))+
+  scale_color_continuous_sequential(palette = "Mako") +
+  guides(color=guide_legend(title="Kuffer-like\nSignature Score"))
+save_plts(kuffer_all_myeloid, "kuffer_umap_myeloid", w=7,h=5)
+
+kuffer_all_myeloid_agesplit<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
+  geom_point(aes(color=kuffer_like_score1), size=1.5)+
+  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  facet_wrap(~AgeGroup)+
+  geom_text(aes(x = -12, y = -16, label=paste0("n = ",comma(CellCount))), cell_num_myeloid)+
+  scale_color_continuous_sequential(palette = "Mako") +
+  guides(color=guide_legend(title="Kuffer-like\nSignature Score"))
+save_plts(kuffer_all_myeloid_agesplit, "kuffer_umap_myeloid_agesplit", w=12,h=5)
+
+# BOX PLOT
+plt_max<-ceiling(max(plt_myeloid$kuffer_like_score1))
+plt_min<-floor(min(plt_myeloid$kuffer_like_score1))+0.5
+
+myeloid_kuffer_box<-
+  ggplot(plt_myeloid, aes(AgeGroup,kuffer_like_score1))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=AgeGroup))+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  facet_grid(.~CellType_rough)+fillscale_age+
+  geom_signif(stat="identity",
+              data=data.frame(x=c(1, 1, 2), xend=c(1, 2, 2),
+                              y=c(plt_max, plt_max+0.25, plt_max+0.25), yend=c(plt_max+0.25, plt_max+0.25, plt_max),
+                              annotation=c("*")),
+              aes(x=x,xend=xend, y=y, yend=yend, annotation=annotation), color="grey50")+ylim(plt_min, plt_max+1)+
+  xlab("Age Group")+ylab("Kuffer-like Signature Score")+
+  geom_text(aes(y=-1.5, x=AgeGroup,label=paste0("n = ",comma(CellCount))),cell_num_myeloid, hjust=-0.1, size=3)
+save_plts(myeloid_kuffer_box, "kuffer_box_myeloid", w=4,h=4)
+
 # ######
 # ## plot genes (pull stats from monte carlo)
 # ######

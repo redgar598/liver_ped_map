@@ -6,6 +6,10 @@ library(dplyr)
 library(scales)
 library(gridExtra)
 library(reshape2)
+library(gtools)
+
+
+
 
 source("R_functions/pretty_plots.R")
 
@@ -612,6 +616,64 @@ hep_age<-FeaturePlot(d10x.combined, reduction = "umap", features = c("ALB", "CPS
                                                             "MGST1", "CYP2E1"),
             ncol = 2, split.by='AgeGroup')
 save_plts(hep_age, "hep_markers_age_rPCA_UMAP", w=6,h=14)
+
+##############
+## Myeloid clustering
+##############
+d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_rough %in% c("Myeloid"))
+d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+
+d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.2)
+
+
+myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T)
+myeloid_cluster_umap
+save_plts(myeloid_cluster_umap, "myeloid_cluster_umap", w=5,h=4)
+
+myeloid_cluster_umap_individual<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T, split.by = "age_id", ncol=5)
+myeloid_cluster_umap_individual
+save_plts(myeloid_cluster_umap_individual, "myeloid_cluster_umap_individual", w=10,h=6)
+
+
+cell_cluster_count<-d10x.combined_myeloid@meta.data %>%  group_by(age_id, seurat_clusters) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n / sum(n))
+
+cell_cluster_count<-as.data.frame(cell_cluster_count)
+cell_cluster_count<-merge(cell_cluster_count, d10x.combined_myeloid@meta.data[,c("age_id","AgeGroup")], by="age_id")
+cell_cluster_count<-cell_cluster_count[!duplicated(cell_cluster_count),]
+
+bar_individual<-ggplot(cell_cluster_count, aes(fill=seurat_clusters, y=n, x=age_id)) + 
+  geom_bar(position="fill", stat="identity", color="black")+theme_bw()+th+
+  facet_wrap(~AgeGroup, scale="free_x")
+save_plts(bar_individual, "bar_individual_myeloid", w=14,h=6)
+
+## low quality clusters?
+umap_MTmyeloid<-FeaturePlot(d10x.combined_myeloid, features = "percent.mt", min.cutoff = "q9", pt.size=1)
+save_plts(umap_MTmyeloid, "umap_MTmyeloid", w=5,h=4)
+
+cluster_MT<-d10x.combined_myeloid@meta.data %>%  group_by(seurat_clusters) %>%
+  dplyr::summarize(Mean = mean(percent.mt, na.rm=TRUE))
+cell_cluster_count<-as.data.frame(cluster_MT)
+
+bar_MT<-ggplot(cluster_MT, aes(seurat_clusters, Mean)) + 
+  geom_bar(stat="identity", color="black")+theme_bw()+th
+bar_MT
+save_plts(bar_MT, "bar_MT", w=4,h=3)
+
+umap_nfeaturemyeloid<-FeaturePlot(d10x.combined_myeloid, features = "nFeature_RNA", min.cutoff = "q9", pt.size=1)
+save_plts(umap_nfeaturemyeloid, "umap_nfeaturemyeloid", w=5,h=4)
+
+cluster_nFeature<-d10x.combined_myeloid@meta.data %>%  group_by(seurat_clusters) %>%
+  dplyr::summarize(Mean = mean(nFeature_RNA, na.rm=TRUE))
+cell_cluster_count<-as.data.frame(cluster_nFeature)
+
+bar_nFeature<-ggplot(cluster_nFeature, aes(seurat_clusters, Mean)) + 
+  geom_bar(stat="identity", color="black")+theme_bw()+th
+bar_nFeature
+save_plts(bar_nFeature, "bar_nFeature", w=4,h=3)
 
 
 print(sessionInfo())
