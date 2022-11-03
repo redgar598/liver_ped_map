@@ -32,7 +32,6 @@ y=1
   # print(dim(d10x))
   
   # Load data and estimate soup profile
-  sc = load10X("Path/to/cellranger/outs/folder/")
   # Estimate rho
   d10x_soup = autoEstCont(d10x)
   # Clean the data
