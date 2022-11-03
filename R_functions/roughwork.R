@@ -35,6 +35,7 @@ y=1
   # Estimate rho
   d10x_soup = autoEstCont(d10x)
   print(dim(d10x_soup))
+  print(class(d10x_soup))
   # Clean the data
   out = adjustCounts(d10x_soup)
   print(dim(out))

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --mem=20G
+#SBATCH --mem=5G
 #SBATCH -J soupX
 #SBATCH -p all 
 #SBATCH -c 32 
