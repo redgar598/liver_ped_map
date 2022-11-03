@@ -29,11 +29,12 @@ y=1
   print(file.path(dataset_loc,paste(samples[y], sep=""),"filtered_feature_bc_matrix"))
   d10x <- Read10X(file.path(dataset_loc,paste(samples[y], sep=""),"filtered_feature_bc_matrix"))
   colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),samples[y],sep="-")
-  # print(dim(d10x))
+  print(dim(d10x))
   
   # Load data and estimate soup profile
   # Estimate rho
   d10x_soup = autoEstCont(d10x)
+  print(dim(d10x_soup))
   # Clean the data
   out = adjustCounts(d10x_soup)
   print(dim(out))
