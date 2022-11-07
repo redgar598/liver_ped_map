@@ -40,10 +40,10 @@ d10x.list <- sapply(1:length(samples), function(y){
   d10x    <- RunUMAP(d10x, dims = 1:30, verbose = F)
   d10x    <- FindNeighbors(d10x, dims = 1:30, verbose = F)
   d10x    <- FindClusters(d10x, verbose = T)
-  meta    <- d10x@meta.data
+  meta_clusters    <- d10x@meta.data
   
   sc = load10X(file.path(dataset_loc,paste(samples[y], sep="")))
-  sc = setClusters(sc, setNames(meta$seurat_clusters, rownames(meta)))
+  sc = setClusters(sc, setNames(meta_clusters$seurat_clusters, rownames(meta_clusters)))
   
   ######
   ## Load data and estimate soup profile
