@@ -134,7 +134,8 @@ samp_num=10
   sig_gene_count$cell<-cell_type
   sig_gene_count}#})
 
-DE_monte_carlo<-do.call(rbind, DE_monte_carlo)
+#DE_monte_carlo<-do.call(rbind, DE_monte_carlo)
+DE_monte_carlo<-sig_gene_count
 DE_monte_carlo<-DE_monte_carlo[which(!(is.na(DE_monte_carlo$gene))),]
 
 save(DE_monte_carlo, file=here("data",paste(cell_type,"adult_ped_diff_motecarlo.RData",sep="_")))
