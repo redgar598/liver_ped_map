@@ -62,10 +62,13 @@ d10x.list <- sapply(1:length(samples), function(y){
   
   #add meta data to each seurat object
   print(head(colnames(d10x)))
-  colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),samples[y],sep="-")
+  print(samples[y])
+  #colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),samples[y],sep="-")
   
-  meta_cell<-data.frame(cell=colnames(d10x), individual=sapply(colnames(d10x), function(x) strsplit(x,"-")[[1]][2]))
+  meta_cell<-data.frame(cell=colnames(d10x), individual=samples[y])
   print(head(meta_cell))
+  print(head(meta))
+  
   meta_cell_add<-merge(meta_cell, meta, by.x="individual", by.y="Sample_ID")
   meta_cell_add<-meta_cell_add[match(colnames(d10x), meta_cell_add$cell),]
   print(identical(meta_cell_add$cell, colnames(d10x)))
