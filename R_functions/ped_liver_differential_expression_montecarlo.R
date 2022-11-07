@@ -86,7 +86,7 @@ command_args <- commandArgs(trailingOnly = TRUE)
 cell_type_indx <- as.numeric(command_args[1])
 cell_type<-cell_types[cell_type_indx]
 
-samp_num=10
+samp_num=10000
 
 
 #DE_monte_carlo<-lapply(cell_types, function(cell_type){
