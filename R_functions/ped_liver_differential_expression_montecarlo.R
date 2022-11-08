@@ -86,10 +86,10 @@ command_args <- commandArgs(trailingOnly = TRUE)
 cell_type_indx <- as.numeric(command_args[1])
 cell_type<-cell_types[cell_type_indx]
 
-samp_num=10000
+samp_num=10
 
 
-#DE_monte_carlo<-lapply(cell_types, function(cell_type){
+DE_monte_carlo<-lapply(cell_types, function(cell_type){
   
   contrasts_celltype<-contrasts_celltype_age[grep(cell_type, contrasts_celltype_age)]
   
@@ -132,13 +132,13 @@ samp_num=10000
   })
   
   sig_gene_count$cell<-cell_type
-  sig_gene_count}#})
+  sig_gene_count}})
 
 #DE_monte_carlo<-do.call(rbind, DE_monte_carlo)
 DE_monte_carlo<-sig_gene_count
 DE_monte_carlo<-DE_monte_carlo[which(!(is.na(DE_monte_carlo$gene))),]
 
-save(DE_monte_carlo, file=here("data",paste(cell_type,"adult_ped_diff_motecarlo.RData",sep="_")))
+save(DE_monte_carlo, file=here("data",paste(cell_type,"adult_ped_diff_motecarlo_10.RData",sep="_")))
 
 
 

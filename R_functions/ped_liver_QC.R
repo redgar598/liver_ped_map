@@ -50,25 +50,15 @@ d10x.list <- sapply(1:length(samples), function(y){
   ######
   # Estimate rho
   sc = autoEstCont(sc)
-  print(dim(sc))
-  print(class(sc))
+  #Genes with highest expression in background. These are often enriched for ribosomal proteins.
   print(head(sc$soupProfile[order(sc$soupProfile$est, decreasing = T), ], n = 20))
   # Clean the data
   sc = adjustCounts(sc)
-  print(dim(sc))
-  print(class(sc))
   
   d10x = CreateSeuratObject(sc)
   
   #add meta data to each seurat object
-  print(head(colnames(d10x)))
-  print(samples[y])
-  #colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),samples[y],sep="-")
-  
   meta_cell<-data.frame(cell=colnames(d10x), individual=samples[y])
-  print(head(meta_cell))
-  print(head(meta))
-  
   meta_cell_add<-merge(meta_cell, meta, by.x="individual", by.y="Sample_ID")
   meta_cell_add<-meta_cell_add[match(colnames(d10x), meta_cell_add$cell),]
   print(identical(meta_cell_add$cell, colnames(d10x)))
@@ -145,7 +135,7 @@ save_plts(MT_plt, "percentMT_plt", w=6,h=4)
 MT_plt_individual<-ggplot(plt_QC_data,aes(percent.mt)) + geom_histogram(binwidth = 0.5) +
   facet_wrap(~individual, scales="free_y")+
   geom_vline(xintercept = 50)+ theme_bw()+xlab("Percent Mitochondrial")+th
-save_plts(MT_plt_individual, "percentMT_plt_individual", w=6,h=4)
+save_plts(MT_plt_individual, "percentMT_plt_individual", w=8,h=4)
 
 
 
@@ -304,8 +294,11 @@ d10x.list.chem <- lapply(X = d10x.list.chem, FUN = function(x) {
 features <- SelectIntegrationFeatures(object.list = d10x.list.chem)
 d10x.list.chem <- lapply(X = d10x.list.chem, FUN = function(x) {
   x <- ScaleData(x, features = features, verbose = FALSE)
+  #x <- ScaleData(x, vars.to.regress = c("nFeature_RNA","S.Score", "G2M.Score"), features = features, verbose = FALSE)
   x <- RunPCA(x, features = features, verbose = FALSE)
 })
+
+
 
 ## Identify anchors
 chem.anchors <- FindIntegrationAnchors(object.list = d10x.list.chem, anchor.features = features, reduction = "rpca")
@@ -564,11 +557,11 @@ levels(d10x.combined@meta.data$CellType_rough)<-c("CD3+ T-cells","Cholangiocytes
                                                   "HSC","LSEC","Myeloid cells","NK-like cells")
 
 roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15, label=T)+colscale_cellType+ggtitle("")+
-  annotate("text", x = -6, y = -11, label = paste0("n = ",comma(ncol(d10x.combined))))
+  annotate("text", x = -11, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
 roughcell_cluster_umap
 save_plts(roughcell_cluster_umap, "rPCA_roughcellType_cluster_umap", w=6,h=4)
 roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15)+colscale_cellType+ggtitle("")+
-  annotate("text", x = -6, y = -11, label = paste0("n = ",comma(ncol(d10x.combined))))
+  annotate("text", x = -11, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
 roughcell_cluster_umap
 save_plts(roughcell_cluster_umap, "rPCA_roughcellType_cluster_umap_nolab", w=6,h=4)
 
@@ -576,19 +569,18 @@ d10x.combined$age_id<-paste(d10x.combined$individual, d10x.combined$AgeGroup)
 d10x.combined$age_id[which(d10x.combined$age_id=="C85_caud5pr Ped")]<-"C85_caud5pr Ped (Frozen)"
 d10x.combined$age_id<-as.factor(d10x.combined$age_id)
 #order by % cell passing QC
-d10x.combined$age_id<-factor(d10x.combined$age_id, c("C86_caud3pr Adult","C92_caud3pr Adult","C85_caud5pr Ped (Frozen)",
-                                                     "C96_caud3pr Ped", "C63_caud5pr Adult","C70_caud5pr Adult",
-                                                     "C61_caud5pr Adult","C93_caud3pr Ped", "C82_caud3pr Adult",
-                                                     "C64_caud5pr Ped"))
+d10x.combined$age_id<-factor(d10x.combined$age_id, c("C86_caud3pr Adult","C92_caud3pr Adult", "C63_caud5pr Adult","C70_caud5pr Adult",
+                                                     "C61_caud5pr Adult","C82_caud3pr Adult",
+                                                     "C85_caud5pr Ped (Frozen)","C96_caud3pr Ped","C93_caud3pr Ped", "C64_caud5pr Ped"))
 levels(d10x.combined$age_id)<-gsub(" ","\n", levels(d10x.combined$age_id))
 
-individual_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_rough", split.by="age_id",pt.size=0.25)+colscale_cellType+ggtitle("")
-save_plts(individual_split, "individual_roughCell_facet_rPCA_UMAP", w=22,h=4)
+individual_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_rough", split.by="age_id",pt.size=0.25, ncol=5)+colscale_cellType+ggtitle("")
+save_plts(individual_split, "individual_roughCell_facet_rPCA_UMAP", w=22,h=8)
 
 cell_num_all<-as.data.frame(table(d10x.combined@meta.data$AgeGroup))
 colnames(cell_num_all)<-c("AgeGroup","CellCount")
 age_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_rough", split.by="AgeGroup",pt.size=0.25)+colscale_cellType+ggtitle("")+
-  geom_text(aes(x=-6, y=-11, label=paste0("n = ",comma(CellCount))), cell_num_all)
+  geom_text(aes(x=-11, y=-12, label=paste0("n = ",comma(CellCount))), cell_num_all)
 save_plts(age_split, "age_roughCell_facet_rPCA_UMAP", w=10,h=5)
 
 
@@ -614,7 +606,7 @@ d10x.combined@meta.data %>%
 TRM_markers_all<-FeaturePlot(d10x.combined, reduction = "umap", features = c("KLRG1", "B3GAT1", "CD69","ITGAE"), ncol = 2)
 save_plts(TRM_markers_all, "TRM_markers", w=5,h=4)
 
-d10x.combined_NK_T_B<-subset(d10x.combined, subset = CellType_rough %in% c("NK_T_B"))
+d10x.combined_NK_T_B<-subset(d10x.combined, subset = CellType_rough %in% c("CD3+ T-cells","gd T-cells","NK-like cells"))
 d10x.combined_NK_T_B <- RunPCA(d10x.combined_NK_T_B, npcs = 30, verbose = FALSE)
 d10x.combined_NK_T_B <- RunUMAP(d10x.combined_NK_T_B, reduction = "pca", dims = 1:30)
 
@@ -649,12 +641,12 @@ save_plts(hep_age, "hep_markers_age_rPCA_UMAP", w=6,h=14)
 ##############
 ## Myeloid clustering
 ##############
-d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_rough %in% c("Myeloid"))
+d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_rough %in% c("Myeloid cells"))
 d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
 d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
 
 d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
-d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.2)
+d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.1)
 
 
 myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T)
