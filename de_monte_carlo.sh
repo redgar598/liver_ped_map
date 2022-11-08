@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -t 5-00:00:00
 #SBATCH --mem=20G
-#SBATCH -J monte_carlo_DE
+#SBATCH -J monte_10_carlo_DE
 #SBATCH -p all
 #SBATCH -c 32 
 #SBATCH -N 1 
