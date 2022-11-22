@@ -129,12 +129,12 @@ qc_plts_individual<-ggplot(plt_QC_data, aes(nCount_RNA,nFeature_RNA,colour=perce
 save_plts(qc_plts_chem, "intital_QC_plts_individual", w=12,h=4)
 
 MT_plt<-ggplot(plt_QC_data,aes(percent.mt)) + geom_histogram(binwidth = 0.5) +
-  geom_vline(xintercept = 50)+ theme_bw()+xlab("Percent Mitochondrial")+th
+  geom_vline(xintercept = 25)+ theme_bw()+xlab("Percent Mitochondrial")+th
 save_plts(MT_plt, "percentMT_plt", w=6,h=4)
 
 MT_plt_individual<-ggplot(plt_QC_data,aes(percent.mt)) + geom_histogram(binwidth = 0.5) +
   facet_wrap(~individual, scales="free_y")+
-  geom_vline(xintercept = 50)+ theme_bw()+xlab("Percent Mitochondrial")+th
+  geom_vline(xintercept = 25)+ theme_bw()+xlab("Percent Mitochondrial")+th
 save_plts(MT_plt_individual, "percentMT_plt_individual", w=8,h=4)
 
 
@@ -145,7 +145,7 @@ save_plts(MT_plt_individual, "percentMT_plt_individual", w=8,h=4)
 d10x.list.raw<-d10x.list
 
 invisible(lapply(1:length(d10x.list), function(x){
-  d10x.list[[x]] <<- subset(d10x.list[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 50)
+  d10x.list[[x]] <<- subset(d10x.list[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 25)
 }))
 
 d10x.list
@@ -293,8 +293,8 @@ d10x.list.chem <- lapply(X = d10x.list.chem, FUN = function(x) {
 # dataset using these features
 features <- SelectIntegrationFeatures(object.list = d10x.list.chem)
 d10x.list.chem <- lapply(X = d10x.list.chem, FUN = function(x) {
-  x <- ScaleData(x, features = features, verbose = FALSE)
-  #x <- ScaleData(x, vars.to.regress = c("nFeature_RNA","S.Score", "G2M.Score"), features = features, verbose = FALSE)
+  #x <- ScaleData(x, features = features, verbose = FALSE)
+  x <- ScaleData(x, vars.to.regress = c("nFeature_RNA","S.Score", "G2M.Score"), features = features, verbose = FALSE)
   x <- RunPCA(x, features = features, verbose = FALSE)
 })
 
@@ -334,6 +334,9 @@ save_plts(chem_umap_sct, "chem_rPCA_umap", w=6,h=4)
 
 age_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)+fillscale_age
 save_plts(age_umap_sct, "age_rPCA_umap", w=6,h=4)
+
+MT_umap_sct<-FeaturePlot(d10x.combined, reduction = "umap", features = "percent.mt", pt.size=0.25)
+save_plts(MT_umap_sct, "MT_rPCA_umap", w=5,h=4)
 
 individual_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "individual", pt.size=0.25)
 save_plts(individual_umap_sct, "individual_rPCA_UMAP", w=6,h=4)
@@ -679,10 +682,11 @@ cluster_MT<-d10x.combined_myeloid@meta.data %>%  group_by(seurat_clusters) %>%
   dplyr::summarize(Mean = mean(percent.mt, na.rm=TRUE))
 cell_cluster_count<-as.data.frame(cluster_MT)
 
-bar_MT<-ggplot(cluster_MT, aes(seurat_clusters, Mean)) + 
-  geom_bar(stat="identity", color="black")+theme_bw()+th
-bar_MT
-save_plts(bar_MT, "bar_MT", w=4,h=3)
+box_MT<-ggplot(d10x.combined_myeloid@meta.data, aes(seurat_clusters, percent.mt)) + 
+  geom_violin(fill="lightgrey", color="lightgrey")+xlab("Myeloid Cluster")+ylab("Percent MT")+
+  geom_boxplot(width=0.1, outlier.size = 0.05)+theme_bw()+th
+box_MT
+save_plts(box_MT, "box_MT", w=8,h=3)
 
 umap_nfeaturemyeloid<-FeaturePlot(d10x.combined_myeloid, features = "nFeature_RNA", min.cutoff = "q9", pt.size=1)
 save_plts(umap_nfeaturemyeloid, "umap_nfeaturemyeloid", w=5,h=4)
@@ -691,11 +695,11 @@ cluster_nFeature<-d10x.combined_myeloid@meta.data %>%  group_by(seurat_clusters)
   dplyr::summarize(Mean = mean(nFeature_RNA, na.rm=TRUE))
 cell_cluster_count<-as.data.frame(cluster_nFeature)
 
-bar_nFeature<-ggplot(cluster_nFeature, aes(seurat_clusters, Mean)) + 
-  geom_bar(stat="identity", color="black")+theme_bw()+th
-bar_nFeature
-save_plts(bar_nFeature, "bar_nFeature", w=4,h=3)
-
+box_nfeature<-ggplot(d10x.combined_myeloid@meta.data, aes(seurat_clusters, nFeature_RNA)) + 
+  geom_violin(fill="lightgrey", color="lightgrey")+xlab("Myeloid Cluster")+ylab("Number of Feature \n(nFeature_RNA)")+
+  geom_boxplot(width=0.1, outlier.size = 0.05)+theme_bw()+th
+box_nfeature
+save_plts(box_nfeature, "box_nfeature", w=8,h=3)
 
 print(sessionInfo())
 
