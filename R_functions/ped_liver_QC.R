@@ -283,10 +283,14 @@ d10x
 # split the dataset into a list of two seurat objects (3' and 5')
 d10x.list.chem <- SplitObject(d10x, split.by = "Chemistry")
 
-# normalize and identify variable features for each dataset independently
+# normalize, identify variable features and score cell cycle for each dataset independently
+s.genes <- cc.genes$s.genes
+g2m.genes <- cc.genes$g2m.genes
+
 d10x.list.chem <- lapply(X = d10x.list.chem, FUN = function(x) {
   x <- NormalizeData(x)
   x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
+  x <- CellCycleScoring(x, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
 })
 
 # select features that are repeatedly variable across datasets for integration run PCA on each
@@ -573,7 +577,7 @@ d10x.combined$age_id[which(d10x.combined$age_id=="C85_caud5pr Ped")]<-"C85_caud5
 d10x.combined$age_id<-as.factor(d10x.combined$age_id)
 #order by % cell passing QC
 d10x.combined$age_id<-factor(d10x.combined$age_id, c("C86_caud3pr Adult","C92_caud3pr Adult", "C63_caud5pr Adult","C70_caud5pr Adult",
-                                                     "C61_caud5pr Adult","C82_caud3pr Adult",
+                                                     "C61_caud5pr Adult","C82_caud3pr Adult","C98_caud3pr Adult",
                                                      "C85_caud5pr Ped (Frozen)","C96_caud3pr Ped","C93_caud3pr Ped", "C64_caud5pr Ped"))
 levels(d10x.combined$age_id)<-gsub(" ","\n", levels(d10x.combined$age_id))
 
