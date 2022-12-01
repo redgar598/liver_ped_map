@@ -20,6 +20,8 @@ library(gtools)
 library(ggsignif)
 library(stats)
 library(scales)
+library(colorspace)
+
 
 
 
@@ -173,4 +175,59 @@ de_04_sig[which(de_04_sig$avg_log2FC<0),]
 
 FeaturePlot(d10x.combined_NK_T_B, features = c("NKG7","CCL5","HLA-A","MT-ND4"), min.cutoff = "q9", pt.size=1)
 
+FeaturePlot(d10x.combined_NK_T_B, features = c("NKG7","CD8A","CD3D","CD4"), min.cutoff = "q9", pt.size=1)
+
+## MacParland markers for tcell (fig9)
+FeaturePlot(d10x.combined_NK_T_B, features = c("PTPRC","CD2","CD3D","TRAC"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_NK_T_B, features = c("IL7R","KLRB1","NKG7","FCGR3A"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_NK_T_B, features = c("GZMA","GZMB","GZMK","PRF1"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_NK_T_B, features = c("CD79A","CD79B","CD27","IGHG1"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_NK_T_B, features = c("MS4A1","LTB","CD52","IGHD"), min.cutoff = "q9", pt.size=1)
+
+
+
+#######################
+## Naive vs memory T cells
+#######################
+
+FeaturePlot(d10x.combined_NK_T_B, features = c("CD4","CD8A","FOXP3","PDCD1"), min.cutoff = "q9", pt.size=1)
+
+d10x.combined_CD3<-subset(d10x.combined_NK_T_B, subset = CellType_rough %in% c("CD3_Tcell"))
+d10x.combined_CD3 <- RunPCA(d10x.combined_CD3, npcs = 30, verbose = FALSE)
+d10x.combined_CD3 <- RunUMAP(d10x.combined_CD3, reduction = "pca", dims = 1:30)
+d10x.combined_CD3 <- FindNeighbors(d10x.combined_CD3, reduction = "pca", dims = 1:30)
+d10x.combined_CD3 <- FindClusters(d10x.combined_CD3, resolution = 0.3)
+CD3_umap<-DimPlot(d10x.combined_CD3, label=T)
+CD3_umap
+save_plts(CD3_umap, "CD3_umap", w=5,h=4)
+
+
+FeaturePlot(d10x.combined_CD3, features = c("GZMB","GZMK","CXCR5","PDCD1"), min.cutoff = "q9", pt.size=1)
+
+genes<-c("GZMB","GZMK","CXCR5","PDCD1","TCF7","CTLA4","CD4","CD8A", "HAVCR2")
+
+d10x.exp<-as.data.frame(d10x.combined_CD3[["RNA"]]@data)
+d10x.exp.GOI<-d10x.exp[genes,]
+d10x.exp.GOI$gene<-rownames(d10x.exp.GOI)
+d10x.exp.GOI<-melt(d10x.exp.GOI)#
+
+umap_mat<-as.data.frame(Embeddings(object = d10x.combined_CD3, reduction = "umap"))#
+umap_mat$cell<-rownames(umap_mat)
+
+meta<-d10x.combined_CD3@meta.data
+meta$cell<-rownames(meta)
+
+plt<-merge(meta, umap_mat, by="cell")
+
+plt<-merge(d10x.exp.GOI, plt,by.x="variable", by.y="cell")
+plt$variable<-as.character(plt$variable)
+plt$seurat_clusters<-as.character(plt$seurat_clusters)
+
+plt_list<-lapply(genes, function(x){
+  plt_gene<-plt[which(plt$gene==x),]
+  ggplot(plt_gene, aes(UMAP_1, UMAP_2, color=value))+geom_point(size=0.75)+facet_wrap(~gene)+
+    scale_color_continuous_sequential(palette = "Blues 2") +theme_bw() + th_present
+})
+
+plot_grid(plotlist = plt_list, align = 'hv', ncol = 3)
 
