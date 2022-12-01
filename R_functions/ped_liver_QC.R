@@ -502,26 +502,26 @@ T_genes<-c("CD3D","IL7R","CD8A","IL32")
 NK_genes<-c("NKG7","CD7")
 gd_genes<-c("GNLY")
 
-d10x.combined_NK_T_B<-subset(d10x.combined, subset = CellType_rough %in% c("NK_T_B"))
-d10x.combined_NK_T_B <- RunPCA(d10x.combined_NK_T_B, npcs = 30, verbose = FALSE)
-d10x.combined_NK_T_B <- RunUMAP(d10x.combined_NK_T_B, reduction = "pca", dims = 1:30)
+d10x.combined_NK_T<-subset(d10x.combined, subset = CellType_rough %in% c("NK_T"))
+d10x.combined_NK_T <- RunPCA(d10x.combined_NK_T, npcs = 30, verbose = FALSE)
+d10x.combined_NK_T <- RunUMAP(d10x.combined_NK_T, reduction = "pca", dims = 1:30)
 
-DimPlot(d10x.combined_NK_T_B, reduction = "umap", pt.size=0.25)
+DimPlot(d10x.combined_NK_T, reduction = "umap", pt.size=0.25)
 
-FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = NK_genes, ncol = 2)
-FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = gd_genes)
-FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = T_genes, ncol = 2)
-FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = B_genes, ncol = 2)
+FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = NK_genes, ncol = 2)
+FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = gd_genes)
+FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = T_genes, ncol = 2)
+FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = B_genes, ncol = 2)
 
 ## same method on sub cluster
 genes<-unique(c(T_genes, NK_genes,gd_genes))
 
-d10x.exp<-as.data.frame(d10x.combined_NK_T_B[["RNA"]]@data)
+d10x.exp<-as.data.frame(d10x.combined_NK_T[["RNA"]]@data)
 d10x.exp.GOI<-d10x.exp[genes,]
 d10x.exp.GOI$gene<-rownames(d10x.exp.GOI)
 d10x.exp.GOI<-melt(d10x.exp.GOI)#
 
-meta<-d10x.combined_NK_T_B@meta.data
+meta<-d10x.combined_NK_T@meta.data
 meta$cell<-rownames(meta)
 
 plt<-merge(d10x.exp.GOI, meta,by.x="variable", by.y="cell")
@@ -756,7 +756,7 @@ load(here("data","adult_ped_integrated.rds"))
 # cell_cluster_count<-merge(cell_cluster_count, d10x.combined_myeloid@meta.data[,c("age_id","AgeGroup")], by="age_id")
 # cell_cluster_count<-cell_cluster_count[!duplicated(cell_cluster_count),]
 # 
-# bar_individual<-ggplot(cell_cluster_count, aes(fill=seurat_clusters, y=n, x=age_id)) + 
+# bar_individual<-ggplot(cell_cluster_count, aes(fill=seurat_clusters, y=n, x=age_id)) +
 #   geom_bar(position="fill", stat="identity", color="black")+theme_bw()+th+
 #   facet_wrap(~AgeGroup, scale="free_x")
 # save_plts(bar_individual, "bar_individual_myeloid", w=14,h=6)
@@ -769,7 +769,7 @@ load(here("data","adult_ped_integrated.rds"))
 #   dplyr::summarize(Mean = mean(percent.mt, na.rm=TRUE))
 # cell_cluster_count<-as.data.frame(cluster_MT)
 # 
-# box_MT<-ggplot(d10x.combined_myeloid@meta.data, aes(seurat_clusters, percent.mt)) + 
+# box_MT<-ggplot(d10x.combined_myeloid@meta.data, aes(seurat_clusters, percent.mt)) +
 #   geom_violin(fill="lightgrey", color="lightgrey")+xlab("Myeloid Cluster")+ylab("Percent MT")+
 #   geom_boxplot(width=0.1, outlier.size = 0.05)+theme_bw()+th
 # box_MT
@@ -782,7 +782,7 @@ load(here("data","adult_ped_integrated.rds"))
 #   dplyr::summarize(Mean = mean(nFeature_RNA, na.rm=TRUE))
 # cell_cluster_count<-as.data.frame(cluster_nFeature)
 # 
-# box_nfeature<-ggplot(d10x.combined_myeloid@meta.data, aes(seurat_clusters, nFeature_RNA)) + 
+# box_nfeature<-ggplot(d10x.combined_myeloid@meta.data, aes(seurat_clusters, nFeature_RNA)) +
 #   geom_violin(fill="lightgrey", color="lightgrey")+xlab("Myeloid Cluster")+ylab("Number of Feature \n(nFeature_RNA)")+
 #   geom_boxplot(width=0.1, outlier.size = 0.05)+theme_bw()+th
 # box_nfeature
