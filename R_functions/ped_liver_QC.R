@@ -492,6 +492,9 @@ identical(plt_summary$cell, rownames(d10x.combined@meta.data))
 rownames(plt_summary)<-plt_summary$cell
 
 d10x.combined<- AddMetaData(d10x.combined, plt_summary)
+d10x.combined
+table(d10x.combined$CellType_rough)
+
 
 ###########
 ## Sub cluster NK T B
