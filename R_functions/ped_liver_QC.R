@@ -181,235 +181,232 @@ source("R_functions/pretty_plots.R")
 #' d10x
 #' 
 #' saveRDS(d10x, file = here("data","d10x_adult_ped_raw.rds"))
-#' 
-#' 
-#' ################
-#' ## Normalize scale and UMAP
-#' ################
-#' d10x <- NormalizeData(d10x)
-#' d10x <- FindVariableFeatures(d10x, selection.method = "vst", nfeatures = 2000)
-#' d10x <- ScaleData(d10x) #ScaleData(cells, vars.to.regress = c("nUMI","percent.mito","donor.id","S.Score","G2M.Score","batch_10X"))
-#' 
-#' # dimension reduction
-#' d10x <- RunPCA(d10x, ndims.print = 1:10, nfeatures.print = 10)
-#' d10x <- RunUMAP(d10x, dims = 1:30)
-#' d10x <- RunTSNE(d10x, dims = 1:30)
-#' 
-#' 
-#' 
-#' ######################
-#' ## cell cycle gene expression
-#' ######################
-#' # A list of cell cycle markers, from Tirosh et al, 2015, is loaded with Seurat.  We can
-#' # segregate this list into markers of G2/M phase and markers of S phase
-#' s.genes <- cc.genes$s.genes
-#' g2m.genes <- cc.genes$g2m.genes
-#' 
-#' d10x <- CellCycleScoring(d10x, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
-#' 
-#' pca_cellcycle<-DimPlot(d10x, reduction="pca",  group.by = "Phase")
-#' save_plts(pca_cellcycle, "pca_cellcycle", w=6,h=4)
-#' 
-#' pca_nfeature<-FeaturePlot(d10x, features = "nFeature_RNA",reduction = "pca", min.cutoff = "q9", pt.size=1)
-#' save_plts(pca_nfeature, "pca_nfeature", w=6,h=4)
-#' 
-#' 
-#' 
-#' ## regress out cell cycle and other covariates
-#' #Transformed data will be available in the SCT assay, which is set as the default after running sctransform
-#' #By default, sctransform accounts for cellular sequencing depth, or nUMIs.
-#' d10x <- SCTransform(d10x, vars.to.regress = c("nFeature_RNA","S.Score", "G2M.Score"), verbose = FALSE)
-#' 
-#' # dimension reduction
-#' d10x <- RunPCA(d10x, verbose = FALSE)
-#' d10x <- RunUMAP(d10x, dims = 1:30)
-#' d10x <- RunTSNE(d10x, dims = 1:30)
-#' 
-#' # cluster
-#' d10x <- FindNeighbors(d10x, reduction = "pca", dims = 1:20)
-#' d10x <- FindClusters(d10x, resolution = 0.5)
-#' 
-#' 
-#' 
-#' ###############
-#' ## visualize
-#' ###############
-#' SCT_cluster_umap<-DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T)
-#' save_plts(SCT_cluster_umap, "SCT_cluster_umap", w=6,h=4)
-#' 
-#' SCT_cluster_tsne<-DimPlot(d10x, reduction = "tsne", pt.size=0.25, label=T)
-#' save_plts(SCT_cluster_tsne, "SCT_cluster_tsne", w=6,h=4)
-#' 
-#' 
-#' cell_pca_SCT<-DimPlot(d10x, reduction="pca", group.by="Phase")
-#' save_plts(cell_pca_SCT, "cell_PCA_afterSCT", w=6,h=4)
-#' 
-#' nFeature_UMAP_SCT<-FeaturePlot(d10x, features = "nFeature_RNA",reduction = "pca", min.cutoff = "q9", pt.size=1)
-#' save_plts(nFeature_UMAP_SCT, "nfeature_UMAP_afterSCT", w=6,h=4)
-#' 
-#' 
-#' 
-#' chem_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "Chemistry", pt.size=0.25)
-#' save_plts(chem_umap_sct, "chem_SCT_umap", w=6,h=4)
-#' 
-#' age_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)+fillscale_age
-#' save_plts(age_umap_sct, "age_SCT_umap", w=6,h=4)
-#' 
-#' individual_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "individual", pt.size=1)
-#' save_plts(individual_umap_sct, "individual_SCT_UMAP", w=6,h=4)
-#' 
-#' 
-#' ## Low quality cluster?
-#' MT_umap_SCT<-FeaturePlot(d10x, features = "percent.mt", min.cutoff = "q9", pt.size=1)
-#' save_plts(pca_nfeature, "pca_nfeature", w=6,h=4)
-#' 
-#' ncount_umap_SCT<-FeaturePlot(d10x, features = "nCount_RNA", min.cutoff = "q9", pt.size=1)
-#' save_plts(ncount_umap_SCT, "ncount_umap_SCT", w=6,h=4)
-#' 
-#' nfeature_umap_SCT<-FeaturePlot(d10x, features = "nFeature_RNA", min.cutoff = "q9", pt.size=1)
-#' save_plts(nfeature_umap_SCT, "nfeature_umap_SCT", w=6,h=4)
-#' 
-#' 
-#' 
-#' 
-#' 
-#' ###############
-#' ## Integration
-#' ###############
-#' #https://satijalab.org/seurat/articles/integration_rpca.html
-#' print("RUNNING INTEGRATION")
-#' ## Start back with raw data
-#' d10x <- merge(d10x.list[[1]], y= d10x.list[2:length(d10x.list)], merge.data=TRUE, project = "adult_ped_map")#add.cell.ids = alldata_names2,
-#' d10x
-#' 
-#' # split the dataset into a list of two seurat objects (3' and 5')
-#' d10x.list.chem <- SplitObject(d10x, split.by = "Chemistry")
-#' 
-#' # normalize, identify variable features and score cell cycle for each dataset independently
-#' s.genes <- cc.genes$s.genes
-#' g2m.genes <- cc.genes$g2m.genes
-#' 
-#' d10x.list.chem <- lapply(X = d10x.list.chem, FUN = function(x) {
-#'   x <- NormalizeData(x)
-#'   x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
-#'   x <- CellCycleScoring(x, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
-#' })
-#' 
-#' # select features that are repeatedly variable across datasets for integration run PCA on each
-#' # dataset using these features
-#' features <- SelectIntegrationFeatures(object.list = d10x.list.chem)
-#' d10x.list.chem <- lapply(X = d10x.list.chem, FUN = function(x) {
-#'   #x <- ScaleData(x, features = features, verbose = FALSE)
-#'   x <- ScaleData(x, vars.to.regress = c("nFeature_RNA","S.Score", "G2M.Score"), features = features, verbose = FALSE)
-#'   x <- RunPCA(x, features = features, verbose = FALSE)
-#' })
-#' 
-#' 
-#' 
-#' ## Identify anchors
-#' chem.anchors <- FindIntegrationAnchors(object.list = d10x.list.chem, anchor.features = features, reduction = "rpca")
-#' d10x.combined <- IntegrateData(anchorset = chem.anchors)
-#' 
-#' DefaultAssay(d10x.combined) <- "integrated"
-#' 
-#' print("INTEGRATED")
-#' 
-#' # Run the standard workflow for visualization and clustering
-#' d10x.combined <- ScaleData(d10x.combined, verbose = FALSE)
-#' d10x.combined <- RunPCA(d10x.combined, npcs = 30, verbose = FALSE)
-#' d10x.combined <- RunUMAP(d10x.combined, reduction = "pca", dims = 1:30)
-#' d10x.combined <- RunTSNE(d10x.combined, dims = 1:30)
-#' 
-#' d10x.combined <- FindNeighbors(d10x.combined, reduction = "pca", dims = 1:30)
-#' d10x.combined <- FindClusters(d10x.combined, resolution = 0.5)
-#' 
-#' d10x.combined
-#' 
-#' 
-#' ###########
-#' ## Visualize integration
-#' ###########
-#' SCT_cluster_umap<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, label=T)
-#' save_plts(SCT_cluster_umap, "rPCA_cluster_umap", w=6,h=4)
-#' 
-#' SCT_cluster_tsne<-DimPlot(d10x.combined, reduction = "tsne", pt.size=0.25, label=T)
-#' save_plts(SCT_cluster_tsne, "rPCA_cluster_tsne", w=6,h=4)
-#' 
-#' chem_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "Chemistry", pt.size=0.25)
-#' save_plts(chem_umap_sct, "chem_rPCA_umap", w=6,h=4)
-#' 
-#' age_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)+fillscale_age
-#' save_plts(age_umap_sct, "age_rPCA_umap", w=6,h=4)
-#' 
-#' MT_umap_sct<-FeaturePlot(d10x.combined, reduction = "umap", features = "percent.mt", pt.size=0.25)
-#' save_plts(MT_umap_sct, "MT_rPCA_umap", w=5,h=4)
-#' 
-#' individual_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "individual", pt.size=0.25)
-#' save_plts(individual_umap_sct, "individual_rPCA_UMAP", w=6,h=4)
-#' 
-#' individual_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "individual", split.by="individual",pt.size=0.25)
-#' save_plts(individual_split, "individual_facet_rPCA_UMAP", w=20,h=4)
-#' 
-#' age_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "individual", split.by="AgeGroup",pt.size=0.25)
-#' save_plts(age_split, "age_facet_rPCA_UMAP", w=10,h=5)
-#' 
-#' 
-#' ############################
-#' ##### Example markers to plot for the liver [From Diana]
-#' ############################
-#' 
-#' ######
-#' #Immune cells
-#' ######
-#' 
-#' ## Macrophages
-#' DotPlot(d10x.combined, features = c( "PTPRC", "CD68", "MARCO","CD5L","VSIG4", "MAF", "LYZ", "CSTA", "S100A8", "S10049", "CD14", "CD74", "GPBAR1", "ID3"), cols=c("blue", "red")) + RotatedAxis()
-#' 
-#' ## NK/T/B cells
-#' DotPlot(d10x.combined, features = c("PTPRC", "CD2", "CD3E", "IL7R", "KLRB1",
-#'                                      "NKG7", "GZMA", "GZMB", "GZMK" , "PRF1","CD4", "CD8A","CD247", "TRAC","TRDC", "TRGC1", "TRGC2", "TRBC1",
-#'                                      "TRBC2", "S1PR1", "CD28", "CD27", "SELL", "CCR7", "CXCR4","CCR4","FAS",
-#'                                      "FOXP3", "CTLA4", "LAG3", "TNFRSF4","TNFRSF18", "ICOS" ,"CD69", "CD79A", "CD79B", "IGHG1", "MS4A1",
-#'                                      "LTB", "CD52", "IGHD", "CD19", "ID3"), cols=c("blue", "red")) + RotatedAxis()
-#' 
-#' # LEC and LSEC
-#' DotPlot(d10x.combined, features = c("CALCRL", "VWF", "RAMP2", "STAB2", "LYVE1", "PECAM1", "ENG", "FCGR2B", "F8", "SPARCL1", "ID1", "SOX18", "CD32B", "ID3"), cols=c("blue", "red")) + RotatedAxis()
-#' 
-#' ######
-#' #Hepatocytes
-#' ######
-#' DotPlot(d10x.combined, features=c("ALB", "HAMP", "ARG1", "PCK1", "AFP", "BCHE", "HAL", "SCD", "CPS1", "CYP3A4",
-#'                                    "ELF3", "CRP", "GSTA2", "AKR1C1", "MGST1", "CYP3A5", "ALDH1A1", "ADH1A", "CYP2E1",
-#'                                    "GLS2", "SDS", "GLUL", "AKR1D1", "HPR",
-#'                                    "HMGCS1", "IGSF23", "ACSS2", "G6PC", "ID3"),
-#'         cols=c("blue", "red")) + RotatedAxis()
-#' 
-#' 
-#' 
-#' ######
-#' #Cholangiocytes
-#' ######
-#' DotPlot(d10x.combined,features = c( "EPCAM", "SOX9", "KRT1", "KRT7", "ANXA4", "KRT18", "ID3"), cols=c("blue", "red")) + RotatedAxis()
-#' 
-#' ######
-#' #HSCs
-#' ######
-#' DotPlot(d10x.combined,features = c( "RBP1", "LRAT", "PDE3B", "ACTA2", "AOX1", "PDE3D", "PDE4D", "SPARC", "TAGLN", "COL1A1", "COL1A2", "COL3A1", "TIMP1", "DCN", "MYL9", "TPM2", "MEG3", "BGN", "IGFBP7", "IGFBP3", "CYR61", "IGFBP6", "CCL2", "COLEC11", "CTGF", "HGF", "ID3"), cols=c("blue", "red")) + RotatedAxis()
-#' FeaturePlot(d10x.combined, reduction = "umap", features = c("PTPRC", "CD3D", "CD68", "CD79A","TRDC", "NKG7", "KRT7", "CALCRL", "ACTA2", "MS4A1", "CYP3A4", "SCD", "FCN2", "CD4", "CD8A", "FCER1A", "MARCO", "LYZ", "VSIG4", "FOLR2", "ID3"), ncol = 4)
-#' key_markers<-FeaturePlot(d10x.combined, reduction = "umap", features = c("EPCAM", "SOX9", "SELL", "PTPRC",
-#'                                                             "TRDC", "NKG7", "CALCRL", "VWF",
-#'                                                             "MARCO", "LYZ","COL1A1","IGFBP3"), ncol = 4)
-#' save_plts(key_markers, "markers_rPCA_UMAP", w=25,h=20)
-#' 
+
+load(here("data","d10x_adult_ped_raw.rds"))
+
+################
+## Normalize scale and UMAP
+################
+d10x <- NormalizeData(d10x)
+d10x <- FindVariableFeatures(d10x, selection.method = "vst", nfeatures = 2000)
+d10x <- ScaleData(d10x) #ScaleData(cells, vars.to.regress = c("nUMI","percent.mito","donor.id","S.Score","G2M.Score","batch_10X"))
+
+# dimension reduction
+d10x <- RunPCA(d10x, ndims.print = 1:10, nfeatures.print = 10)
+d10x <- RunUMAP(d10x, dims = 1:30)
+d10x <- RunTSNE(d10x, dims = 1:30)
+
+
+
+######################
+## cell cycle gene expression
+######################
+# A list of cell cycle markers, from Tirosh et al, 2015, is loaded with Seurat.  We can
+# segregate this list into markers of G2/M phase and markers of S phase
+s.genes <- cc.genes$s.genes
+g2m.genes <- cc.genes$g2m.genes
+
+d10x <- CellCycleScoring(d10x, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
+
+pca_cellcycle<-DimPlot(d10x, reduction="pca",  group.by = "Phase")
+save_plts(pca_cellcycle, "pca_cellcycle", w=6,h=4)
+
+pca_nfeature<-FeaturePlot(d10x, features = "nFeature_RNA",reduction = "pca", min.cutoff = "q9", pt.size=1)
+save_plts(pca_nfeature, "pca_nfeature", w=6,h=4)
+
+
+
+## regress out cell cycle and other covariates
+#Transformed data will be available in the SCT assay, which is set as the default after running sctransform
+#By default, sctransform accounts for cellular sequencing depth, or nUMIs.
+d10x <- SCTransform(d10x, vars.to.regress = c("nFeature_RNA","S.Score", "G2M.Score"), verbose = FALSE)
+
+# dimension reduction
+d10x <- RunPCA(d10x, verbose = FALSE)
+d10x <- RunUMAP(d10x, dims = 1:30)
+d10x <- RunTSNE(d10x, dims = 1:30)
+
+# cluster
+d10x <- FindNeighbors(d10x, reduction = "pca", dims = 1:20)
+d10x <- FindClusters(d10x, resolution = 0.5)
+
+
+
+###############
+## visualize
+###############
+SCT_cluster_umap<-DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T)
+save_plts(SCT_cluster_umap, "SCT_cluster_umap", w=6,h=4)
+
+SCT_cluster_tsne<-DimPlot(d10x, reduction = "tsne", pt.size=0.25, label=T)
+save_plts(SCT_cluster_tsne, "SCT_cluster_tsne", w=6,h=4)
+
+
+cell_pca_SCT<-DimPlot(d10x, reduction="pca", group.by="Phase")
+save_plts(cell_pca_SCT, "cell_PCA_afterSCT", w=6,h=4)
+
+nFeature_UMAP_SCT<-FeaturePlot(d10x, features = "nFeature_RNA",reduction = "pca", min.cutoff = "q9", pt.size=1)
+save_plts(nFeature_UMAP_SCT, "nfeature_UMAP_afterSCT", w=6,h=4)
+
+
+
+chem_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "Chemistry", pt.size=0.25)
+save_plts(chem_umap_sct, "chem_SCT_umap", w=6,h=4)
+
+age_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)+fillscale_age
+save_plts(age_umap_sct, "age_SCT_umap", w=6,h=4)
+
+individual_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "individual", pt.size=1)
+save_plts(individual_umap_sct, "individual_SCT_UMAP", w=6,h=4)
+
+
+## Low quality cluster?
+MT_umap_SCT<-FeaturePlot(d10x, features = "percent.mt", min.cutoff = "q9", pt.size=1)
+save_plts(pca_nfeature, "pca_nfeature", w=6,h=4)
+
+ncount_umap_SCT<-FeaturePlot(d10x, features = "nCount_RNA", min.cutoff = "q9", pt.size=1)
+save_plts(ncount_umap_SCT, "ncount_umap_SCT", w=6,h=4)
+
+nfeature_umap_SCT<-FeaturePlot(d10x, features = "nFeature_RNA", min.cutoff = "q9", pt.size=1)
+save_plts(nfeature_umap_SCT, "nfeature_umap_SCT", w=6,h=4)
+
+
+
+
+
+###############
+## Integration
+###############
+#https://satijalab.org/seurat/articles/integration_rpca.html
+print("RUNNING INTEGRATION")
+## Start back with raw data
+d10x <- merge(d10x.list[[1]], y= d10x.list[2:length(d10x.list)], merge.data=TRUE, project = "adult_ped_map")#add.cell.ids = alldata_names2,
+d10x
+
+# split the dataset into a list of two seurat objects (3' and 5')
+d10x.list.chem <- SplitObject(d10x, split.by = "Chemistry")
+
+# normalize, identify variable features and score cell cycle for each dataset independently
+s.genes <- cc.genes$s.genes
+g2m.genes <- cc.genes$g2m.genes
+
+d10x.list.chem <- lapply(X = d10x.list.chem, FUN = function(x) {
+  x <- NormalizeData(x)
+  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
+  x <- CellCycleScoring(x, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
+})
+
+# select features that are repeatedly variable across datasets for integration run PCA on each
+# dataset using these features
+features <- SelectIntegrationFeatures(object.list = d10x.list.chem)
+d10x.list.chem <- lapply(X = d10x.list.chem, FUN = function(x) {
+  #x <- ScaleData(x, features = features, verbose = FALSE)
+  x <- ScaleData(x, vars.to.regress = c("nFeature_RNA","S.Score", "G2M.Score"), features = features, verbose = FALSE)
+  x <- RunPCA(x, features = features, verbose = FALSE)
+})
+
+
+
+## Identify anchors
+chem.anchors <- FindIntegrationAnchors(object.list = d10x.list.chem, anchor.features = features, reduction = "rpca")
+d10x.combined <- IntegrateData(anchorset = chem.anchors)
+
+DefaultAssay(d10x.combined) <- "integrated"
+
+print("INTEGRATED")
+
+# Run the standard workflow for visualization and clustering
+d10x.combined <- ScaleData(d10x.combined, verbose = FALSE)
+d10x.combined <- RunPCA(d10x.combined, npcs = 30, verbose = FALSE)
+d10x.combined <- RunUMAP(d10x.combined, reduction = "pca", dims = 1:30)
+d10x.combined <- RunTSNE(d10x.combined, dims = 1:30)
+
+d10x.combined <- FindNeighbors(d10x.combined, reduction = "pca", dims = 1:30)
+d10x.combined <- FindClusters(d10x.combined, resolution = 0.5)
+
+d10x.combined
+
+
+###########
+## Visualize integration
+###########
+SCT_cluster_umap<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, label=T)
+save_plts(SCT_cluster_umap, "rPCA_cluster_umap", w=6,h=4)
+
+SCT_cluster_tsne<-DimPlot(d10x.combined, reduction = "tsne", pt.size=0.25, label=T)
+save_plts(SCT_cluster_tsne, "rPCA_cluster_tsne", w=6,h=4)
+
+chem_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "Chemistry", pt.size=0.25)
+save_plts(chem_umap_sct, "chem_rPCA_umap", w=6,h=4)
+
+age_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)+fillscale_age
+save_plts(age_umap_sct, "age_rPCA_umap", w=6,h=4)
+
+MT_umap_sct<-FeaturePlot(d10x.combined, reduction = "umap", features = "percent.mt", pt.size=0.25)
+save_plts(MT_umap_sct, "MT_rPCA_umap", w=5,h=4)
+
+individual_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "individual", pt.size=0.25)
+save_plts(individual_umap_sct, "individual_rPCA_UMAP", w=6,h=4)
+
+individual_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "individual", split.by="individual",pt.size=0.25)
+save_plts(individual_split, "individual_facet_rPCA_UMAP", w=20,h=4)
+
+age_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "individual", split.by="AgeGroup",pt.size=0.25)
+save_plts(age_split, "age_facet_rPCA_UMAP", w=10,h=5)
+
+
+############################
+##### Example markers to plot for the liver [From Diana]
+############################
+
+######
+#Immune cells
+######
+
+## Macrophages
+DotPlot(d10x.combined, features = c( "PTPRC", "CD68", "MARCO","CD5L","VSIG4", "MAF", "LYZ", "CSTA", "S100A8", "S10049", "CD14", "CD74", "GPBAR1", "ID3"), cols=c("blue", "red")) + RotatedAxis()
+
+## NK/T/B cells
+DotPlot(d10x.combined, features = c("PTPRC", "CD2", "CD3E", "IL7R", "KLRB1",
+                                     "NKG7", "GZMA", "GZMB", "GZMK" , "PRF1","CD4", "CD8A","CD247", "TRAC","TRDC", "TRGC1", "TRGC2", "TRBC1",
+                                     "TRBC2", "S1PR1", "CD28", "CD27", "SELL", "CCR7", "CXCR4","CCR4","FAS",
+                                     "FOXP3", "CTLA4", "LAG3", "TNFRSF4","TNFRSF18", "ICOS" ,"CD69", "CD79A", "CD79B", "IGHG1", "MS4A1",
+                                     "LTB", "CD52", "IGHD", "CD19", "ID3"), cols=c("blue", "red")) + RotatedAxis()
+
+# LEC and LSEC
+DotPlot(d10x.combined, features = c("CALCRL", "VWF", "RAMP2", "STAB2", "LYVE1", "PECAM1", "ENG", "FCGR2B", "F8", "SPARCL1", "ID1", "SOX18", "CD32B", "ID3"), cols=c("blue", "red")) + RotatedAxis()
+
+######
+#Hepatocytes
+######
+DotPlot(d10x.combined, features=c("ALB", "HAMP", "ARG1", "PCK1", "AFP", "BCHE", "HAL", "SCD", "CPS1", "CYP3A4",
+                                   "ELF3", "CRP", "GSTA2", "AKR1C1", "MGST1", "CYP3A5", "ALDH1A1", "ADH1A", "CYP2E1",
+                                   "GLS2", "SDS", "GLUL", "AKR1D1", "HPR",
+                                   "HMGCS1", "IGSF23", "ACSS2", "G6PC", "ID3"),
+        cols=c("blue", "red")) + RotatedAxis()
+
+
+
+######
+#Cholangiocytes
+######
+DotPlot(d10x.combined,features = c( "EPCAM", "SOX9", "KRT1", "KRT7", "ANXA4", "KRT18", "ID3"), cols=c("blue", "red")) + RotatedAxis()
+
+######
+#HSCs
+######
+DotPlot(d10x.combined,features = c( "RBP1", "LRAT", "PDE3B", "ACTA2", "AOX1", "PDE3D", "PDE4D", "SPARC", "TAGLN", "COL1A1", "COL1A2", "COL3A1", "TIMP1", "DCN", "MYL9", "TPM2", "MEG3", "BGN", "IGFBP7", "IGFBP3", "CYR61", "IGFBP6", "CCL2", "COLEC11", "CTGF", "HGF", "ID3"), cols=c("blue", "red")) + RotatedAxis()
+FeaturePlot(d10x.combined, reduction = "umap", features = c("PTPRC", "CD3D", "CD68", "CD79A","TRDC", "NKG7", "KRT7", "CALCRL", "ACTA2", "MS4A1", "CYP3A4", "SCD", "FCN2", "CD4", "CD8A", "FCER1A", "MARCO", "LYZ", "VSIG4", "FOLR2", "ID3"), ncol = 4)
+key_markers<-FeaturePlot(d10x.combined, reduction = "umap", features = c("EPCAM", "SOX9", "SELL", "PTPRC",
+                                                            "TRDC", "NKG7", "CALCRL", "VWF",
+                                                            "MARCO", "LYZ","COL1A1","IGFBP3"), ncol = 4)
+save_plts(key_markers, "markers_rPCA_UMAP", w=25,h=20)
+
 
 
 #################
 ## Rough annotation
 ################# 
-                                      load(here("data","adult_ped_integrated.rds"))
-
-
-
 Macrophage_genes<-c( "PTPRC", "CD68", "MARCO","CD5L","VSIG4", "MAF", "LYZ", "CSTA", "S100A8", "S10049",
                      "CD14", "CD74", "GPBAR1", "ID3")
       # NK_T_B_genes<-c("PTPRC", "CD2", "CD3E", "IL7R", "KLRB1","NKG7", "GZMA", "GZMB", "GZMK" , "PRF1","CD4",
@@ -589,6 +586,23 @@ load(here("data","adult_ped_integrated.rds"))
 # ########
 # ## refining cell labels
 # ########
+# d10x.combined@meta.data$second_best_cell<-as.factor(d10x.combined@meta.data$second_best_cell)
+# levels(d10x.combined@meta.data$second_best_cell)<-c("B-cells","Cholangiocytes","Cholangiocytes\n(Hepatocyte Like)",
+#                                                     "HSC\n(Hepatocyte Like)","LSEC\n(Hepatocyte Like)","Myeloid cells\n(Hepatocyte Like)",
+#                                                     "NKT cells\n(Hepatocyte Like)","HSC","LSEC","Myeloid cells","NKT cells")
+# 
+# 
+# secondbest_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="second_best_cell", pt.size=0.15, label=T)+colscale_cellType+ggtitle("")+
+#   annotate("text", x = -11, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
+# secondbest_cluster_umap
+# save_plts(secondbest_cluster_umap, "rPCA_secondbest_cellType_cluster_umap", w=6,h=4)
+# roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="second_best_cell", pt.size=0.15)+colscale_cellType+ggtitle("")+
+#   annotate("text", x = -11, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
+# roughcell_cluster_umap
+# save_plts(roughcell_cluster_umap, "rPCA_secondbest__cluster_umap_nolab", w=6,h=4)
+# 
+# 
+# 
 # genes <- c(B_genes,T_genes,NK_genes,gd_genes,Macrophage_genes,NK_T_B_genes,LEC_genes,Hepatocyte_genes,Cholangiocytes_genes,HSCs_genes)
 # 
 # DotPlot(object = d10x.combined, features = B_genes)

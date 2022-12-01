@@ -4,8 +4,8 @@ save_plts<-function(plt, name, w,h){
   ggsave(plt, file=paste(here("figures/jpeg/"),name,".jpeg", sep=""), w=w, h=h)}
 
 
-myColors_celltype <- c("#4b911d","#b83b3b","#006d2c","#6bbce8","#3469ad","#d17906","#b01e87","#60ba5d")
-color_possibilities_celltype<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","LSEC","Myeloid cells","NK-like cells")
+myColors_celltype <- c("#4b911d","#b83b3b","#006d2c","#6bbce8","#3469ad","#d17906","#b01e87","#60ba5d","#a0c487","#d9a5a5","#87a4c9","#e8c392","#dea4ce")
+color_possibilities_celltype<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","LSEC","Myeloid cells","NK-like cells", "NKT cells\n(Hepatocyte Like)","Cholangiocytes\n(Hepatocyte Like)","HSC\n(Hepatocyte Like)","LSEC\n(Hepatocyte Like)","Myeloid cells\n(Hepatocyte Like)")
 names(myColors_celltype) <- color_possibilities_celltype
 fillscale_cellType <- scale_fill_manual(name="Cell Type",
                                         values = myColors_celltype, drop = T)
