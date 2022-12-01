@@ -475,6 +475,8 @@ cell_rough$seurat_clusters<-rownames(cell_rough)
 save(cell_rough, file=here("data/cell_rough_maxmean.RData"))
 
 ## second option to plot (to maybe manually relable hepatocytes)
+not_hep_cell<-colnames(cell_rough)[which(!(colnames(cell_rough)%in%c("Hepatocyte","CellType_rough" ,"seurat_clusters")))]
+
 cell_rough$second_best_cell<-sapply(1:nrow(cell_rough), function(x){
   if(cell_rough$CellType_rough[x]!="Hepatocyte"){cell_rough$CellType_rough[x]}else{
     not_hep_mean_max<-max(cell_rough[x, not_hep_cell])
