@@ -98,7 +98,7 @@ FeaturePlot(d10x.combined_myeloid, features = recent_recruit_myeloid, min.cutoff
 
 
 ###################################################
-#0: Low quality, soupy, high MT
+#0: recently recruited myeloid (monocyte)
 top_DE_up[which(top_DE_up$cluster=="0"),]
 top_DE[which(top_DE$cluster=="0"),]
 myeloid_0<-FeaturePlot(d10x.combined_myeloid, features = c("LYZ","S100A10","AHNAK","VCAN"), min.cutoff = "q9", pt.size=1)
@@ -106,7 +106,7 @@ myeloid_0
 save_plts(myeloid_0, "myeloid_cluster_0_markers", w=8,h=6)
 
 
-#1: unclear
+#1: recently recruited myeloid (monocyte)
 top_DE[which(top_DE$cluster=="1"),]
 top_DE_up[which(top_DE_up$cluster=="1"),]
 myeloid_1<-FeaturePlot(d10x.combined_myeloid, features = c("AREG","GPR183","IFI30","RPL17"), min.cutoff = "q9", pt.size=1)
@@ -121,31 +121,32 @@ myeloid_245
 save_plts(myeloid_245, "myeloid_cluster_245_markers", w=8,h=6)
 
 
-#7: unclear
+#7: unclear soupy?
 top_DE[which(top_DE$cluster=="7"),]
 top_DE_up[which(top_DE_up$cluster=="7"),]
-myeloid_7<-FeaturePlot(d10x.combined_myeloid, features = c("NRGN","PF4","PPBP","GNG11"), min.cutoff = "q9", pt.size=1)
+myeloid_7<-FeaturePlot(d10x.combined_myeloid, features = c("MT1M","APOC1","MT1G","SAA2"), min.cutoff = "q9", pt.size=1)
 myeloid_7
 save_plts(myeloid_7, "myeloid_cluster_7_markers", w=8,h=6)
 
 
-#6: B cells, almost all markers sig up
+#6: Neutrophils
+#neutrophil makers from literature
+neutro_gene<-c("CSF3R","FCGR3B","NAMPT","CXCR2")
+
 top_DE[which(top_DE$cluster=="6"),]
 top_DE_up[which(top_DE_up$cluster=="6"),]
-B_genes<-c("POU2F2","FCER2","MS4A1","LTB","CD37","CD79B","IGLC2","IGHG1","IGKC", "CD19")
-myeloid_5<-FeaturePlot(d10x.combined_myeloid, features = c("MS4A1","CD37","CD19","CD79B"), min.cutoff = "q9", pt.size=1)
-myeloid_5
-save_plts(myeloid_5, "myeloid_cluster_5_markers", w=8,h=6)
-FeaturePlot(d10x.combined_myeloid, features = B_genes, min.cutoff = "q9", pt.size=1)
-diff_exp_sig[which(diff_exp_sig$gene%in%B_genes),]
+myeloid_6<-FeaturePlot(d10x.combined_myeloid, features = c("AZU1","DEFA3","DEFA4","ELANE"), min.cutoff = "q9", pt.size=1)
+myeloid_6
+save_plts(myeloid_6, "myeloid_cluster_6_markers", w=8,h=6)
+FeaturePlot(d10x.combined_myeloid, features = neutro_gene, min.cutoff = "q9", pt.size=1)
+diff_exp_sig[which(diff_exp_sig$gene%in%neutro_gene),]
 
 
 #3: Neutrophils
 top_DE[which(top_DE$cluster=="3"),]
 top_DE_up[which(top_DE_up$cluster=="3"),]
 FeaturePlot(d10x.combined_myeloid, features = c("DEFA3","DEFA4","OLFM4","LTF"), min.cutoff = "q9", pt.size=1)
-#neutrophil makers from literature
-neutro_gene<-c("CSF3R","FCGR3B","NAMPT","CXCR2")
+
 diff_exp_sig[which(diff_exp_sig$gene%in%neutro_gene),]
 myeloid_3<-FeaturePlot(d10x.combined_myeloid, features = neutro_gene, min.cutoff = "q9", pt.size=1)
 myeloid_3
