@@ -504,400 +504,413 @@ save(cell_label, file=paste(here("data/"),"adult_ped_cellRough.rds", sep=""))
 
 load(here("data","adult_ped_integrated.rds"))
 
-# 
-# #####
-# ## plot cell types
-# #####
-# d10x.combined@meta.data$CellType_rough<-as.factor(d10x.combined@meta.data$CellType_rough)
-# levels(d10x.combined@meta.data$CellType_rough)<-c("B-cells","Cholangiocytes",
-#                                                   "Hepatocytes",
-#                                                   "HSC","LSEC","Myeloid cells","NK and T cells")
-# 
-# roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15, label=T)+colscale_cellType+ggtitle("")+
-#   annotate("text", x = -11, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
-# roughcell_cluster_umap
-# save_plts(roughcell_cluster_umap, "rPCA_roughcellType_cluster_umap", w=6,h=4)
-# roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15)+colscale_cellType+ggtitle("")+
-#   annotate("text", x = -11, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
-# roughcell_cluster_umap
-# save_plts(roughcell_cluster_umap, "rPCA_roughcellType_cluster_umap_nolab", w=6,h=4)
-# 
-# 
-# ########
-# ## refining cell labels
-# ########
-# d10x.combined@meta.data$second_best_cell<-as.factor(d10x.combined@meta.data$second_best_cell)
-# levels(d10x.combined@meta.data$second_best_cell)<-c("B-cells","Cholangiocytes","Cholangiocytes\n(Hepatocyte Like)",
-#                                                     "HSC\n(Hepatocyte Like)","LSEC\n(Hepatocyte Like)","Myeloid cells\n(Hepatocyte Like)",
-#                                                     "NKT cells\n(Hepatocyte Like)","HSC","LSEC","Myeloid cells","NKT cells")
-# 
-# 
-# secondbest_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="second_best_cell", pt.size=0.15, label=T)+colscale_cellType+ggtitle("")+
-#   annotate("text", x = -11, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
-# secondbest_cluster_umap
-# save_plts(secondbest_cluster_umap, "rPCA_secondbest_cellType_cluster_umap", w=6,h=4)
-# secondbest_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="second_best_cell", pt.size=0.15)+colscale_cellType+ggtitle("")+
-#   annotate("text", x = -11, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
-# secondbest_cluster_umap
-# save_plts(secondbest_cluster_umap, "rPCA_secondbest__cluster_umap_nolab", w=6,h=4)
-# 
-# 
-# DefaultAssay(d10x.combined) <- "RNA"
-# 
-# pdf(file = here("figures/dot_plots.pdf"), w=10, h=10)
-# DotPlot(object = d10x.combined, features = B_genes)+xlab("B Cell Marker")
-# DotPlot(object = d10x.combined, features = T_genes)+xlab("T Cell Marker")
-# DotPlot(object = d10x.combined, features = NK_genes)+xlab("NK Cell Marker")
-# DotPlot(object = d10x.combined, features = LEC_genes)+xlab("LSEC Marker")
-# DotPlot(object = d10x.combined, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
-# DotPlot(object = d10x.combined, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
-# DotPlot(object = d10x.combined, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
-# DotPlot(object = d10x.combined, features = HSCs_genes[1:14])+xlab("HSC Marker")
-# DotPlot(object = d10x.combined, features = HSCs_genes[15:27])+xlab("HSC Marker")
-# DotPlot(object = d10x.combined, features = Macrophage_genes)+xlab("Macrophage Marker")
-# dev.off()
-# 
-# #4 as LSEC
-# DefaultAssay(d10x.combined) <- "integrated"
-# d10x.combined@meta.data$CellType_rough<-as.character(d10x.combined@meta.data$CellType_rough)
-# d10x.combined@meta.data$CellType_rough[which(d10x.combined@meta.data$seurat_clusters=="4")]<-"LSEC\n(Hepatocyte Like)"
-# 
-# 
-# 
-# 
-# 
-# ##########
-# ## Individual plots
-# ##########
-# d10x.combined$age_id<-paste(d10x.combined$individual, d10x.combined$AgeGroup)
-# d10x.combined$age_id[which(d10x.combined$age_id=="C85_caud5pr Ped")]<-"C85_caud5pr Ped (Frozen)"
-# d10x.combined$age_id<-as.factor(d10x.combined$age_id)
-# #order by % cell passing QC
-# d10x.combined$age_id<-factor(d10x.combined$age_id, c("C86_caud3pr Adult","C92_caud3pr Adult", "C63_caud5pr Adult","C70_caud5pr Adult",
-#                                                      "C61_caud5pr Adult","C82_caud3pr Adult","C98_caud3pr Adult",
-#                                                      "C85_caud5pr Ped (Frozen)","C96_caud3pr Ped","C93_caud3pr Ped", "C64_caud5pr Ped"))
-# levels(d10x.combined$age_id)<-gsub(" ","\n", levels(d10x.combined$age_id))
-# 
-# individual_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_rough", split.by="age_id",pt.size=0.25, ncol=5)+colscale_cellType+ggtitle("")
-# save_plts(individual_split, "individual_roughCell_facet_rPCA_UMAP", w=22,h=12)
-# 
-# cell_num_all<-as.data.frame(table(d10x.combined@meta.data$AgeGroup))
-# colnames(cell_num_all)<-c("AgeGroup","CellCount")
-# age_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_rough", split.by="AgeGroup",pt.size=0.25)+colscale_cellType+ggtitle("")+
-#   geom_text(aes(x=-11, y=-12, label=paste0("n = ",comma(CellCount))), cell_num_all)
-# save_plts(age_split, "age_roughCell_facet_rPCA_UMAP", w=10,h=5)
-# 
-# 
-# 
-# ########
-# ## mean genes per cell
-# ########
-# d10x.combined@meta.data %>%
-#   group_by(individual) %>%
-#   summarise(max = mean(nFeature_RNA, na.rm=TRUE))
-# 
-# 
-# ##############
-# ## Really no hepatocytes in ped samples
-# ##############
-# ## diff in ped (none in ped?)
-# hep_age<-FeaturePlot(d10x.combined, reduction = "umap", features = c("ALB", "CPS1", "CYP3A4",
-#                                                             "MGST1", "CYP2E1"),
-#             ncol = 2, split.by='AgeGroup')
-# save_plts(hep_age, "hep_markers_age_rPCA_UMAP", w=6,h=14)
-# 
-# ##############
-# ## Myeloid clustering
-# ##############
-# d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_rough %in% c("Myeloid cells"))
-# d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
-# d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
-# 
-# d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
-# d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.1)
-# 
-# 
-# myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T)
-# myeloid_cluster_umap
-# save_plts(myeloid_cluster_umap, "myeloid_cluster_umap", w=5,h=4)
-# 
-# myeloid_cluster_umap_individual<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T, split.by = "age_id", ncol=5)
-# myeloid_cluster_umap_individual
-# save_plts(myeloid_cluster_umap_individual, "myeloid_cluster_umap_individual", w=10,h=6)
-# 
-# 
-# cell_cluster_count<-d10x.combined_myeloid@meta.data %>%  group_by(age_id, seurat_clusters) %>%
-#   summarise(n = n()) %>%
-#   mutate(freq = n / sum(n))
-# 
-# cell_cluster_count<-as.data.frame(cell_cluster_count)
-# cell_cluster_count<-merge(cell_cluster_count, d10x.combined_myeloid@meta.data[,c("age_id","AgeGroup")], by="age_id")
-# cell_cluster_count<-cell_cluster_count[!duplicated(cell_cluster_count),]
-# 
-# bar_individual<-ggplot(cell_cluster_count, aes(fill=seurat_clusters, y=n, x=age_id)) +
-#   geom_bar(position="fill", stat="identity", color="black")+theme_bw()+th+
-#   facet_wrap(~AgeGroup, scale="free_x")
-# save_plts(bar_individual, "bar_individual_myeloid", w=14,h=6)
-# 
-# ## low quality clusters?
-# umap_MTmyeloid<-FeaturePlot(d10x.combined_myeloid, features = "percent.mt", min.cutoff = "q9", pt.size=1)
-# save_plts(umap_MTmyeloid, "umap_MTmyeloid", w=5,h=4)
-# 
-# cluster_MT<-d10x.combined_myeloid@meta.data %>%  group_by(seurat_clusters) %>%
-#   dplyr::summarize(Mean = mean(percent.mt, na.rm=TRUE))
-# cell_cluster_count<-as.data.frame(cluster_MT)
-# 
-# box_MT<-ggplot(d10x.combined_myeloid@meta.data, aes(seurat_clusters, percent.mt)) +
-#   geom_violin(fill="lightgrey", color="lightgrey")+xlab("Myeloid Cluster")+ylab("Percent MT")+
-#   geom_boxplot(width=0.1, outlier.size = 0.05)+theme_bw()+th
-# box_MT
-# save_plts(box_MT, "box_MT", w=8,h=3)
-# 
-# umap_nfeaturemyeloid<-FeaturePlot(d10x.combined_myeloid, features = "nFeature_RNA", min.cutoff = "q9", pt.size=1)
-# save_plts(umap_nfeaturemyeloid, "umap_nfeaturemyeloid", w=5,h=4)
-# 
-# cluster_nFeature<-d10x.combined_myeloid@meta.data %>%  group_by(seurat_clusters) %>%
-#   dplyr::summarize(Mean = mean(nFeature_RNA, na.rm=TRUE))
-# cell_cluster_count<-as.data.frame(cluster_nFeature)
-# 
-# box_nfeature<-ggplot(d10x.combined_myeloid@meta.data, aes(seurat_clusters, nFeature_RNA)) +
-#   geom_violin(fill="lightgrey", color="lightgrey")+xlab("Myeloid Cluster")+ylab("Number of Feature \n(nFeature_RNA)")+
-#   geom_boxplot(width=0.1, outlier.size = 0.05)+theme_bw()+th
-# box_nfeature
-# save_plts(box_nfeature, "box_nfeature", w=8,h=3)
-# 
-# 
-# ############
-# ## Myeloid labelling
-# ############
-# recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
-# kuffer_signature<-c("VSIG4","MARCO","CD5L","HMOX1")
-# neutro_gene<-c("CSF3R","FCGR3B","NAMPT","CXCR2","DEFA3","DEFA4")
-# 
-# FeaturePlot(d10x.combined_myeloid, features = recent_recruit_myeloid, min.cutoff = "q9", pt.size=1)
-# FeaturePlot(d10x.combined_myeloid, features = kuffer_signature, min.cutoff = "q9", pt.size=1)
-# FeaturePlot(d10x.combined_myeloid, features = neutro_gene, min.cutoff = "q9", pt.size=1)
-# 
-# 
-# ## Dot plot of all markers
-# DefaultAssay(d10x.combined_myeloid) <- "RNA"
-# pdf(file = here("figures/dot_plots_myeloid.pdf"), w=10, h=10)
-# DotPlot(object = d10x.combined_myeloid, features = B_genes)+xlab("B Cell Marker")
-# DotPlot(object = d10x.combined_myeloid, features = T_genes)+xlab("T Cell Marker")
-# DotPlot(object = d10x.combined_myeloid, features = NK_genes)+xlab("NK Cell Marker")
-# DotPlot(object = d10x.combined_myeloid, features = LEC_genes)+xlab("LSEC Marker")
-# DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
-# DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
-# DotPlot(object = d10x.combined_myeloid, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
-# DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[1:14])+xlab("HSC Marker")
-# DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[15:27])+xlab("HSC Marker")
-# DotPlot(object = d10x.combined_myeloid, features = Macrophage_genes)+xlab("Macrophage Marker")
-# dev.off()
-# DefaultAssay(d10x.combined_myeloid) <- "integrated"
-# 
-# d10x.combined_myeloid@meta.data$CellType_rough<-as.character(d10x.combined_myeloid@meta.data$CellType_rough)
-# d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("0","1"))]<-"RR Myeloid"
-# d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("2","4","5"))]<-"KC Like"
-# d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("3"))]<-"Neutrophil"
-# d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("6"))]<-"Neutrophil\n(DEFA+)"
-# d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("7"))]<-"Myeloid cells\n(Hepatocyte Like)"
-# 
-# myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_rough")+colscale_cellType
-# myeloid_cluster_umap
-# save_plts(myeloid_cluster_umap, "myeloid_cluster_umap_labelled", w=7,h=5)
-# 
-# source(here("R_functions/entropy_d10x.R"))
-# plt_entropy_individual<-entropy_d10(d10x.combined_myeloid, "individual")
-# entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_myeloid)
-# save_plts(entropy_individual, "entropy_individual_myeloid", w=15,h=10)
-# 
-# 
-# 
-# 
-# ############
-# ## B cell labelling
-# ############
-# d10x.combined_bcell<-subset(d10x.combined, subset = CellType_rough %in% c("B-cells"))
-# d10x.combined_bcell <- RunPCA(d10x.combined_bcell, npcs = 30, verbose = FALSE)
-# d10x.combined_bcell <- RunUMAP(d10x.combined_bcell, reduction = "pca", dims = 1:30)
-# d10x.combined_bcell <- FindNeighbors(d10x.combined_bcell, reduction = "pca", dims = 1:30)
-# d10x.combined_bcell <- FindClusters(d10x.combined_bcell, resolution = 0.3)
-# 
-# bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=T)
-# bcell_cluster_umap
-# save_plts(bcell_cluster_umap, "bcell_cluster_umap", w=5,h=4)
-# 
-# b_genes_noIG<-c("POU2F2", "FCER2", "MS4A1", "LTB","CD37","CD79B", "CD19")
-# immunoglobins<-c("IGKC","IGHG1","IGLC2", "IGHA1")
-# 
-# FeaturePlot(d10x.combined_bcell, features = b_genes_noIG, min.cutoff = "q9", pt.size=1)
-# FeaturePlot(d10x.combined_bcell, features = immunoglobins, min.cutoff = "q9", pt.size=1)
-# 
-# 
-# ## Dot plot of all markers
-# DefaultAssay(d10x.combined_bcell) <- "RNA"
-# pdf(file = here("figures/dot_plots_bcell.pdf"), w=10, h=10)
-# DotPlot(object = d10x.combined_bcell, features = B_genes)+xlab("B Cell Marker")
-# DotPlot(object = d10x.combined_bcell, features = T_genes)+xlab("T Cell Marker")
-# DotPlot(object = d10x.combined_bcell, features = NK_genes)+xlab("NK Cell Marker")
-# DotPlot(object = d10x.combined_bcell, features = LEC_genes)+xlab("LSEC Marker")
-# DotPlot(object = d10x.combined_bcell, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
-# DotPlot(object = d10x.combined_bcell, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
-# DotPlot(object = d10x.combined_bcell, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
-# DotPlot(object = d10x.combined_bcell, features = HSCs_genes[1:14])+xlab("HSC Marker")
-# DotPlot(object = d10x.combined_bcell, features = HSCs_genes[15:27])+xlab("HSC Marker")
-# DotPlot(object = d10x.combined_bcell, features = Macrophage_genes)+xlab("Macrophage Marker")
-# dev.off()
-# DefaultAssay(d10x.combined_bcell) <- "integrated"
-# 
-# 
-# d10x.combined_bcell@meta.data$CellType_rough<-as.character(d10x.combined_bcell@meta.data$CellType_rough)
-# d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("0"))]<-"Mature B-cells"
-# d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("1","2","3"))]<-"Plasma cells"
-# d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("4"))]<-"B-cells\n(Hepatocyte Like)"
-# 
-# bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_rough")+colscale_cellType
-# bcell_cluster_umap
-# save_plts(bcell_cluster_umap, "BCell_cluster_umap_labelled", w=6,h=4)
-# 
-# source(here("R_functions/entropy_d10x.R"))
-# plt_entropy_individual<-entropy_d10(d10x.combined_myeloid, "individual")
-# entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_myeloid)
-# save_plts(entropy_individual, "entropy_individual_myeloid", w=15,h=10)
-# 
-# 
-# 
-# 
-# ###########
-# ## Sub cluster NK T 
-# ###########
-# d10x.combined_NK_T<-subset(d10x.combined, subset = CellType_rough %in% c("NK_T"))
-# d10x.combined_NK_T <- RunPCA(d10x.combined_NK_T, npcs = 30, verbose = FALSE)
-# d10x.combined_NK_T <- RunUMAP(d10x.combined_NK_T, reduction = "pca", dims = 1:30)
-# d10x.combined_NK_T <- FindNeighbors(d10x.combined_NK_T, reduction = "pca", dims = 1:30)
-# d10x.combined_NK_T <- FindClusters(d10x.combined_NK_T, resolution = 0.1)
-# 
-# NK_T_umap<-DimPlot(d10x.combined_NK_T, label=T)
-# NK_T_umap
-# save_plts(NK_T_umap, "NK_T_umap", w=8,h=6)
-# 
-# FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = NK_genes, ncol = 2)
-# FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = gd_genes)
-# FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = T_genes, ncol = 2)
-# FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = B_genes, ncol = 2)
-# 
-# ## Dot plot of all markers
-# DefaultAssay(d10x.combined_NK_T) <- "RNA"
-# pdf(file = here("figures/dot_plots_tcell.pdf"), w=10, h=10)
-# DotPlot(object = d10x.combined_NK_T, features = B_genes)+xlab("B Cell Marker")
-# DotPlot(object = d10x.combined_NK_T, features = T_genes)+xlab("T Cell Marker")
-# DotPlot(object = d10x.combined_NK_T, features = NK_genes)+xlab("NK Cell Marker")
-# DotPlot(object = d10x.combined_NK_T, features = LEC_genes)+xlab("LSEC Marker")
-# DotPlot(object = d10x.combined_NK_T, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
-# DotPlot(object = d10x.combined_NK_T, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
-# DotPlot(object = d10x.combined_NK_T, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
-# DotPlot(object = d10x.combined_NK_T, features = HSCs_genes[1:14])+xlab("HSC Marker")
-# DotPlot(object = d10x.combined_NK_T, features = HSCs_genes[15:27])+xlab("HSC Marker")
-# DotPlot(object = d10x.combined_NK_T, features = Macrophage_genes)+xlab("Macrophage Marker")
-# dev.off()
-# DefaultAssay(d10x.combined_NK_T) <- "integrated"
-# 
-# 
-# ## mean marker method on sub cluster
-# genes<-unique(c(T_genes, NK_genes,gd_genes))
-# 
-# d10x.exp<-as.data.frame(d10x.combined_NK_T[["RNA"]]@data)
-# d10x.exp.GOI<-d10x.exp[genes,]
-# d10x.exp.GOI$gene<-rownames(d10x.exp.GOI)
-# d10x.exp.GOI<-melt(d10x.exp.GOI)#
-# 
-# meta<-d10x.combined_NK_T@meta.data
-# meta$cell<-rownames(meta)
-# 
-# plt<-merge(d10x.exp.GOI, meta,by.x="variable", by.y="cell")
-# plt$variable<-as.character(plt$variable)
-# plt$seurat_clusters<-as.character(plt$seurat_clusters)
-# 
-# ## possible cells types
-# cluster_marker_mean<-function(gene_list, type){
-#   plt_epi<-plt[which(plt$gene%in%gene_list),]
-#   mean_type<-as.data.frame(tapply(plt_epi$value, plt_epi$seurat_clusters, mean))
-#   colnames(mean_type)<-type
-#   mean_type
-# }
-# 
-# cell_rough<-cbind(cluster_marker_mean(T_genes, "CD3_Tcell"),
-#                   cluster_marker_mean(NK_genes, "nkTcell"),
-#                   cluster_marker_mean(gd_genes, "gdTcell"))
-# 
-# cell_rough$CellType_rough_sub<-sapply(1:nrow(cell_rough), function(x) {
-#   compart<-colnames(cell_rough)[which(cell_rough[x,] == max(cell_rough[x,]))]
-#   if(length(compart)==1){compart}else{"Unclear"}
-# })
-# 
-# cell_rough$seurat_clusters<-rownames(cell_rough)
-# 
-# lapply(1:nrow(cell_rough),function(x){
-#   d10x.combined_NK_T@meta.data[which(d10x.combined_NK_T@meta.data$seurat_clusters==cell_rough$seurat_clusters[x]),]$CellType_rough<<-cell_rough$CellType_rough_sub[x]})
-# table(d10x.combined_NK_T@meta.data$CellType_rough)
-# 
-# 
-# source(here("R_functions/entropy_d10x.R"))
-# plt_entropy_individual<-entropy_d10(d10x.combined_NK_T, "individual")
-# entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_NK_T)
-# save_plts(entropy_individual, "entropy_individual_tcell", w=15,h=10)
-# 
-# 
-# 
-# ##############
-# ## Relabel subtypes
-# ##############
-# 
-# d10x.combined@meta.data$CellType_refined<-sapply(1:nrow(d10x.combined@meta.data), function(x){
-#   if(rownames(d10x.combined@meta.data)[x]%in%rownames(d10x.combined_myeloid@meta.data)){
-#     d10x.combined_myeloid@meta.data$CellType_rough[which(rownames(d10x.combined_myeloid@meta.data)==rownames(d10x.combined@meta.data)[x])]
-#   }else{
-#     if(rownames(d10x.combined@meta.data)[x]%in%rownames(d10x.combined_bcell@meta.data)){
-#       d10x.combined_bcell@meta.data$CellType_rough[which(rownames(d10x.combined_bcell@meta.data)==rownames(d10x.combined@meta.data)[x])]
-#   }else{    
-#     if(rownames(d10x.combined@meta.data)[x]%in%rownames(d10x.combined_NK_T@meta.data)){
-#       d10x.combined_NK_T@meta.data$CellType_rough[which(rownames(d10x.combined_NK_T@meta.data)==rownames(d10x.combined@meta.data)[x])]
-#     }else{d10x.combined@meta.data$CellType_rough[x]}}}})
-# 
-# d10x.combined@meta.data$CellType_refined<-as.factor(d10x.combined@meta.data$CellType_refined)
-# d10x.combined@meta.data$CellType_refined<-factor(d10x.combined@meta.data$CellType_refined, levels = c("B-cells","Mature B-cells","Plasma cells","B-cells\n(Hepatocyte Like)",
-#                                                                                                       "CD3+ T-cells","gd T-cells","NK-like cells","NKT cells\n(Hepatocyte Like)", "NKT cells",
-#                                                                                                       "Cholangiocytes","Cholangiocytes\n(Hepatocyte Like)","LSEC","LSEC\n(Hepatocyte Like)",
-#                                                                                                       "Myeloid cells", "Myeloid cells\n(Hepatocyte Like)","RR Myeloid","KC Like","Neutrophil","Neutrophil\n(DEFA+)",
-#                                                                                                       "HSC","HSC\n(Hepatocyte Like)","Hepatocytes"))
-# 
-# all_refined_cluster_umap<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")
-# all_refined_cluster_umap
-# save_plts(all_refined_cluster_umap, "refined_cellType_map", w=7,h=5)
-# 
-# all_refined_cluster_umap_nolab<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")
-# all_refined_cluster_umap_nolab
-# save_plts(all_refined_cluster_umap_nolab, "refined_cellType_map_nolabel", w=7,h=5)
-# 
-# ##############
-# ### entropy in clusters
-# ##############
-# source(here("R_functions/entropy_d10x.R"))
-# 
-# plt_entropy_individual<-entropy_d10(d10x.combined, "individual")
-# plt_entropy_age<-entropy_d10(d10x.combined, "AgeGroup")
-# plt_entropy_chem<-entropy_d10(d10x.combined, "Chemistry")
-# 
-# entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined)
-# save_plts(entropy_individual, "entropy_individual_allclusters", w=15,h=10)
-# 
-# entropy_age<-entropy_plt(plt_entropy_age, "AgeGroup", d10x.combined)
-# save_plts(entropy_age, "entropy_age_allclusters", w=15,h=10)
-# 
-# entropy_chem<-entropy_plt(plt_entropy_chem, "Chemistry", d10x.combined)
-# save_plts(entropy_chem, "entropy_chemistry_allclusters", w=15,h=10)
-# 
-# 
+
+#####
+## plot cell types
+#####
+d10x.combined@meta.data$CellType_rough<-as.factor(d10x.combined@meta.data$CellType_rough)
+levels(d10x.combined@meta.data$CellType_rough)<-c("B-cells","Cholangiocytes",
+                                                  "Hepatocytes",
+                                                  "HSC","LSEC","Myeloid cells","NK and T cells")
+
+roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15, label=T)+colscale_cellType+ggtitle("")+
+  annotate("text", x = -11, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
+roughcell_cluster_umap
+save_plts(roughcell_cluster_umap, "rPCA_roughcellType_cluster_umap", w=6,h=4)
+roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15)+colscale_cellType+ggtitle("")+
+  annotate("text", x = -11, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
+roughcell_cluster_umap
+save_plts(roughcell_cluster_umap, "rPCA_roughcellType_cluster_umap_nolab", w=6,h=4)
+
+
+########
+## refining cell labels
+########
+d10x.combined@meta.data$second_best_cell<-as.factor(d10x.combined@meta.data$second_best_cell)
+levels(d10x.combined@meta.data$second_best_cell)<-c("B-cells","Cholangiocytes","Cholangiocytes\n(Hepatocyte Like)",
+                                                    "HSC\n(Hepatocyte Like)","LSEC\n(Hepatocyte Like)","Myeloid cells\n(Hepatocyte Like)",
+                                                    "NKT cells\n(Hepatocyte Like)","HSC","LSEC","Myeloid cells","NKT cells")
+
+
+secondbest_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="second_best_cell", pt.size=0.15, label=T)+colscale_cellType+ggtitle("")+
+  annotate("text", x = -11, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
+secondbest_cluster_umap
+save_plts(secondbest_cluster_umap, "rPCA_secondbest_cellType_cluster_umap", w=6,h=4)
+secondbest_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="second_best_cell", pt.size=0.15)+colscale_cellType+ggtitle("")+
+  annotate("text", x = -11, y = -12, label = paste0("n = ",comma(ncol(d10x.combined))))
+secondbest_cluster_umap
+save_plts(secondbest_cluster_umap, "rPCA_secondbest__cluster_umap_nolab", w=6,h=4)
+
+
+DefaultAssay(d10x.combined) <- "RNA"
+
+pdf(file = here("figures/dot_plots.pdf"), w=10, h=10)
+DotPlot(object = d10x.combined, features = B_genes)+xlab("B Cell Marker")
+DotPlot(object = d10x.combined, features = T_genes)+xlab("T Cell Marker")
+DotPlot(object = d10x.combined, features = NK_genes)+xlab("NK Cell Marker")
+DotPlot(object = d10x.combined, features = LEC_genes)+xlab("LSEC Marker")
+DotPlot(object = d10x.combined, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
+DotPlot(object = d10x.combined, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
+DotPlot(object = d10x.combined, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
+DotPlot(object = d10x.combined, features = HSCs_genes[1:14])+xlab("HSC Marker")
+DotPlot(object = d10x.combined, features = HSCs_genes[15:27])+xlab("HSC Marker")
+DotPlot(object = d10x.combined, features = Macrophage_genes)+xlab("Macrophage Marker")
+dev.off()
+
+#4 as LSEC
+DefaultAssay(d10x.combined) <- "integrated"
+d10x.combined@meta.data$CellType_rough<-as.character(d10x.combined@meta.data$CellType_rough)
+d10x.combined@meta.data$CellType_rough[which(d10x.combined@meta.data$seurat_clusters=="4")]<-"LSEC\n(Hepatocyte Like)"
+
+
+
+
+
+##########
+## Individual plots
+##########
+d10x.combined$age_id<-paste(d10x.combined$individual, d10x.combined$AgeGroup)
+d10x.combined$age_id[which(d10x.combined$age_id=="C85_caud5pr Ped")]<-"C85_caud5pr Ped (Frozen)"
+d10x.combined$age_id<-as.factor(d10x.combined$age_id)
+#order by % cell passing QC
+d10x.combined$age_id<-factor(d10x.combined$age_id, c("C86_caud3pr Adult","C92_caud3pr Adult", "C63_caud5pr Adult","C70_caud5pr Adult",
+                                                     "C61_caud5pr Adult","C82_caud3pr Adult","C98_caud3pr Adult",
+                                                     "C85_caud5pr Ped (Frozen)","C96_caud3pr Ped","C93_caud3pr Ped", "C64_caud5pr Ped"))
+levels(d10x.combined$age_id)<-gsub(" ","\n", levels(d10x.combined$age_id))
+
+individual_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_rough", split.by="age_id",pt.size=0.25, ncol=5)+colscale_cellType+ggtitle("")
+save_plts(individual_split, "individual_roughCell_facet_rPCA_UMAP", w=22,h=12)
+
+cell_num_all<-as.data.frame(table(d10x.combined@meta.data$AgeGroup))
+colnames(cell_num_all)<-c("AgeGroup","CellCount")
+age_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_rough", split.by="AgeGroup",pt.size=0.25)+colscale_cellType+ggtitle("")+
+  geom_text(aes(x=-11, y=-12, label=paste0("n = ",comma(CellCount))), cell_num_all)
+save_plts(age_split, "age_roughCell_facet_rPCA_UMAP", w=10,h=5)
+
+
+
+########
+## mean genes per cell
+########
+d10x.combined@meta.data %>%
+  group_by(individual) %>%
+  summarise(max = mean(nFeature_RNA, na.rm=TRUE))
+
+
+##############
+## Really no hepatocytes in ped samples
+##############
+## diff in ped (none in ped?)
+hep_age<-FeaturePlot(d10x.combined, reduction = "umap", features = c("ALB", "CPS1", "CYP3A4",
+                                                            "MGST1", "CYP2E1"),
+            ncol = 2, split.by='AgeGroup')
+save_plts(hep_age, "hep_markers_age_rPCA_UMAP", w=6,h=14)
+
+##############
+## Myeloid clustering
+##############
+d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_rough %in% c("Myeloid cells"))
+d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+
+d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.1)
+
+
+myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T)
+myeloid_cluster_umap
+save_plts(myeloid_cluster_umap, "myeloid_cluster_umap", w=5,h=4)
+
+myeloid_cluster_umap_individual<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T, split.by = "age_id", ncol=5)
+myeloid_cluster_umap_individual
+save_plts(myeloid_cluster_umap_individual, "myeloid_cluster_umap_individual", w=10,h=6)
+
+
+cell_cluster_count<-d10x.combined_myeloid@meta.data %>%  group_by(age_id, seurat_clusters) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n / sum(n))
+
+cell_cluster_count<-as.data.frame(cell_cluster_count)
+cell_cluster_count<-merge(cell_cluster_count, d10x.combined_myeloid@meta.data[,c("age_id","AgeGroup")], by="age_id")
+cell_cluster_count<-cell_cluster_count[!duplicated(cell_cluster_count),]
+
+bar_individual<-ggplot(cell_cluster_count, aes(fill=seurat_clusters, y=n, x=age_id)) +
+  geom_bar(position="fill", stat="identity", color="black")+theme_bw()+th+
+  facet_wrap(~AgeGroup, scale="free_x")
+save_plts(bar_individual, "bar_individual_myeloid", w=14,h=6)
+
+## low quality clusters?
+umap_MTmyeloid<-FeaturePlot(d10x.combined_myeloid, features = "percent.mt", min.cutoff = "q9", pt.size=1)
+save_plts(umap_MTmyeloid, "umap_MTmyeloid", w=5,h=4)
+
+cluster_MT<-d10x.combined_myeloid@meta.data %>%  group_by(seurat_clusters) %>%
+  dplyr::summarize(Mean = mean(percent.mt, na.rm=TRUE))
+cell_cluster_count<-as.data.frame(cluster_MT)
+
+box_MT<-ggplot(d10x.combined_myeloid@meta.data, aes(seurat_clusters, percent.mt)) +
+  geom_violin(fill="lightgrey", color="lightgrey")+xlab("Myeloid Cluster")+ylab("Percent MT")+
+  geom_boxplot(width=0.1, outlier.size = 0.05)+theme_bw()+th
+box_MT
+save_plts(box_MT, "box_MT", w=8,h=3)
+
+umap_nfeaturemyeloid<-FeaturePlot(d10x.combined_myeloid, features = "nFeature_RNA", min.cutoff = "q9", pt.size=1)
+save_plts(umap_nfeaturemyeloid, "umap_nfeaturemyeloid", w=5,h=4)
+
+cluster_nFeature<-d10x.combined_myeloid@meta.data %>%  group_by(seurat_clusters) %>%
+  dplyr::summarize(Mean = mean(nFeature_RNA, na.rm=TRUE))
+cell_cluster_count<-as.data.frame(cluster_nFeature)
+
+box_nfeature<-ggplot(d10x.combined_myeloid@meta.data, aes(seurat_clusters, nFeature_RNA)) +
+  geom_violin(fill="lightgrey", color="lightgrey")+xlab("Myeloid Cluster")+ylab("Number of Feature \n(nFeature_RNA)")+
+  geom_boxplot(width=0.1, outlier.size = 0.05)+theme_bw()+th
+box_nfeature
+save_plts(box_nfeature, "box_nfeature", w=8,h=3)
+
+
+############
+## Myeloid labelling
+############
+recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
+kuffer_signature<-c("VSIG4","MARCO","CD5L","HMOX1")
+neutro_gene<-c("CSF3R","FCGR3B","NAMPT","CXCR2","DEFA3","DEFA4")
+
+FeaturePlot(d10x.combined_myeloid, features = recent_recruit_myeloid, min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_myeloid, features = kuffer_signature, min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_myeloid, features = neutro_gene, min.cutoff = "q9", pt.size=1)
+
+
+## Dot plot of all markers
+DefaultAssay(d10x.combined_myeloid) <- "RNA"
+pdf(file = here("figures/dot_plots_myeloid.pdf"), w=10, h=10)
+DotPlot(object = d10x.combined_myeloid, features = B_genes)+xlab("B Cell Marker")
+DotPlot(object = d10x.combined_myeloid, features = T_genes)+xlab("T Cell Marker")
+DotPlot(object = d10x.combined_myeloid, features = NK_genes)+xlab("NK Cell Marker")
+DotPlot(object = d10x.combined_myeloid, features = LEC_genes)+xlab("LSEC Marker")
+DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
+DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
+DotPlot(object = d10x.combined_myeloid, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
+DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[1:14])+xlab("HSC Marker")
+DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[15:27])+xlab("HSC Marker")
+DotPlot(object = d10x.combined_myeloid, features = Macrophage_genes)+xlab("Macrophage Marker")
+dev.off()
+DefaultAssay(d10x.combined_myeloid) <- "integrated"
+
+d10x.combined_myeloid@meta.data$CellType_rough<-as.character(d10x.combined_myeloid@meta.data$CellType_rough)
+d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("0","1"))]<-"RR Myeloid"
+d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("2","4","5"))]<-"KC Like"
+d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("3"))]<-"Neutrophil"
+d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("6"))]<-"Neutrophil\n(DEFA+)"
+d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("7"))]<-"Myeloid cells\n(Hepatocyte Like)"
+
+myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_rough")+colscale_cellType
+myeloid_cluster_umap
+save_plts(myeloid_cluster_umap, "myeloid_cluster_umap_labelled", w=7,h=5)
+
+source(here("R_functions/entropy_d10x.R"))
+plt_entropy_individual<-entropy_d10(d10x.combined_myeloid, "individual")
+entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_myeloid)
+save_plts(entropy_individual, "entropy_individual_myeloid", w=15,h=10)
+
+
+
+
+############
+## B cell labelling
+############
+d10x.combined_bcell<-subset(d10x.combined, subset = CellType_rough %in% c("B-cells"))
+d10x.combined_bcell <- RunPCA(d10x.combined_bcell, npcs = 30, verbose = FALSE)
+d10x.combined_bcell <- RunUMAP(d10x.combined_bcell, reduction = "pca", dims = 1:30)
+d10x.combined_bcell <- FindNeighbors(d10x.combined_bcell, reduction = "pca", dims = 1:30)
+d10x.combined_bcell <- FindClusters(d10x.combined_bcell, resolution = 0.3)
+
+bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=T)
+bcell_cluster_umap
+save_plts(bcell_cluster_umap, "bcell_cluster_umap", w=5,h=4)
+
+b_genes_noIG<-c("POU2F2", "FCER2", "MS4A1", "LTB","CD37","CD79B", "CD19")
+immunoglobins<-c("IGKC","IGHG1","IGLC2", "IGHA1")
+
+FeaturePlot(d10x.combined_bcell, features = b_genes_noIG, min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_bcell, features = immunoglobins, min.cutoff = "q9", pt.size=1)
+
+
+## Dot plot of all markers
+DefaultAssay(d10x.combined_bcell) <- "RNA"
+pdf(file = here("figures/dot_plots_bcell.pdf"), w=10, h=10)
+DotPlot(object = d10x.combined_bcell, features = B_genes)+xlab("B Cell Marker")
+DotPlot(object = d10x.combined_bcell, features = T_genes)+xlab("T Cell Marker")
+DotPlot(object = d10x.combined_bcell, features = NK_genes)+xlab("NK Cell Marker")
+DotPlot(object = d10x.combined_bcell, features = LEC_genes)+xlab("LSEC Marker")
+DotPlot(object = d10x.combined_bcell, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
+DotPlot(object = d10x.combined_bcell, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
+DotPlot(object = d10x.combined_bcell, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
+DotPlot(object = d10x.combined_bcell, features = HSCs_genes[1:14])+xlab("HSC Marker")
+DotPlot(object = d10x.combined_bcell, features = HSCs_genes[15:27])+xlab("HSC Marker")
+DotPlot(object = d10x.combined_bcell, features = Macrophage_genes)+xlab("Macrophage Marker")
+dev.off()
+DefaultAssay(d10x.combined_bcell) <- "integrated"
+
+
+d10x.combined_bcell@meta.data$CellType_rough<-as.character(d10x.combined_bcell@meta.data$CellType_rough)
+d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("0"))]<-"Mature B-cells"
+d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("1","2","3"))]<-"Plasma cells"
+d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("4"))]<-"B-cells\n(Hepatocyte Like)"
+
+bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_rough")+colscale_cellType
+bcell_cluster_umap
+save_plts(bcell_cluster_umap, "BCell_cluster_umap_labelled", w=6,h=4)
+
+source(here("R_functions/entropy_d10x.R"))
+plt_entropy_individual<-entropy_d10(d10x.combined_myeloid, "individual")
+entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_myeloid)
+save_plts(entropy_individual, "entropy_individual_myeloid", w=15,h=10)
+
+
+
+
+###########
+## Sub cluster NK T
+###########
+d10x.combined_NK_T<-subset(d10x.combined, subset = CellType_rough %in% c("NK and T cells"))
+d10x.combined_NK_T <- RunPCA(d10x.combined_NK_T, npcs = 30, verbose = FALSE)
+d10x.combined_NK_T <- RunUMAP(d10x.combined_NK_T, reduction = "pca", dims = 1:30)
+d10x.combined_NK_T <- FindNeighbors(d10x.combined_NK_T, reduction = "pca", dims = 1:30)
+d10x.combined_NK_T <- FindClusters(d10x.combined_NK_T, resolution = 0.1)
+
+NK_T_umap<-DimPlot(d10x.combined_NK_T, label=T)
+NK_T_umap
+save_plts(NK_T_umap, "NK_T_umap", w=8,h=6)
+
+FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = NK_genes, ncol = 2)
+FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = gd_genes)
+FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = T_genes, ncol = 2)
+
+## Dot plot of all markers
+DefaultAssay(d10x.combined_NK_T) <- "RNA"
+pdf(file = here("figures/dot_plots_tcell.pdf"), w=10, h=10)
+DotPlot(object = d10x.combined_NK_T, features = B_genes)+xlab("B Cell Marker")
+DotPlot(object = d10x.combined_NK_T, features = T_genes)+xlab("T Cell Marker")
+DotPlot(object = d10x.combined_NK_T, features = NK_genes)+xlab("NK Cell Marker")
+DotPlot(object = d10x.combined_NK_T, features = LEC_genes)+xlab("LSEC Marker")
+DotPlot(object = d10x.combined_NK_T, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
+DotPlot(object = d10x.combined_NK_T, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
+DotPlot(object = d10x.combined_NK_T, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
+DotPlot(object = d10x.combined_NK_T, features = HSCs_genes[1:14])+xlab("HSC Marker")
+DotPlot(object = d10x.combined_NK_T, features = HSCs_genes[15:27])+xlab("HSC Marker")
+DotPlot(object = d10x.combined_NK_T, features = Macrophage_genes)+xlab("Macrophage Marker")
+dev.off()
+DefaultAssay(d10x.combined_NK_T) <- "integrated"
+
+
+## mean marker method on sub cluster
+genes<-unique(c(T_genes, NK_genes,gd_genes))
+
+d10x.exp<-as.data.frame(d10x.combined_NK_T[["RNA"]]@data)
+d10x.exp.GOI<-d10x.exp[genes,]
+d10x.exp.GOI$gene<-rownames(d10x.exp.GOI)
+d10x.exp.GOI<-melt(d10x.exp.GOI)#
+
+meta<-d10x.combined_NK_T@meta.data
+meta$cell<-rownames(meta)
+
+plt<-merge(d10x.exp.GOI, meta,by.x="variable", by.y="cell")
+plt$variable<-as.character(plt$variable)
+plt$seurat_clusters<-as.character(plt$seurat_clusters)
+
+## possible cells types
+cluster_marker_mean<-function(gene_list, type){
+  plt_epi<-plt[which(plt$gene%in%gene_list),]
+  mean_type<-as.data.frame(tapply(plt_epi$value, plt_epi$seurat_clusters, mean))
+  colnames(mean_type)<-type
+  mean_type
+}
+
+cell_rough<-cbind(cluster_marker_mean(T_genes, "CD3_Tcell"),
+                  cluster_marker_mean(NK_genes, "nkTcell"),
+                  cluster_marker_mean(gd_genes, "gdTcell"))
+
+cell_rough$CellType_rough_sub<-sapply(1:nrow(cell_rough), function(x) {
+  compart<-colnames(cell_rough)[which(cell_rough[x,] == max(cell_rough[x,]))]
+  if(length(compart)==1){compart}else{"Unclear"}
+})
+
+cell_rough$seurat_clusters<-rownames(cell_rough)
+
+lapply(1:nrow(cell_rough),function(x){
+  d10x.combined_NK_T@meta.data[which(d10x.combined_NK_T@meta.data$seurat_clusters==cell_rough$seurat_clusters[x]),]$CellType_rough<<-cell_rough$CellType_rough_sub[x]})
+table(d10x.combined_NK_T@meta.data$CellType_rough)
+
+
+source(here("R_functions/entropy_d10x.R"))
+plt_entropy_individual<-entropy_d10(d10x.combined_NK_T, "individual")
+entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_NK_T)
+save_plts(entropy_individual, "entropy_individual_tcell", w=15,h=10)
+
+plt_entropy_age<-entropy_d10(d10x.combined_NK_T, "AgeGroup")
+entropy_age<-entropy_plt(plt_entropy_age, "AgeGroup", d10x.combined_NK_T)
+save_plts(entropy_age, "entropy_age_tcell", w=15,h=10)
+
+
+##############
+## Relabel subtypes
+##############
+
+d10x.combined@meta.data$CellType_refined<-sapply(1:nrow(d10x.combined@meta.data), function(x){
+  if(rownames(d10x.combined@meta.data)[x]%in%rownames(d10x.combined_myeloid@meta.data)){
+    d10x.combined_myeloid@meta.data$CellType_rough[which(rownames(d10x.combined_myeloid@meta.data)==rownames(d10x.combined@meta.data)[x])]
+  }else{
+    if(rownames(d10x.combined@meta.data)[x]%in%rownames(d10x.combined_bcell@meta.data)){
+      d10x.combined_bcell@meta.data$CellType_rough[which(rownames(d10x.combined_bcell@meta.data)==rownames(d10x.combined@meta.data)[x])]
+  }else{
+    if(rownames(d10x.combined@meta.data)[x]%in%rownames(d10x.combined_NK_T@meta.data)){
+      d10x.combined_NK_T@meta.data$CellType_rough[which(rownames(d10x.combined_NK_T@meta.data)==rownames(d10x.combined@meta.data)[x])]
+    }else{d10x.combined@meta.data$CellType_rough[x]}}}})
+
+d10x.combined@meta.data$CellType_refined<-as.factor(d10x.combined@meta.data$CellType_refined)
+levels(d10x.combined@meta.data$CellType_refined)<-c("B-cells\n(Hepatocyte Like)","CD3+ T-cells","Cholangiocytes",
+                                                    "gd T-cells","Hepatocytes","HSC","KC Like","LSEC","LSEC\n(Hepatocyte Like)",
+                                                    "Mature B-cells","Myeloid cells\n(Hepatocyte Like)", "Neutrophil",
+                                                    "Neutrophil\n(DEFA+)", "NK-like cells", "Plasma cells","RR Myeloid")
+
+d10x.combined@meta.data$CellType_refined<-factor(d10x.combined@meta.data$CellType_refined, levels = c("B-cells","Mature B-cells","Plasma cells","B-cells\n(Hepatocyte Like)",
+                                                                                                      "CD3+ T-cells","gd T-cells","NK-like cells","NKT cells\n(Hepatocyte Like)", "NKT cells",
+                                                                                                      "Cholangiocytes","Cholangiocytes\n(Hepatocyte Like)","LSEC","LSEC\n(Hepatocyte Like)",
+                                                                                                      "Myeloid cells", "Myeloid cells\n(Hepatocyte Like)","RR Myeloid","KC Like","Neutrophil","Neutrophil\n(DEFA+)",
+                                                                                                      "HSC","HSC\n(Hepatocyte Like)","Hepatocytes"))
+
+all_refined_cluster_umap<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")
+all_refined_cluster_umap
+save_plts(all_refined_cluster_umap, "refined_cellType_map", w=7,h=5)
+
+all_refined_cluster_umap_nolab<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")
+all_refined_cluster_umap_nolab
+save_plts(all_refined_cluster_umap_nolab, "refined_cellType_map_nolabel", w=7,h=5)
+
+##############
+### entropy in clusters
+##############
+source(here("R_functions/entropy_d10x.R"))
+
+plt_entropy_individual<-entropy_d10(d10x.combined, "individual")
+plt_entropy_age<-entropy_d10(d10x.combined, "AgeGroup")
+plt_entropy_chem<-entropy_d10(d10x.combined, "Chemistry")
+
+entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined)
+save_plts(entropy_individual, "entropy_individual_allclusters", w=15,h=10)
+
+entropy_age<-entropy_plt(plt_entropy_age, "AgeGroup", d10x.combined)
+save_plts(entropy_age, "entropy_age_allclusters", w=15,h=10)
+
+entropy_chem<-entropy_plt(plt_entropy_chem, "Chemistry", d10x.combined)
+save_plts(entropy_chem, "entropy_chemistry_allclusters", w=15,h=10)
+
+
+##############
+## Save integrated with refined cluster labels
+##############
+save(d10x.combined, file=paste(here("data/"),"adult_ped_integrated_refinedlabels.rds", sep=""))
+
+
 
 
 
