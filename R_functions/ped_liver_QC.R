@@ -711,6 +711,11 @@ plt_entropy_individual<-entropy_d10(d10x.combined_myeloid, "individual")
 entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_myeloid)
 save_plts(entropy_individual, "entropy_individual_myeloid", w=15,h=10)
 
+plt_entropy_age<-entropy_d10(d10x.combined_myeloid, "AgeGroup")
+entropy_age<-entropy_plt(plt_entropy_age, "AgeGroup", d10x.combined_myeloid)
+save_plts(entropy_age, "entropy_age_myeloid", w=15,h=10)
+
+
 
 
 
@@ -761,9 +766,9 @@ bcell_cluster_umap
 save_plts(bcell_cluster_umap, "BCell_cluster_umap_labelled", w=6,h=4)
 
 source(here("R_functions/entropy_d10x.R"))
-plt_entropy_individual<-entropy_d10(d10x.combined_myeloid, "individual")
-entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_myeloid)
-save_plts(entropy_individual, "entropy_individual_myeloid", w=15,h=10)
+plt_entropy_individual<-entropy_d10(d10x.combined_bcell, "individual")
+entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_bcell)
+save_plts(entropy_individual, "entropy_individual_bcell", w=15,h=10)
 
 
 
@@ -878,13 +883,26 @@ d10x.combined@meta.data$CellType_refined<-factor(d10x.combined@meta.data$CellTyp
                                                                                                       "Myeloid cells", "Myeloid cells\n(Hepatocyte Like)","RR Myeloid","KC Like","Neutrophil","Neutrophil\n(DEFA+)",
                                                                                                       "HSC","HSC\n(Hepatocyte Like)","Hepatocytes"))
 
-all_refined_cluster_umap<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")
+all_refined_cluster_umap<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  annotate("text",x=-11, y=-12, label=paste0("n = ",comma(ncol(d10x.combined))))
 all_refined_cluster_umap
 save_plts(all_refined_cluster_umap, "refined_cellType_map", w=7,h=5)
 
-all_refined_cluster_umap_nolab<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")
+
+all_refined_cluster_umap_nolab<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  annotate("text",x=-11, y=-12, label=paste0("n = ",comma(ncol(d10x.combined))))
 all_refined_cluster_umap_nolab
 save_plts(all_refined_cluster_umap_nolab, "refined_cellType_map_nolabel", w=7,h=5)
+
+individual_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_refined", split.by="age_id",pt.size=0.25, ncol=5)+colscale_cellType+ggtitle("")
+save_plts(individual_split, "individual_roughCell_facet_rPCA_UMAP_refined", w=22,h=12)
+
+cell_num_all<-as.data.frame(table(d10x.combined@meta.data$AgeGroup))
+colnames(cell_num_all)<-c("AgeGroup","CellCount")
+age_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_refined", split.by="AgeGroup",pt.size=0.25)+colscale_cellType+ggtitle("")+
+  geom_text(aes(x=-11, y=-12, label=paste0("n = ",comma(CellCount))), cell_num_all)
+save_plts(age_split, "age_roughCell_facet_rPCA_UMAP_refined", w=10,h=5)
+
 
 ##############
 ### entropy in clusters
@@ -909,6 +927,8 @@ save_plts(entropy_chem, "entropy_chemistry_allclusters", w=15,h=10)
 ## Save integrated with refined cluster labels
 ##############
 save(d10x.combined, file=paste(here("data/"),"adult_ped_integrated_refinedlabels.rds", sep=""))
+cell_label<-d10x.combined@meta.data
+save(cell_label, file=paste(here("data/"),"adult_ped_cellRefined.rds", sep=""))
 
 
 

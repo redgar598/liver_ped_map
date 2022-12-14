@@ -113,7 +113,7 @@ rm(d10x)
 gc()
 
 ### load integrate for UMAP etc
-load(here("data","adult_ped_integrated.rds"))
+load(here("data","adult_ped_integrated_refinedlabels.rds"))
 score_data<-score_data[match(rownames(d10x.combined@meta.data),rownames(score_data)),]
 identical(rownames(d10x.combined@meta.data),rownames(score_data))
 d10x.combined <- AddMetaData(d10x.combined, metadata = score_data)
@@ -133,7 +133,7 @@ meta$cell<-rownames(meta)
 plt<-merge(meta, umap_mat, by="cell")
 
 
-d10x.combined_NK_T_B<-subset(d10x.combined, subset = CellType_rough %in% c("CD3_Tcell","nkTcell","gdTcell"))
+d10x.combined_NK_T_B<-subset(d10x.combined, subset = CellType_rough %in% c("NK and T cells"))
 d10x.combined_NK_T_B <- RunPCA(d10x.combined_NK_T_B, npcs = 30, verbose = FALSE)
 d10x.combined_NK_T_B <- RunUMAP(d10x.combined_NK_T_B, reduction = "pca", dims = 1:30)
 umap_mat_Tcell<-as.data.frame(Embeddings(object = d10x.combined_NK_T_B, reduction = "umap"))#
@@ -144,7 +144,7 @@ plt_Tcell<-merge(meta_Tcell, umap_mat_Tcell, by="cell")
 cell_num_tcell<-as.data.frame(table(plt_Tcell$AgeGroup))
 colnames(cell_num_tcell)<-c("AgeGroup","CellCount")
 
-d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_rough %in% c("Myeloid"))
+d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_rough %in% c("Myeloid cells"))
 d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
 d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
 umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_myeloid, reduction = "umap"))#
@@ -218,7 +218,7 @@ print(paste("Comparing the kuffer-like score in myeloid cells, there is a sig di
 ########## 
 ## T cell Exhaustion
 ########## 
-lapply(c("CD3_Tcell", "gdTcell", "nkTcell"), function(cell_type){
+lapply(c("NK_T"), function(cell_type){
   plt_Tcell_celltype<-plt_Tcell[which(plt_Tcell$CellType_rough==cell_type),]
   
   plt_Tcell_adult<-plt_Tcell_celltype[which(plt_Tcell_celltype$AgeGroup=="Adult"),]
@@ -243,117 +243,117 @@ lapply(c("CD3_Tcell", "gdTcell", "nkTcell"), function(cell_type){
   (length(Tcell_pval_montecarlo[which(Tcell_pval_montecarlo>pval)])+1)/(samp_num+1)
 })
 
-  
-#####
-# Plot Signatures
-#####
-####
-## myeloid_immune_supressive_score1
-####
-## UMAPs
-immune_all<-ggplot(plt, aes(UMAP_1,UMAP_2, color=myeloid_immune_supressive_score1))+
-  geom_point(size=1.5)+
-  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
-  annotate("text", x = -11, y = -12, label = paste0("n = ",comma(nrow(plt))))+
-  scale_colour_continuous("Immune\nSupressive\nSignature Score")
-save_plts(immune_all, "immunesupressive_umap_all", w=7,h=5)
-
-immune_all_agesplit<-ggplot(plt, aes(UMAP_1,UMAP_2))+
-  geom_point(aes(color=myeloid_immune_supressive_score1),size=1.5)+
-  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
-  facet_wrap(~AgeGroup)+
-  geom_text(aes(x = -11, y = -12, label=paste0("n = ",comma(CellCount))), cell_num_all)+
-  scale_colour_continuous("Immune\nSupressive\nSignature Score")
-save_plts(immune_all_agesplit, "immunesupressive_umap_all_agesplit", w=12,h=5)
-
-immune_myeloid<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2, color=myeloid_immune_supressive_score1))+
-  geom_point(size=1.5)+
-  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
-  annotate("text", x = -4, y = -12, label = paste0("n = ",comma(nrow(plt_myeloid))))+
-  scale_colour_continuous("Immune\nSupressive\nSignature Score")
-save_plts(immune_myeloid, "immunesupressive_umap_myeloid", w=7,h=5)
-
-immune_myeloid_agesplit<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
-  geom_point(aes(color=myeloid_immune_supressive_score1), size=1.5)+
-  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
-  facet_wrap(~AgeGroup)+
-  geom_text(aes(x = -4, y = -12, label=paste0("n = ",comma(CellCount))), cell_num_myeloid)+
-  scale_colour_continuous("Immune\nSupressive\nSignature Score")
-save_plts(immune_myeloid_agesplit, "immunesupressive_umap_myeloid_agesplit", w=12,h=5)
-
-# BOX PLOT
-plt_max<-ceiling(max(plt_myeloid$myeloid_immune_supressive_score1))
-plt_min<-floor(min(plt_myeloid$myeloid_immune_supressive_score1))
-
-myeloid_immune_box<-
-  ggplot(plt_myeloid, aes(AgeGroup,myeloid_immune_supressive_score1))+
-  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=AgeGroup))+
-  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
-  facet_grid(.~CellType_rough)+fillscale_age+
-  geom_signif(stat="identity",
-              data=data.frame(x=c(1, 1, 2), xend=c(1, 2, 2),
-                              y=c(plt_max, plt_max+0.25, plt_max+0.25), yend=c(plt_max+0.25, plt_max+0.25, plt_max),
-                              annotation=c("*")),
-              aes(x=x,xend=xend, y=y, yend=yend, annotation=annotation), color="grey50")+ylim(plt_min, plt_max+1)+
-  xlab("Age Group")+ylab("Immune Supressive Signature Score")+
-  geom_text(aes(y=-1, x=AgeGroup,label=paste0("n = ",comma(CellCount))),cell_num_myeloid, hjust=-0.1, size=3)
-save_plts(myeloid_immune_box, "immunesupressive_box_myeloid", w=4,h=4)
-
-
-####
-## inflammatory_macs_score1
-####
-
-## UMAPs
-inflam_all<-ggplot(plt, aes(UMAP_1,UMAP_2, color=inflammatory_macs_score1))+
-  geom_point(size=1.5)+
-  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
-  annotate("text", x = -11, y = -12, label = paste0("n = ",comma(nrow(plt))))+
-  scale_colour_continuous("Inflammatory\nMacrophage\nSignature Score")
-save_plts(inflam_all, "inflammatory_umap_all", w=7,h=5)
-
-inflam_all_agesplit<-ggplot(plt, aes(UMAP_1,UMAP_2))+
-  geom_point(aes(color=inflammatory_macs_score1),size=1.5)+
-  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
-  facet_wrap(~AgeGroup)+
-  geom_text(aes(x = -11, y = -12, label=paste0("n = ",comma(CellCount))), cell_num_all)+
-  scale_colour_continuous("Inflammatory\nMacrophage\nSignature Score")
-save_plts(inflam_all_agesplit, "inflammatory_umap_all_agesplit", w=12,h=5)
-
-inflam_myeloid<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2, color=inflammatory_macs_score1))+
-  geom_point(size=1.5)+
-  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
-  annotate("text", x = -4, y = -12, label = paste0("n = ",comma(nrow(plt_myeloid))))+
-  scale_colour_continuous("Inflammatory\nMacrophage\nSignature Score")
-save_plts(inflam_myeloid, "inflammatory_umap_myeloid", w=7,h=5)
-
-inflam_myeloid_agesplit<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
-  geom_point(aes(color=inflammatory_macs_score1), size=1.5)+
-  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
-  facet_wrap(~AgeGroup)+
-  geom_text(aes(x = -4, y = -12, label=paste0("n = ",comma(CellCount))), cell_num_myeloid)+
-  scale_colour_continuous("Inflammatory\nMacrophage\nSignature Score")
-save_plts(inflam_myeloid_agesplit, "inflammatory_umap_myeloid_agesplit", w=12,h=5)
-
-
-
-# BOX PLOT
-plt_max<-ceiling(max(plt_myeloid$inflammatory_macs_score1))
-plt_min<-floor(min(plt_myeloid$inflammatory_macs_score1))
-
-inflam_box_myeloid<-
-  ggplot(plt_myeloid, aes(AgeGroup,inflammatory_macs_score1))+
-  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=AgeGroup))+
-  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
-  facet_grid(.~CellType_rough)+fillscale_age+
-  geom_signif(stat="identity",
-              data=data.frame(x=c(1, 1, 2), xend=c(1, 2, 2),
-                              y=c(plt_max, plt_max+0.25, plt_max+0.25), yend=c(plt_max+0.25, plt_max+0.25, plt_max),
-                              annotation=c("*")),
-              aes(x=x,xend=xend, y=y, yend=yend, annotation=annotation), color="grey50")+ylim(plt_min, plt_max+1)+
-  xlab("Age Group")+ylab("Inflammatory Macrophage Signature Score")+
-  geom_text(aes(y=-1.8, x=AgeGroup,label=paste0("n = ",comma(CellCount))),cell_num_myeloid, hjust=-0.1, size=3)
-save_plts(inflam_box_myeloid, "inflammatory_box_myeloid", w=4,h=4)
+                                  #   
+                                  # #####
+                                  # # Plot Signatures
+                                  # #####
+                                  # ####
+                                  # ## myeloid_immune_supressive_score1
+                                  # ####
+                                  # ## UMAPs
+                                  # immune_all<-ggplot(plt, aes(UMAP_1,UMAP_2, color=myeloid_immune_supressive_score1))+
+                                  #   geom_point(size=1.5)+
+                                  #   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+                                  #   annotate("text", x = -11, y = -12, label = paste0("n = ",comma(nrow(plt))))+
+                                  #   scale_colour_continuous("Immune\nSupressive\nSignature Score")
+                                  # save_plts(immune_all, "immunesupressive_umap_all", w=7,h=5)
+                                  # 
+                                  # immune_all_agesplit<-ggplot(plt, aes(UMAP_1,UMAP_2))+
+                                  #   geom_point(aes(color=myeloid_immune_supressive_score1),size=1.5)+
+                                  #   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+                                  #   facet_wrap(~AgeGroup)+
+                                  #   geom_text(aes(x = -11, y = -12, label=paste0("n = ",comma(CellCount))), cell_num_all)+
+                                  #   scale_colour_continuous("Immune\nSupressive\nSignature Score")
+                                  # save_plts(immune_all_agesplit, "immunesupressive_umap_all_agesplit", w=12,h=5)
+                                  # 
+                                  # immune_myeloid<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2, color=myeloid_immune_supressive_score1))+
+                                  #   geom_point(size=1.5)+
+                                  #   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+                                  #   annotate("text", x = -4, y = -12, label = paste0("n = ",comma(nrow(plt_myeloid))))+
+                                  #   scale_colour_continuous("Immune\nSupressive\nSignature Score")
+                                  # save_plts(immune_myeloid, "immunesupressive_umap_myeloid", w=7,h=5)
+                                  # 
+                                  # immune_myeloid_agesplit<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
+                                  #   geom_point(aes(color=myeloid_immune_supressive_score1), size=1.5)+
+                                  #   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+                                  #   facet_wrap(~AgeGroup)+
+                                  #   geom_text(aes(x = -4, y = -12, label=paste0("n = ",comma(CellCount))), cell_num_myeloid)+
+                                  #   scale_colour_continuous("Immune\nSupressive\nSignature Score")
+                                  # save_plts(immune_myeloid_agesplit, "immunesupressive_umap_myeloid_agesplit", w=12,h=5)
+                                  # 
+                                  # # BOX PLOT
+                                  # plt_max<-ceiling(max(plt_myeloid$myeloid_immune_supressive_score1))
+                                  # plt_min<-floor(min(plt_myeloid$myeloid_immune_supressive_score1))
+                                  # 
+                                  # myeloid_immune_box<-
+                                  #   ggplot(plt_myeloid, aes(AgeGroup,myeloid_immune_supressive_score1))+
+                                  #   geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=AgeGroup))+
+                                  #   theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+                                  #   facet_grid(.~CellType_rough)+fillscale_age+
+                                  #   geom_signif(stat="identity",
+                                  #               data=data.frame(x=c(1, 1, 2), xend=c(1, 2, 2),
+                                  #                               y=c(plt_max, plt_max+0.25, plt_max+0.25), yend=c(plt_max+0.25, plt_max+0.25, plt_max),
+                                  #                               annotation=c("*")),
+                                  #               aes(x=x,xend=xend, y=y, yend=yend, annotation=annotation), color="grey50")+ylim(plt_min, plt_max+1)+
+                                  #   xlab("Age Group")+ylab("Immune Supressive Signature Score")+
+                                  #   geom_text(aes(y=-1, x=AgeGroup,label=paste0("n = ",comma(CellCount))),cell_num_myeloid, hjust=-0.1, size=3)
+                                  # save_plts(myeloid_immune_box, "immunesupressive_box_myeloid", w=4,h=4)
+                                  # 
+                                  # 
+                                  # ####
+                                  # ## inflammatory_macs_score1
+                                  # ####
+                                  # 
+                                  # ## UMAPs
+                                  # inflam_all<-ggplot(plt, aes(UMAP_1,UMAP_2, color=inflammatory_macs_score1))+
+                                  #   geom_point(size=1.5)+
+                                  #   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+                                  #   annotate("text", x = -11, y = -12, label = paste0("n = ",comma(nrow(plt))))+
+                                  #   scale_colour_continuous("Inflammatory\nMacrophage\nSignature Score")
+                                  # save_plts(inflam_all, "inflammatory_umap_all", w=7,h=5)
+                                  # 
+                                  # inflam_all_agesplit<-ggplot(plt, aes(UMAP_1,UMAP_2))+
+                                  #   geom_point(aes(color=inflammatory_macs_score1),size=1.5)+
+                                  #   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+                                  #   facet_wrap(~AgeGroup)+
+                                  #   geom_text(aes(x = -11, y = -12, label=paste0("n = ",comma(CellCount))), cell_num_all)+
+                                  #   scale_colour_continuous("Inflammatory\nMacrophage\nSignature Score")
+                                  # save_plts(inflam_all_agesplit, "inflammatory_umap_all_agesplit", w=12,h=5)
+                                  # 
+                                  # inflam_myeloid<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2, color=inflammatory_macs_score1))+
+                                  #   geom_point(size=1.5)+
+                                  #   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+                                  #   annotate("text", x = -4, y = -12, label = paste0("n = ",comma(nrow(plt_myeloid))))+
+                                  #   scale_colour_continuous("Inflammatory\nMacrophage\nSignature Score")
+                                  # save_plts(inflam_myeloid, "inflammatory_umap_myeloid", w=7,h=5)
+                                  # 
+                                  # inflam_myeloid_agesplit<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
+                                  #   geom_point(aes(color=inflammatory_macs_score1), size=1.5)+
+                                  #   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+                                  #   facet_wrap(~AgeGroup)+
+                                  #   geom_text(aes(x = -4, y = -12, label=paste0("n = ",comma(CellCount))), cell_num_myeloid)+
+                                  #   scale_colour_continuous("Inflammatory\nMacrophage\nSignature Score")
+                                  # save_plts(inflam_myeloid_agesplit, "inflammatory_umap_myeloid_agesplit", w=12,h=5)
+                                  # 
+                                  # 
+                                  # 
+                                  # # BOX PLOT
+                                  # plt_max<-ceiling(max(plt_myeloid$inflammatory_macs_score1))
+                                  # plt_min<-floor(min(plt_myeloid$inflammatory_macs_score1))
+                                  # 
+                                  # inflam_box_myeloid<-
+                                  #   ggplot(plt_myeloid, aes(AgeGroup,inflammatory_macs_score1))+
+                                  #   geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=AgeGroup))+
+                                  #   theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+                                  #   facet_grid(.~CellType_rough)+fillscale_age+
+                                  #   geom_signif(stat="identity",
+                                  #               data=data.frame(x=c(1, 1, 2), xend=c(1, 2, 2),
+                                  #                               y=c(plt_max, plt_max+0.25, plt_max+0.25), yend=c(plt_max+0.25, plt_max+0.25, plt_max),
+                                  #                               annotation=c("*")),
+                                  #               aes(x=x,xend=xend, y=y, yend=yend, annotation=annotation), color="grey50")+ylim(plt_min, plt_max+1)+
+                                  #   xlab("Age Group")+ylab("Inflammatory Macrophage Signature Score")+
+                                  #   geom_text(aes(y=-1.8, x=AgeGroup,label=paste0("n = ",comma(CellCount))),cell_num_myeloid, hjust=-0.1, size=3)
+                                  # save_plts(inflam_box_myeloid, "inflammatory_box_myeloid", w=4,h=4)
 
 ####
 ## exhausted_tcells_score1
@@ -376,14 +376,14 @@ tcell_exhaust_all_agesplit<-ggplot(plt, aes(UMAP_1,UMAP_2))+
 save_plts(tcell_exhaust_all_agesplit, "tcell_exhaustumap_all_agesplit", w=12,h=5)
 
 ## T cell types for visualization
-plt_Tcell$CellType_rough<-as.factor(plt_Tcell$CellType_rough)
-levels(plt_Tcell$CellType_rough)<-c("CD3+ T-cells","gd T-cells","NK-like cells")
-
-tcell_color<-ggplot(plt_Tcell, aes(UMAP_1,UMAP_2, color=CellType_rough))+
-  geom_point(size=1.5)+
-  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
-  annotate("text", x = -9, y = -6, label = paste0("n = ",comma(nrow(plt_Tcell))))+colscale_cellType
-save_plts(tcell_color, "tcell_umap", w=7,h=5)
+                    # plt_Tcell$CellType_rough<-as.factor(plt_Tcell$CellType_rough)
+                    # levels(plt_Tcell$CellType_rough)<-c("NK_T")
+                    # 
+                    # tcell_color<-ggplot(plt_Tcell, aes(UMAP_1,UMAP_2, color=CellType_rough))+
+                    #   geom_point(size=1.5)+
+                    #   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+                    #   annotate("text", x = -9, y = -6, label = paste0("n = ",comma(nrow(plt_Tcell))))+colscale_cellType
+                    # save_plts(tcell_color, "tcell_umap", w=7,h=5)
 
 
 tcell_exhaust_tcells<-ggplot(plt_Tcell, aes(UMAP_1,UMAP_2, color=exhausted_tcells_score1))+
@@ -409,7 +409,7 @@ plt_min<-floor(min(plt_Tcell$exhausted_tcells_score1))
 SignificanceDF<-data.frame(x=c(1, 1, 2), xend=c(1, 2, 2),
            y=c(plt_max, plt_max+0.1, plt_max+0.1), yend=c(plt_max+0.1, plt_max+0.1, plt_max),
            annotation=c("*"),
-           CellType_rough="CD3_Tcell")
+           CellType_rough="NK_T")
 
 tcellexhaust_box_tcell<-ggplot(plt_Tcell, aes(AgeGroup,exhausted_tcells_score1))+
   geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=AgeGroup))+
@@ -537,32 +537,123 @@ myeloid_kuffer_box<-
   geom_text(aes(y=-1.5, x=AgeGroup,label=paste0("n = ",comma(CellCount))),cell_num_myeloid, hjust=-0.1, size=3)
 save_plts(myeloid_kuffer_box, "kuffer_box_myeloid", w=4,h=4)
 
-# ######
-# ## plot genes (pull stats from monte carlo)
-# ######
-# plot_key_genes<-function(keygenes, label){
-#   all_plots<-lapply(1:length(keygenes), function(y){
-#     plots<-lapply(1:length(cell_types),function(x){
-#       p<-VlnPlot(subset(d10x, subset = CellType_rough == cell_types[x]) , features = keygenes[y], pt.size = 0, log=T)
-#       p<-if(length(grep(cell_types[x], diff_exp_all[which(diff_exp_all$gene==keygenes[y]),]$cell.1))!=0){
-#         p+theme(plot.background = element_rect(color = "black",size = 2)) +fillscale_age +xlab("") + ylab("")+ theme(legend.position="none")}else{  
-#           p+fillscale_age +xlab("") + ylab("")+ theme(legend.position="none")
-#         }
-#       p})
-#     plot_grid(plotlist = plots, ncol=1)})
-#   
-#   
-#   label_blank<-lapply(1:length(cell_types), function(x){
-#     ggplot()+geom_blank()+theme_void()+ggtitle(cell_types[x])+ theme(plot.title = element_text(hjust = 0.5,vjust = -30))  })
-#   label_blank<-plot_grid(plotlist = label_blank, ncol=1)
-#   
-#   plot_grid(label_blank, plot_grid(plotlist=all_plots, ncol=length(keygenes)), rel_widths=c(0.1,1))
-#   ggsave2(paste0(here("figures/"), label, "_adult_ped.pdf"), w=20,h=20)
-#   ggsave2(paste0(here("figures/jpeg/"),label, "_adult_ped.jpeg"), w=20,h=20,bg="white")}
-# 
-# plot_key_genes(myeloid_immune_supressive, "myeloid_immune_supressive")
-# plot_key_genes(inflammatory_macs, "inflammatory_macs")
-# plot_key_genes(exhausted_tcells, "exhausted_tcells")
+
+
+##############
+## Age and Score associations
+##############
+plt_myeloid$CellType_refined<-as.character(plt_myeloid$CellType_refined)
+cell_num_myeloid_type<-as.data.frame(table(plt_myeloid$AgeGroup, plt_myeloid$CellType_refined))
+colnames(cell_num_myeloid_type)<-c("AgeGroup","CellType_refined","CellCount")
+
+comp_simple<-list(c("Adult","Ped"))
+
+ggplot(plt_myeloid, aes(AgeGroup,kuffer_like_score1))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=AgeGroup))+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  fillscale_age+
+  ylim(plt_min, plt_max+1)+
+  xlab("Age Group")+ylab("Kuffer-like Signature Score")+facet_wrap(~CellType_refined)+
+  geom_text(aes(y=-1.5, x=AgeGroup,label=paste0("n = ",comma(CellCount))),cell_num_myeloid_type, hjust=-0.1, size=3)+
+  geom_signif(comparisons = comp_simple, step_increase = 0.03,tip_length = 0.01,
+              size = 0.5, vjust = 0.5,
+              textsize = 5,  map_signif_level = T, color="grey60")
+
+
+plt_KCRR<-plt_myeloid[which(plt_myeloid$CellType_refined %in% c("KC Like","RR Myeloid")),]
+plt_KCRR$CellType_refined<-as.character(plt_KCRR$CellType_refined)
+cell_num_KCRR_type<-as.data.frame(table(as.factor(plt_KCRR$Age)))
+colnames(cell_num_KCRR_type)<-c("Age","CellCount")
+
+ggplot(plt_KCRR, aes(as.factor(Age),kuffer_like_score1))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.25,aes(fill=AgeGroup))+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  fillscale_age+
+  xlab("Age Group")+ylab("Kuffer-like Signature Score")+
+  geom_text(aes(y=-1.5, x=as.factor(Age),label=comma(CellCount)),cell_num_KCRR_type, size=3)
+
+
+plt_KCRR<-plt_myeloid[which(plt_myeloid$CellType_refined %in% c("KC Like","RR Myeloid")),]
+plt_KCRR$CellType_refined<-as.character(plt_KCRR$CellType_refined)
+cell_num_KCRR_type<-as.data.frame(table(as.factor(plt_KCRR$Age), plt_KCRR$CellType_refined))
+colnames(cell_num_KCRR_type)<-c("Age","CellType_refined","CellCount")
+
+ggplot(plt_KCRR, aes(as.factor(Age),kuffer_like_score1))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.25,aes(fill=AgeGroup))+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  fillscale_age+
+  xlab("Age Group")+ylab("Kuffer-like Signature Score")+facet_wrap(.~CellType_refined, ncol=1)+
+  geom_text(aes(y=-1.5, x=as.factor(Age),label=comma(CellCount)),cell_num_KCRR_type, size=3)
 
 
 
+
+### RR myeloid
+plt_myeloid$CellType_refined<-as.character(plt_myeloid$CellType_refined)
+cell_num_myeloid_type<-as.data.frame(table(plt_myeloid$AgeGroup, plt_myeloid$CellType_refined))
+colnames(cell_num_myeloid_type)<-c("AgeGroup","CellType_refined","CellCount")
+
+comp_simple<-list(c("Adult","Ped"))
+
+ggplot(plt_myeloid, aes(AgeGroup,recently_recruited_myeloid1))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=AgeGroup))+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  fillscale_age+
+  ylim(plt_min, plt_max+1)+
+  xlab("Age Group")+ylab("Recently Recruited Myeloid Signature Score")+facet_wrap(~CellType_refined)+
+  geom_text(aes(y=-1.5, x=AgeGroup,label=paste0("n = ",comma(CellCount))),cell_num_myeloid_type, hjust=-0.1, size=3)+
+  geom_signif(comparisons = comp_simple, step_increase = 0.03,tip_length = 0.01,
+              size = 0.5, vjust = 0.5,
+              textsize = 5,  map_signif_level = T, color="grey60")
+
+plt_myeloid$CellType_refined<-as.character(plt_myeloid$CellType_refined)
+cell_num_myeloid_type<-as.data.frame(table(as.factor(plt_myeloid$Age)))
+colnames(cell_num_myeloid_type)<-c("Age","CellCount")
+
+ggplot(plt_myeloid, aes(as.factor(Age),recently_recruited_myeloid1))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=AgeGroup))+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  fillscale_age+
+  ylim(plt_min, plt_max+1)+
+  xlab("Age Group")+ylab("Recently Recruited Myeloid Signature Score")+
+  geom_text(aes(y=-1.5, x=as.factor(Age),label=paste0("n = ",comma(CellCount))),cell_num_myeloid_type, hjust=-0.1, size=3)+
+  geom_signif(comparisons = comp_simple, step_increase = 0.03,tip_length = 0.01,
+              size = 0.5, vjust = 0.5,
+              textsize = 5,  map_signif_level = T, color="grey60")
+
+
+plt_KCRR<-plt_myeloid[which(plt_myeloid$CellType_refined %in% c("KC Like","RR Myeloid")),]
+plt_KCRR$CellType_refined<-as.character(plt_KCRR$CellType_refined)
+cell_num_KCRR_type<-as.data.frame(table(as.factor(plt_KCRR$Age)))
+colnames(cell_num_KCRR_type)<-c("Age","CellCount")
+
+ggplot(plt_KCRR, aes(as.factor(Age),recently_recruited_myeloid1))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.25,aes(fill=AgeGroup))+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  fillscale_age+
+  xlab("Age Group")+ylab("Recently Recruited Myeloid Signature Score")+
+  geom_text(aes(y=-1.5, x=as.factor(Age),label=comma(CellCount)),cell_num_KCRR_type, size=3)
+
+
+plt_KCRR<-plt_myeloid[which(plt_myeloid$CellType_refined %in% c("KC Like","RR Myeloid")),]
+plt_KCRR$CellType_refined<-as.character(plt_KCRR$CellType_refined)
+cell_num_KCRR_type<-as.data.frame(table(as.factor(plt_KCRR$Age), plt_KCRR$CellType_refined))
+colnames(cell_num_KCRR_type)<-c("Age","CellType_refined","CellCount")
+
+ggplot(plt_KCRR, aes(as.factor(Age),recently_recruited_myeloid1))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.25,aes(fill=AgeGroup))+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  fillscale_age+
+  xlab("Age Group")+ylab("Recently Recruited Myeloid Signature Score")+facet_wrap(.~CellType_refined, ncol=1)+
+  geom_text(aes(y=-1.5, x=as.factor(Age),label=comma(CellCount)),cell_num_KCRR_type, size=3)
+
+
+ggplot(plt_KCRR, aes(Age,recently_recruited_myeloid1))+geom_point()+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  fillscale_age+stat_smooth(method="lm")+
+  xlab("Age Group")+ylab("Recently Recruited Myeloid Signature Score")
+
+ggplot(plt_KCRR, aes(Age,kuffer_like_score1))+geom_point()+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  fillscale_age+stat_smooth(method="lm")+
+  xlab("Age Group")+ylab("Kuffer-like Signature Score")

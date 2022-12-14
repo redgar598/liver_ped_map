@@ -51,10 +51,10 @@ d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNorm
 
 
 ## testing factor
-d10x$cell_age<-paste(as.character(d10x$CellType_refined), d10x$AgeGroup, sep = "_")
-Idents(d10x) <- "cell_age"
+d10x$cell_sex<-paste(as.character(d10x$CellType_refined), d10x$Sex, sep = "_")
+Idents(d10x) <- "cell_sex"
 
-table(d10x$CellType_refined, d10x$AgeGroup)
+table(d10x$CellType_refined, d10x$Sex)
 
 
 #MAST (Finak et al., 2015), which fits a hurdle model to the expression of each gene,
@@ -67,15 +67,15 @@ cell_types[grep("CD3",cell_types)]<-"CD3"
 cell_types[grep("DEFA",cell_types)]<-"DEFA"
 
 contrasts_celltype_age<-do.call(rbind,lapply(1:length(cell_types), function(x){
-  combinations(n = 2, r = 2, v = d10x$cell_age[grep(cell_types[x],d10x$cell_age)], repeats.allowed = FALSE)
-  }))
+  combinations(n = 2, r = 2, v = d10x$cell_sex[grep(cell_types[x],d10x$cell_sex)], repeats.allowed = FALSE)
+}))
 
 contrasts_celltype_age
 
 nrow(contrasts_celltype_age)
 
 
-diff_exp_all<-lapply(1:nrow(contrasts_celltype_age), function(x){
+diff_exp_all_sex<-lapply(1:nrow(contrasts_celltype_age), function(x){
   de<-FindMarkers(d10x, ident.1 = contrasts_celltype_age[x,1], ident.2 = contrasts_celltype_age[x,2], test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
   print(paste(contrasts_celltype_age[x,1],"vs", contrasts_celltype_age[x,2],":", nrow(de), sep=" "))
   de$gene<-rownames(de)
@@ -86,10 +86,24 @@ diff_exp_all<-lapply(1:nrow(contrasts_celltype_age), function(x){
   de})
 
 
-diff_exp_all<-do.call(rbind, diff_exp_all)
+diff_exp_all_sex<-do.call(rbind, diff_exp_all_sex)
 
-save(diff_exp_all, file=here("data","adult_ped_diff_genes.RData"))
-#load(file=here("data","adult_ped_diff_genes.RData"))
+save(diff_exp_all_sex, file=here("data","adult_ped_sex_diff_genes.RData"))
+#load(file=here("data","adult_ped_sex_diff_genes.RData"))
+
+
+
+##################
+## IFN signalling
+##################
+#Lists from GSEA "HALLMARK_INTERFERON_GAMMA_RESPONSE" and "HALLMARK_INTERFERON_ALPHA_RESPONSE"
+IFNa<-c("ADAR","B2M","BATF2","BST2","C1S","CASP1","CASP8","CCRL2","CD47","CD74","CMPK2","CNP","CSF1","CXCL10","CXCL11","DDX60","DHX58","EIF2AK2","ELF1","EPSTI1","MVB12A","TENT5A","CMTR1","GBP2","GBP4","GMPR","HERC6","HLA-C","IFI27","IFI30","IFI35","IFI44","IFI44L","IFIH1","IFIT2","IFIT3","IFITM1","IFITM2","IFITM3","IL15","IL4R","IL7","IRF1","IRF2","IRF7","IRF9","ISG15","ISG20","LAMP3","LAP3","LGALS3BP","LPAR6","LY6E","MOV10","MX1","NCOA7","NMI","NUB1","OAS1","OASL","OGFR","PARP12","PARP14","PARP9","PLSCR1","PNPT1","HELZ2","PROCR","PSMA3","PSMB8","PSMB9","PSME1","PSME2","RIPK2","RNF31","RSAD2","RTP4","SAMD9","SAMD9L","SELL","SLC25A28","SP110","STAT2","TAP1","TDRD7","TMEM140","TRAFD1","TRIM14","TRIM21","TRIM25","TRIM26","TRIM5","TXNIP","UBA7","UBE2L6","USP18","WARS1")
+IFNg<-c("ADAR","APOL6","ARID5B","ARL4A","AUTS2","B2M","BANK1","BATF2","BPGM","BST2","BTG1","C1R","C1S","CASP1","CASP3","CASP4","CASP7","CASP8","CCL2","CCL5","CCL7","CD274","CD38","CD40","CD69","CD74","CD86","CDKN1A","CFB","CFH","CIITA","CMKLR1","CMPK2","CSF2RB","CXCL10","CXCL11","CXCL9","DDX58","DDX60","DHX58","EIF2AK2","EIF4E3","EPSTI1","FAS","FCGR1A","FGL2","FPR1","CMTR1","GBP4","GBP6","GCH1","GPR18","GZMA","HERC6","HIF1A","HLA-A","HLA-B","HLA-DMA","HLA-DQA1","HLA-DRB1","HLA-G","ICAM1","IDO1","IFI27","IFI30","IFI35","IFI44","IFI44L","IFIH1","IFIT1","IFIT2","IFIT3","IFITM2","IFITM3","IFNAR2","IL10RA","IL15","IL15RA","IL18BP","IL2RB","IL4R","IL6","IL7","IRF1","IRF2","IRF4","IRF5","IRF7","IRF8","IRF9","ISG15","ISG20","ISOC1","ITGB7","JAK2","KLRK1","LAP3","LATS2","LCP2","LGALS3BP","LY6E","LYSMD2","MARCHF1","METTL7B","MT2A","MTHFD2","MVP","MX1","MX2","MYD88","NAMPT","NCOA3","NFKB1","NFKBIA","NLRC5","NMI","NOD1","NUP93","OAS2","OAS3","OASL","OGFR","P2RY14","PARP12","PARP14","PDE4B","PELI1","PFKP","PIM1","PLA2G4A","PLSCR1","PML","PNP","PNPT1","HELZ2","PSMA2","PSMA3","PSMB10","PSMB2","PSMB8","PSMB9","PSME1","PSME2","PTGS2","PTPN1","PTPN2","PTPN6","RAPGEF6","RBCK1","RIPK1","RIPK2","RNF213","RNF31","RSAD2","RTP4","SAMD9L","SAMHD1","SECTM1","SELP","SERPING1","SLAMF7","SLC25A28","SOCS1","SOCS3","SOD2","SP110","SPPL2A","SRI","SSPN","ST3GAL5","ST8SIA4","STAT1","STAT2","STAT3","STAT4","TAP1","TAPBP","TDRD7","TNFAIP2","TNFAIP3","TNFAIP6","TNFSF10","TOR1B","TRAFD1","TRIM14","TRIM21","TRIM25","TRIM26","TXNIP","UBE2L6","UPP1","USP18","VAMP5","VAMP8","VCAM1","WARS1","XAF1","XCL1","ZBP1","ZNFX1")
+
+diff_exp_sig_sex<-diff_exp_all_sex[which(diff_exp_all_sex$p_val_adj < 0.005 & abs(diff_exp_all_sex$avg_log2FC) > 1),]
+
+diff_exp_sig_sex[which(diff_exp_sig_sex$gene%in%IFNa),]
+diff_exp_sig_sex[which(diff_exp_sig_sex$gene%in%IFNg),]
 
 #################
 ## Look at some interesting markers
@@ -97,20 +111,22 @@ save(diff_exp_all, file=here("data","adult_ped_diff_genes.RData"))
 diff_exp_all[which(diff_exp_all$gene%in%c("KLRG1", "B3GAT1", "CD69","ITGAE")),]
 diff_exp_all[which(diff_exp_all$gene%in%c("LYZ", "MARCO", "MRC1","PTPRC")),]
 
-keygenes<-c("KLRG1", "B3GAT1", "CD69","ITGAE","LYZ", "MARCO", "MRC1","PTPRC")
+keygenes<-IFNg
 diff_exp_all[which(diff_exp_all$gene%in%keygenes),]
 
-Idents(d10x) <- "AgeGroup"
+Idents(d10x) <- "Sex"
+
+cell_types<-unique(as.character(d10x$CellType_refined))
 
 all_plots<-lapply(1:length(keygenes), function(y){
-plots<-lapply(1:length(cell_types),function(x){
-p<-VlnPlot(subset(d10x, subset = CellType_refined == cell_types[x]) , features = keygenes[y], pt.size = 0, log=T)
-p<-if(length(grep(cell_types[x], diff_exp_all[which(diff_exp_all$gene==keygenes[y]),]$cell.1))!=0){
-  p+theme(plot.background = element_rect(color = "black",size = 2)) +fillscale_age +xlab("") + ylab("")+ theme(legend.position="none")}else{  
-    p+fillscale_age +xlab("") + ylab("")+ theme(legend.position="none")
-}
-p})
-plot_grid(plotlist = plots, ncol=1)})
+  plots<-lapply(1:length(cell_types),function(x){
+    p<-VlnPlot(subset(d10x, subset = CellType_refined == cell_types[x]) , features = keygenes[y], pt.size = 0, log=T)
+    p<-if(length(grep(cell_types[x], diff_exp_all[which(diff_exp_all$gene==keygenes[y]),]$cell.1))!=0){
+      p+theme(plot.background = element_rect(color = "black",size = 2)) +fillscale_age +xlab("") + ylab("")+ theme(legend.position="none")}else{  
+        p+fillscale_age +xlab("") + ylab("")+ theme(legend.position="none")
+      }
+    p})
+  plot_grid(plotlist = plots, ncol=1)})
 
 
 label_blank<-lapply(1:length(cell_types), function(x){
@@ -146,15 +162,3 @@ plot_grid(label_blank, top_DE_plot, rel_widths=c(0.1,1))
 
 ggsave2(here("figures", "TopDE_adult_ped.pdf"), w=20,h=20)
 ggsave2(here("figures/jpeg", "TopDE_adult_ped.jpeg"), w=20,h=20,bg="white")
-
-##################
-## IFN signalling
-##################
-#Lists from GSEA "HALLMARK_INTERFERON_GAMMA_RESPONSE" and "HALLMARK_INTERFERON_ALPHA_RESPONSE"
-IFNa<-c("ADAR","B2M","BATF2","BST2","C1S","CASP1","CASP8","CCRL2","CD47","CD74","CMPK2","CNP","CSF1","CXCL10","CXCL11","DDX60","DHX58","EIF2AK2","ELF1","EPSTI1","MVB12A","TENT5A","CMTR1","GBP2","GBP4","GMPR","HERC6","HLA-C","IFI27","IFI30","IFI35","IFI44","IFI44L","IFIH1","IFIT2","IFIT3","IFITM1","IFITM2","IFITM3","IL15","IL4R","IL7","IRF1","IRF2","IRF7","IRF9","ISG15","ISG20","LAMP3","LAP3","LGALS3BP","LPAR6","LY6E","MOV10","MX1","NCOA7","NMI","NUB1","OAS1","OASL","OGFR","PARP12","PARP14","PARP9","PLSCR1","PNPT1","HELZ2","PROCR","PSMA3","PSMB8","PSMB9","PSME1","PSME2","RIPK2","RNF31","RSAD2","RTP4","SAMD9","SAMD9L","SELL","SLC25A28","SP110","STAT2","TAP1","TDRD7","TMEM140","TRAFD1","TRIM14","TRIM21","TRIM25","TRIM26","TRIM5","TXNIP","UBA7","UBE2L6","USP18","WARS1")
-IFNg<-c("ADAR","APOL6","ARID5B","ARL4A","AUTS2","B2M","BANK1","BATF2","BPGM","BST2","BTG1","C1R","C1S","CASP1","CASP3","CASP4","CASP7","CASP8","CCL2","CCL5","CCL7","CD274","CD38","CD40","CD69","CD74","CD86","CDKN1A","CFB","CFH","CIITA","CMKLR1","CMPK2","CSF2RB","CXCL10","CXCL11","CXCL9","DDX58","DDX60","DHX58","EIF2AK2","EIF4E3","EPSTI1","FAS","FCGR1A","FGL2","FPR1","CMTR1","GBP4","GBP6","GCH1","GPR18","GZMA","HERC6","HIF1A","HLA-A","HLA-B","HLA-DMA","HLA-DQA1","HLA-DRB1","HLA-G","ICAM1","IDO1","IFI27","IFI30","IFI35","IFI44","IFI44L","IFIH1","IFIT1","IFIT2","IFIT3","IFITM2","IFITM3","IFNAR2","IL10RA","IL15","IL15RA","IL18BP","IL2RB","IL4R","IL6","IL7","IRF1","IRF2","IRF4","IRF5","IRF7","IRF8","IRF9","ISG15","ISG20","ISOC1","ITGB7","JAK2","KLRK1","LAP3","LATS2","LCP2","LGALS3BP","LY6E","LYSMD2","MARCHF1","METTL7B","MT2A","MTHFD2","MVP","MX1","MX2","MYD88","NAMPT","NCOA3","NFKB1","NFKBIA","NLRC5","NMI","NOD1","NUP93","OAS2","OAS3","OASL","OGFR","P2RY14","PARP12","PARP14","PDE4B","PELI1","PFKP","PIM1","PLA2G4A","PLSCR1","PML","PNP","PNPT1","HELZ2","PSMA2","PSMA3","PSMB10","PSMB2","PSMB8","PSMB9","PSME1","PSME2","PTGS2","PTPN1","PTPN2","PTPN6","RAPGEF6","RBCK1","RIPK1","RIPK2","RNF213","RNF31","RSAD2","RTP4","SAMD9L","SAMHD1","SECTM1","SELP","SERPING1","SLAMF7","SLC25A28","SOCS1","SOCS3","SOD2","SP110","SPPL2A","SRI","SSPN","ST3GAL5","ST8SIA4","STAT1","STAT2","STAT3","STAT4","TAP1","TAPBP","TDRD7","TNFAIP2","TNFAIP3","TNFAIP6","TNFSF10","TOR1B","TRAFD1","TRIM14","TRIM21","TRIM25","TRIM26","TXNIP","UBE2L6","UPP1","USP18","VAMP5","VAMP8","VCAM1","WARS1","XAF1","XCL1","ZBP1","ZNFX1")
-
-diff_exp_sig<-diff_exp_all[which(diff_exp_all$p_val_adj < 0.005 & abs(diff_exp_all$avg_log2FC) > 1),]
-
-diff_exp_sig[which(diff_exp_sig$gene%in%IFNa),]
-diff_exp_sig[which(diff_exp_sig$gene%in%IFNg),]

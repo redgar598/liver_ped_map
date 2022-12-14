@@ -32,7 +32,7 @@ source("R_functions/pretty_plots.R")
 
 
 ### load integrate for UMAP etc
-load(here("data","adult_ped_integrated.rds"))
+load(here("data","adult_ped_integrated_refinedlabels.rds"))
 
 
 B_genes<-c("POU2F2","FCER2","MS4A1","LTB","CD37","CD79B","IGLC2","IGHG1","IGKC", "CD19")
@@ -40,30 +40,27 @@ T_genes<-c("CD3D","IL7R","CD8A","IL32")
 NK_genes<-c("NKG7","CD7")
 gd_genes<-c("GNLY")
 
-d10x.combined_NK_T_B<-subset(d10x.combined, subset = CellType_rough %in% c("CD3_Tcell","nkTcell","gdTcell"))
+d10x.combined_NK_T<-subset(d10x.combined, subset = CellType_refined %in% c("CD3+ T-cells","NK-like cells","gd T-cells"))
 rm(d10x.combined)
 gc()
-d10x.combined_NK_T_B <- RunPCA(d10x.combined_NK_T_B, npcs = 30, verbose = FALSE)
-d10x.combined_NK_T_B <- RunUMAP(d10x.combined_NK_T_B, reduction = "pca", dims = 1:30)
-d10x.combined_NK_T_B <- FindNeighbors(d10x.combined_NK_T_B, reduction = "pca", dims = 1:30)
-d10x.combined_NK_T_B <- FindClusters(d10x.combined_NK_T_B, resolution = 0.1)
-NK_T_B_umap<-DimPlot(d10x.combined_NK_T_B, label=T)
-NK_T_B_umap
-save_plts(NK_T_B_umap, "NK_T_B_umap", w=8,h=6)
-
-NK_T_B_umap<-DimPlot(d10x.combined_NK_T_B, label=T, group.by = "CellType_rough")
-NK_T_B_umap
-save_plts(NK_T_B_umap, "NK_T_B_umap_celltype", w=8,h=6)
+d10x.combined_NK_T <- RunPCA(d10x.combined_NK_T, npcs = 30, verbose = FALSE)
+d10x.combined_NK_T <- RunUMAP(d10x.combined_NK_T, reduction = "pca", dims = 1:30)
+d10x.combined_NK_T <- FindNeighbors(d10x.combined_NK_T, reduction = "pca", dims = 1:30)
+d10x.combined_NK_T <- FindClusters(d10x.combined_NK_T, resolution = 0.1)
+DimPlot(d10x.combined_NK_T)
 
 
-NK_B_T_clusters<-d10x.combined_NK_T_B@meta.data
+FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = NK_genes, ncol = 2)
+FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = gd_genes)
+FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = T_genes, ncol = 2)
 
 
+# are adult T cells more hepatocyte
+age_tcell<-DimPlot(d10x.combined_NK_T, split.by = "AgeGroup", group.by = "CellType_refined")+colscale_cellType
 
-FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = NK_genes, ncol = 2)
-FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = gd_genes)
-FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = T_genes, ncol = 2)
-
+Hep_Tcell<-FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = c("ALB","SERPINA1","HAMP","PCK1"), ncol = 2)
+Tcell_hep<-plot_grid(age_tcell, Hep_Tcell, ncol=1, rel_heights = c(1.1,2))
+save_plts(Tcell_hep, "age_tcell_hepmarker", w=8,h=10)
 
 
 
@@ -129,7 +126,7 @@ top_DE_up[which(top_DE_up$gene%in%c(T_genes,NK_genes,gd_genes)),]
 #0: CD3+ CD8+ Tcell
 top_DE_up[which(top_DE_up$cluster=="0"),]
 top_DE[which(top_DE$cluster=="0"),]
-NK_T_N_0<-FeaturePlot(d10x.combined_NK_T_B, features = c("CD52","IL7R","CD8A","CD3D"), min.cutoff = "q9", pt.size=1)
+NK_T_N_0<-FeaturePlot(d10x.combined_NK_T, features = c("CD52","IL7R","CD8A","CD3D"), min.cutoff = "q9", pt.size=1)
 NK_T_N_0
 save_plts(NK_T_N_0, "NK_T_N_cluster_0_markers", w=8,h=6)
 
@@ -137,28 +134,28 @@ save_plts(NK_T_N_0, "NK_T_N_cluster_0_markers", w=8,h=6)
 #1: Adult Hep NK? Soupy
 top_DE[which(top_DE$cluster=="1"),]
 top_DE_up[which(top_DE_up$cluster=="1"),]
-NK_T_N_1<-FeaturePlot(d10x.combined_NK_T_B, features = c("ALB","APOA1","APOA2","SERPINA1"), min.cutoff = "q9", pt.size=1)
+NK_T_N_1<-FeaturePlot(d10x.combined_NK_T, features = c("ALB","APOA1","APOA2","SERPINA1"), min.cutoff = "q9", pt.size=1)
 NK_T_N_1
 save_plts(NK_T_N_1, "NK_T_N_cluster_1_markers", w=8,h=6)
 
 #2: NK like
 top_DE[which(top_DE$cluster=="2"),]
 top_DE_up[which(top_DE_up$cluster=="2"),]
-NK_T_N_2<-FeaturePlot(d10x.combined_NK_T_B, features = c("FCER1G","FOS","CCL3","IL2RB"), min.cutoff = "q9", pt.size=1)
+NK_T_N_2<-FeaturePlot(d10x.combined_NK_T, features = c("FCER1G","FOS","CCL3","IL2RB"), min.cutoff = "q9", pt.size=1)
 NK_T_N_2
 save_plts(NK_T_N_2, "NK_T_N_cluster_2_markers", w=8,h=6)
 
 #3: GNLY+
 top_DE[which(top_DE$cluster=="3"),]
 top_DE_up[which(top_DE_up$cluster=="3"),]
-NK_T_N_3<-FeaturePlot(d10x.combined_NK_T_B, features = c("GNLY","FCGR3A","GZMB","PRF1"), min.cutoff = "q9", pt.size=1)
+NK_T_N_3<-FeaturePlot(d10x.combined_NK_T, features = c("GNLY","FCGR3A","GZMB","PRF1"), min.cutoff = "q9", pt.size=1)
 NK_T_N_3
 save_plts(NK_T_N_3, "NK_T_N_cluster_3_markers", w=8,h=6)
 
 #4: Adult Hep NK? Soupy
 top_DE[which(top_DE$cluster=="4"),]
 top_DE_up[which(top_DE_up$cluster=="4"),]
-NK_T_N_4<-FeaturePlot(d10x.combined_NK_T_B, features = c("ALB","SAA1","SAA2","CRP"), min.cutoff = "q9", pt.size=1)
+NK_T_N_4<-FeaturePlot(d10x.combined_NK_T, features = c("ALB","SAA1","SAA2","CRP"), min.cutoff = "q9", pt.size=1)
 NK_T_N_4
 save_plts(NK_T_N_4, "NK_T_N_cluster_4_markers", w=8,h=6)
 
@@ -166,14 +163,14 @@ save_plts(NK_T_N_4, "NK_T_N_cluster_4_markers", w=8,h=6)
 #5: CD8A TRAV17+ (alpha)
 top_DE[which(top_DE$cluster=="5"),]
 top_DE_up[which(top_DE_up$cluster=="5"),]
-NK_T_N_5<-FeaturePlot(d10x.combined_NK_T_B, features = c("CD8A","CD74","TRAV17","IL32"), min.cutoff = "q9", pt.size=1)
+NK_T_N_5<-FeaturePlot(d10x.combined_NK_T, features = c("CD8A","CD74","TRAV17","IL32"), min.cutoff = "q9", pt.size=1)
 NK_T_N_5
 save_plts(NK_T_N_5, "NK_T_N_cluster_5_markers", w=8,h=6)
 
 #5: CD8A TRDV2+ (delta)
 top_DE[which(top_DE$cluster=="6"),]
 top_DE_up[which(top_DE_up$cluster=="6"),]
-NK_T_N_6<-FeaturePlot(d10x.combined_NK_T_B, features = c("TRDV2","TRGV9","IL7R","SLC4A10"), min.cutoff = "q9", pt.size=1)
+NK_T_N_6<-FeaturePlot(d10x.combined_NK_T, features = c("TRDV2","TRGV9","IL7R","SLC4A10"), min.cutoff = "q9", pt.size=1)
 NK_T_N_6
 save_plts(NK_T_N_6, "NK_T_N_cluster_6_markers", w=8,h=6)
 
@@ -184,16 +181,16 @@ de_04_sig[which(de_04_sig$avg_log2FC<0),]
 de_04_sig[which(de_04_sig$avg_log2FC>0),]
 
 
-FeaturePlot(d10x.combined_NK_T_B, features = c("TRAC","CD3D","FCER1G","CD7"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_NK_T, features = c("TRAC","CD3D","FCER1G","CD7"), min.cutoff = "q9", pt.size=1)
 
-FeaturePlot(d10x.combined_NK_T_B, features = c("NKG7","CD8A","CD3D","CD4"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_NK_T, features = c("NKG7","CD8A","CD3D","CD4"), min.cutoff = "q9", pt.size=1)
 
 ## MacParland markers for tcell (fig9)
-FeaturePlot(d10x.combined_NK_T_B, features = c("PTPRC","CD2","CD3D","TRAC"), min.cutoff = "q9", pt.size=1)
-FeaturePlot(d10x.combined_NK_T_B, features = c("IL7R","KLRB1","NKG7","FCGR3A"), min.cutoff = "q9", pt.size=1)
-FeaturePlot(d10x.combined_NK_T_B, features = c("GZMA","GZMB","GZMK","PRF1"), min.cutoff = "q9", pt.size=1)
-FeaturePlot(d10x.combined_NK_T_B, features = c("CD79A","CD79B","CD27","IGHG1"), min.cutoff = "q9", pt.size=1)
-FeaturePlot(d10x.combined_NK_T_B, features = c("MS4A1","LTB","CD52","IGHD"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_NK_T, features = c("PTPRC","CD2","CD3D","TRAC"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_NK_T, features = c("IL7R","KLRB1","NKG7","FCGR3A"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_NK_T, features = c("GZMA","GZMB","GZMK","PRF1"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_NK_T, features = c("CD79A","CD79B","CD27","IGHG1"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_NK_T, features = c("MS4A1","LTB","CD52","IGHD"), min.cutoff = "q9", pt.size=1)
 
 
 
@@ -201,9 +198,9 @@ FeaturePlot(d10x.combined_NK_T_B, features = c("MS4A1","LTB","CD52","IGHD"), min
 ## Naive vs memory T cells
 #######################
 
-FeaturePlot(d10x.combined_NK_T_B, features = c("CD4","CD8A","FOXP3","PDCD1"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_NK_T, features = c("CD4","CD8A","FOXP3","PDCD1"), min.cutoff = "q9", pt.size=1)
 
-d10x.combined_CD3<-subset(d10x.combined_NK_T_B, subset = CellType_rough %in% c("CD3_Tcell"))
+d10x.combined_CD3<-subset(d10x.combined_NK_T, subset = CellType_rough %in% c("CD3_Tcell"))
 d10x.combined_CD3 <- RunPCA(d10x.combined_CD3, npcs = 30, verbose = FALSE)
 d10x.combined_CD3 <- RunUMAP(d10x.combined_CD3, reduction = "pca", dims = 1:30)
 d10x.combined_CD3 <- FindNeighbors(d10x.combined_CD3, reduction = "pca", dims = 1:30)
@@ -255,7 +252,7 @@ plot_grid(plotlist = plt_list, align = 'hv', ncol = 3)
 #######################
 ## Naive vs memory T cells (split by individual)
 #######################
-d10x.combined_CD3<-subset(d10x.combined_NK_T_B, subset = CellType_rough %in% c("CD3_Tcell"))
+d10x.combined_CD3<-subset(d10x.combined_NK_T, subset = CellType_rough %in% c("CD3_Tcell"))
 d10x.combined_CD3 <- RunPCA(d10x.combined_CD3, npcs = 30, verbose = FALSE)
 d10x.combined_CD3 <- RunUMAP(d10x.combined_CD3, reduction = "pca", dims = 1:30)
 d10x.combined_CD3 <- FindNeighbors(d10x.combined_CD3, reduction = "pca", dims = 1:30)
@@ -295,21 +292,21 @@ FeaturePlot(d10x.combined_CD3, features = c("CD8A", "CD4"), blend = TRUE)
 TRM_markers_all<-FeaturePlot(d10x.combined, reduction = "umap", features = c("KLRG1", "B3GAT1", "CD69","ITGAE"), ncol = 2)
 save_plts(TRM_markers_all, "TRM_markers", w=5,h=4)
 
-d10x.combined_NK_T_B<-subset(d10x.combined, subset = CellType_rough %in% c("CD3+ T-cells","gd T-cells","NK-like cells"))
-d10x.combined_NK_T_B <- RunPCA(d10x.combined_NK_T_B, npcs = 30, verbose = FALSE)
-d10x.combined_NK_T_B <- RunUMAP(d10x.combined_NK_T_B, reduction = "pca", dims = 1:30)
+d10x.combined_NK_T<-subset(d10x.combined, subset = CellType_rough %in% c("CD3+ T-cells","gd T-cells","NK-like cells"))
+d10x.combined_NK_T <- RunPCA(d10x.combined_NK_T, npcs = 30, verbose = FALSE)
+d10x.combined_NK_T <- RunUMAP(d10x.combined_NK_T, reduction = "pca", dims = 1:30)
 
-FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = c("KLRG1", "B3GAT1", "CD69","ITGAE"), ncol = 2)
-TRM_markers_NKTB<-FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = c("KLRG1", "B3GAT1", "CD69","ITGAE"), split="AgeGroup", ncol = 2)
+FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = c("KLRG1", "B3GAT1", "CD69","ITGAE"), ncol = 2)
+TRM_markers_NKTB<-FeaturePlot(d10x.combined_NK_T, reduction = "umap", features = c("KLRG1", "B3GAT1", "CD69","ITGAE"), split="AgeGroup", ncol = 2)
 save_plts(TRM_markers_NKTB, "TRM_markers_NK_T_B", w=5,h=10)
 
-d10x.exp<-as.data.frame(d10x.combined_NK_T_B[["RNA"]]@data)
+d10x.exp<-as.data.frame(d10x.combined_NK_T[["RNA"]]@data)
 d10x.exp.GOI<-d10x.exp[c("KLRG1", "B3GAT1", "CD69","ITGAE"),]
 
 d10x.exp.GOI$gene<-rownames(d10x.exp.GOI)
 d10x.exp.GOI<-melt(d10x.exp.GOI)#
 
-meta<-d10x.combined_NK_T_B@meta.data
+meta<-d10x.combined_NK_T@meta.data
 meta$cell<-rownames(meta)
 
 plt<-merge(d10x.exp.GOI, meta,by.x="variable", by.y="cell")

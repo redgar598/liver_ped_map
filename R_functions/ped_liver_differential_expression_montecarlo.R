@@ -34,7 +34,7 @@ d10x<-readRDS(file = here("data","d10x_adult_ped_raw.rds"))
 ######
 ## add cell type labels
 ######
-load(here("data","adult_ped_cellRough.rds"))
+load(here("data","adult_ped_cellRefined.rds"))
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
@@ -63,6 +63,11 @@ table(d10x$CellType_rough, d10x$AgeGroup)
 
 cell_types<-unique(d10x$CellType_rough)
 
+cell_types<-unique(as.character(d10x$CellType_refined))
+cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
+cell_types[grep("CD3",cell_types)]<-"CD3"
+cell_types[grep("DEFA",cell_types)]<-"DEFA"
+
 contrasts_celltype_age<-do.call(rbind,lapply(1:length(cell_types), function(x){
   combinations(n = 2, r = 2, v = d10x$cell_age[grep(cell_types[x],d10x$cell_age)], repeats.allowed = FALSE)}))
 
@@ -86,7 +91,7 @@ command_args <- commandArgs(trailingOnly = TRUE)
 cell_type_indx <- as.numeric(command_args[1])
 cell_type<-cell_types[cell_type_indx]
 
-samp_num=10
+samp_num=1000
 
 
 #DE_monte_carlo<-lapply(cell_types, function(cell_type){
@@ -138,6 +143,6 @@ samp_num=10
 DE_monte_carlo<-sig_gene_count
 DE_monte_carlo<-DE_monte_carlo[which(!(is.na(DE_monte_carlo$gene))),]
 
-save(DE_monte_carlo, file=here("data",paste(cell_type,"adult_ped_diff_motecarlo_10.RData",sep="_")))
+save(DE_monte_carlo, file=here("data",paste(cell_type,"adult_ped_diff_motecarlo_1000.RData",sep="_")))
 
 
