@@ -8,13 +8,13 @@
 #SBATCH --output=%x.out
 
 
-#cellType_index=$1
+cellType_index=$1
 
 module load R/4.2.1
 
-Rscript R_functions/test.R
+#Rscript R_functions/test.R
 
-#Rscript R_functions/ped_liver_differential_expression_montecarlo.R $cellType_index
+Rscript R_functions/ped_liver_differential_expression_montecarlo.R $cellType_index
 
 
 
