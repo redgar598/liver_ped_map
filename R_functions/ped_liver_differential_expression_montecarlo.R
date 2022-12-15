@@ -96,9 +96,9 @@ samp_num=1000
   
   contrasts_celltype<-contrasts_celltype_age[grep(cell_type, contrasts_celltype_age)]
   
-  d10x_adult_celltype<-subset(d10x_adult, subset = CellType_rough == cell_type)
+  d10x_adult_celltype<-subset(d10x_adult, subset = CellType_refined == cell_type)
   ncol(d10x_adult_celltype)
-  d10x_ped_celltype<-subset(d10x_ped, subset = CellType_rough == cell_type)
+  d10x_ped_celltype<-subset(d10x_ped, subset = CellType_refined == cell_type)
   ncol(d10x_ped_celltype)
 
   
