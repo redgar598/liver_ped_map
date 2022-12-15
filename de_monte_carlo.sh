@@ -8,7 +8,7 @@
 #SBATCH --output=%x.out
 
 
-cellType_index=$1
+#cellType_index=$1
 
 module load R/4.2.1
 
