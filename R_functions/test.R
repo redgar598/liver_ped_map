@@ -1,19 +1,7 @@
-# library(here)
-# dataset_loc <- here("../../../projects/macparland/RE/PediatricAdult")
-# print(list.files(dataset_loc))
+library(here)
+library(Seurat)
 
-# 
-# library(targets)
-# library(tarchetypes)
-# tar_make()
-# 
+load(here("data/adult_ped_integrated_refinedlabels.rds"))
 
-# 
-# tar_load(d10x.list.mt)
-# print(d10x.list.mt)
-
-if (!require("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
-
-BiocManager::install("MAST")
-
+cell_label<-d10x.combined@meta.data
+save(cell_label, file=paste(here("data/"),"adult_ped_cellRefined.rds", sep=""))
