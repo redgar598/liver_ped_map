@@ -51,17 +51,15 @@ d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNorm
 
 
 ## testing factor
-d10x$cell_age<-paste(d10x$CellType_rough, d10x$AgeGroup, sep = "_")
+d10x$cell_age<-paste(d10x$CellType_refined, d10x$AgeGroup, sep = "_")
 Idents(d10x) <- "cell_age"
 
-table(d10x$CellType_rough, d10x$AgeGroup)
+table(d10x$CellType_refined, d10x$AgeGroup)
 
 
 #MAST (Finak et al., 2015), which fits a hurdle model to the expression of each gene,
 #consisting of logistic regression for the zero process (i.e., whether the gene is expressed) #
 #and linear regression for the continuous process (i.e., the expression level). 
-
-cell_types<-unique(d10x$CellType_rough)
 
 cell_types<-unique(as.character(d10x$CellType_refined))
 cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]

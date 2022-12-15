@@ -116,7 +116,7 @@ diff_exp_sig_sex[which(diff_exp_sig_sex$gene%in%type1_IFN),]
 diff_exp_all[which(diff_exp_all$gene%in%c("KLRG1", "B3GAT1", "CD69","ITGAE")),]
 diff_exp_all[which(diff_exp_all$gene%in%c("LYZ", "MARCO", "MRC1","PTPRC")),]
 
-keygenes<-IFNg
+keygenes<-unique(diff_exp_sig_sex[which(diff_exp_sig_sex$gene%in%type1_IFN),]$gene)
 diff_exp_all[which(diff_exp_all$gene%in%keygenes),]
 
 Idents(d10x) <- "Sex"
