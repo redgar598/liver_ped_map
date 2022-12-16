@@ -33,7 +33,7 @@ d10x<-readRDS(file = here("data","d10x_adult_ped_raw.rds"))
 ######
 ## add cell type labels
 ######
-load(here("data","adult_ped_cellRough.rds"))
+load(here("data","adult_ped_cellRefined.rds"))
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
@@ -46,20 +46,23 @@ d10x <- AddMetaData(d10x, metadata = cell_label)
 d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
 
 ## testing factor
-d10x$cell_age<-paste(d10x$CellType_rough, d10x$AgeGroup, sep = "_")
+d10x$cell_age<-paste(d10x$CellType_refined, d10x$AgeGroup, sep = "_")
 Idents(d10x) <- "cell_age"
 
-table(d10x$CellType_rough, d10x$AgeGroup)
+table(d10x$CellType_refined, d10x$AgeGroup)
 
 ##########
 ## Load DE Results
 ##########
-cell_types<-unique(cell_label$CellType_rough)
+cell_types<-unique(as.character(cell_label$CellType_refined))
+cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
+cell_types[grep("CD3",cell_types)]<-"CD3"
+cell_types[grep("DEFA",cell_types)]<-"DEFA"
 
-cell_types<-cell_types[2:8]
+cell_types<-cell_types[c(1,2,3,4,6,7,9,11,12)]
 
 DE_monte_carlo<-do.call(rbind, lapply(cell_types, function(celltype){
-  load(here("data",paste(celltype,"adult_ped_diff_motecarlo_10.RData",sep="_")))
+  load(here("data",paste(celltype,"adult_ped_diff_motecarlo_1000.RData",sep="_")))
   DE_monte_carlo}))
 
 DE_monte_carlo_sig<-DE_monte_carlo[which(DE_monte_carlo$monte_carlo_sig<0.001),]
@@ -81,6 +84,20 @@ keygenes<-c("KLRG1", "B3GAT1", "CD69","ITGAE","LYZ", "MARCO", "MRC1","PTPRC")
 DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%keygenes),]
 
 
+##################
+## IFN signalling
+##################
+#Lists from GSEA "HALLMARK_INTERFERON_GAMMA_RESPONSE" and "HALLMARK_INTERFERON_ALPHA_RESPONSE"
+IFNa<-c("ADAR","B2M","BATF2","BST2","C1S","CASP1","CASP8","CCRL2","CD47","CD74","CMPK2","CNP","CSF1","CXCL10","CXCL11","DDX60","DHX58","EIF2AK2","ELF1","EPSTI1","MVB12A","TENT5A","CMTR1","GBP2","GBP4","GMPR","HERC6","HLA-C","IFI27","IFI30","IFI35","IFI44","IFI44L","IFIH1","IFIT2","IFIT3","IFITM1","IFITM2","IFITM3","IL15","IL4R","IL7","IRF1","IRF2","IRF7","IRF9","ISG15","ISG20","LAMP3","LAP3","LGALS3BP","LPAR6","LY6E","MOV10","MX1","NCOA7","NMI","NUB1","OAS1","OASL","OGFR","PARP12","PARP14","PARP9","PLSCR1","PNPT1","HELZ2","PROCR","PSMA3","PSMB8","PSMB9","PSME1","PSME2","RIPK2","RNF31","RSAD2","RTP4","SAMD9","SAMD9L","SELL","SLC25A28","SP110","STAT2","TAP1","TDRD7","TMEM140","TRAFD1","TRIM14","TRIM21","TRIM25","TRIM26","TRIM5","TXNIP","UBA7","UBE2L6","USP18","WARS1")
+IFNg<-c("ADAR","APOL6","ARID5B","ARL4A","AUTS2","B2M","BANK1","BATF2","BPGM","BST2","BTG1","C1R","C1S","CASP1","CASP3","CASP4","CASP7","CASP8","CCL2","CCL5","CCL7","CD274","CD38","CD40","CD69","CD74","CD86","CDKN1A","CFB","CFH","CIITA","CMKLR1","CMPK2","CSF2RB","CXCL10","CXCL11","CXCL9","DDX58","DDX60","DHX58","EIF2AK2","EIF4E3","EPSTI1","FAS","FCGR1A","FGL2","FPR1","CMTR1","GBP4","GBP6","GCH1","GPR18","GZMA","HERC6","HIF1A","HLA-A","HLA-B","HLA-DMA","HLA-DQA1","HLA-DRB1","HLA-G","ICAM1","IDO1","IFI27","IFI30","IFI35","IFI44","IFI44L","IFIH1","IFIT1","IFIT2","IFIT3","IFITM2","IFITM3","IFNAR2","IL10RA","IL15","IL15RA","IL18BP","IL2RB","IL4R","IL6","IL7","IRF1","IRF2","IRF4","IRF5","IRF7","IRF8","IRF9","ISG15","ISG20","ISOC1","ITGB7","JAK2","KLRK1","LAP3","LATS2","LCP2","LGALS3BP","LY6E","LYSMD2","MARCHF1","METTL7B","MT2A","MTHFD2","MVP","MX1","MX2","MYD88","NAMPT","NCOA3","NFKB1","NFKBIA","NLRC5","NMI","NOD1","NUP93","OAS2","OAS3","OASL","OGFR","P2RY14","PARP12","PARP14","PDE4B","PELI1","PFKP","PIM1","PLA2G4A","PLSCR1","PML","PNP","PNPT1","HELZ2","PSMA2","PSMA3","PSMB10","PSMB2","PSMB8","PSMB9","PSME1","PSME2","PTGS2","PTPN1","PTPN2","PTPN6","RAPGEF6","RBCK1","RIPK1","RIPK2","RNF213","RNF31","RSAD2","RTP4","SAMD9L","SAMHD1","SECTM1","SELP","SERPING1","SLAMF7","SLC25A28","SOCS1","SOCS3","SOD2","SP110","SPPL2A","SRI","SSPN","ST3GAL5","ST8SIA4","STAT1","STAT2","STAT3","STAT4","TAP1","TAPBP","TDRD7","TNFAIP2","TNFAIP3","TNFAIP6","TNFSF10","TOR1B","TRAFD1","TRIM14","TRIM21","TRIM25","TRIM26","TXNIP","UBE2L6","UPP1","USP18","VAMP5","VAMP8","VCAM1","WARS1","XAF1","XCL1","ZBP1","ZNFX1")
+
+#list from http://www.gsea-msigdb.org/gsea/msigdb/geneset_page.jsp?geneSetName=GOBP_RESPONSE_TO_TYPE_I_INTERFERON
+# GOBP_RESPONSE_TO_TYPE_I_INTERFERON GO:0034340 GO:0060337,GO:0071357
+type1_IFN<-c("TANK","ADAR","IFITM3","IFITM2","CDC37","USP18","TREX1","TRIM6","DCST1","TTLL12","YTHDF3","SAMHD1","LSM14A","SETD2","TBK1","CNOT7","UBE2K","IFNE","STING1","IFI27","IFIT1","IFNA1","IFNA2","IFNA4","IFNA5","IFNA6","IFNA7","IFNA8","IFNA10","IFNA13","IFNA14","IFNA16","IFNA17","IFNA21","IFNAR1","IFNAR2","IFNB1","IFNW1","IRAK1","IRF3","IRF7","JAK1","USP27X","MIR21","MMP12","IFIT1B","MX1","MYD88","OAS1","OAS2","OAS3","YTHDF2","SHFL","METTL3","IFNK","MAVS","USP29","PTPN1","PTPN2","PTPN6","PTPN11","CACTIN","AZI2","SHMT2","SMPD1","SP100","STAT1","STAT2","TRAF3","TYK2","WNT5A","MUL1","ZBP1","TRIM56","NLRC5","IFITM1","FADD","CH25H","TRIM41","RNF185","ISG15","IKBKE","TBKBP1")
+
+DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%IFNa),]
+DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%IFNg),]
+DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%type1_IFN),]
 
 ###########
 ## Plot violins
