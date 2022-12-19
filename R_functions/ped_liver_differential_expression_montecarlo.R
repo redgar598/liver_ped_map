@@ -51,6 +51,11 @@ d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNorm
 
 
 ## testing factor
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC")]<-"LSEC_nothep"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil")]<-"Neutrophil_notDEFA"
+
 d10x$cell_age<-paste(d10x$CellType_refined, d10x$AgeGroup, sep = "_")
 Idents(d10x) <- "cell_age"
 
@@ -64,7 +69,6 @@ table(d10x$CellType_refined, d10x$AgeGroup)
 cell_types<-unique(as.character(d10x$CellType_refined))
 cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
 cell_types[grep("CD3",cell_types)]<-"CD3"
-cell_types[grep("DEFA",cell_types)]<-"DEFA"
 
 contrasts_celltype_age<-do.call(rbind,lapply(1:length(cell_types), function(x){
   combinations(n = 2, r = 2, v = d10x$cell_age[grep(cell_types[x],d10x$cell_age)], repeats.allowed = FALSE)}))
@@ -95,6 +99,7 @@ samp_num=1000
 #DE_monte_carlo<-lapply(cell_types, function(cell_type){
   
   contrasts_celltype<-contrasts_celltype_age[grep(cell_type, contrasts_celltype_age)]
+  cell_type<-as.character(unique(d10x$CellType_refined)[grep(cell_type,unique(d10x$CellType_refined))])
   
   d10x_adult_celltype<-subset(d10x_adult, subset = CellType_refined == cell_type)
   ncol(d10x_adult_celltype)
