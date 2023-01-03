@@ -174,78 +174,192 @@ plot_key_genes(inflammatory_macs, "inflammatory_macs_montecarlo")
 plot_key_genes(exhausted_tcells, "exhausted_tcells_montecarlo")
 
 
+
+
+
+########
+## interpret DGE
+########
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC")]<-"LSEC_nothep"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil")]<-"Neutrophil_notDEFA"
+
+d10x$cell_age<-paste(d10x$CellType_refined, d10x$AgeGroup, sep = "_")
+Idents(d10x) <- "cell_age"
+
+cell_types<-unique(as.character(d10x$CellType_refined))
+cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
+cell_types[grep("CD3",cell_types)]<-"CD3"
+
+contrasts_celltype_age<-do.call(rbind,lapply(1:length(cell_types), function(x){
+  combinations(n = 2, r = 2, v = d10x$cell_age[grep(cell_types[x],d10x$cell_age)], repeats.allowed = FALSE)}))
+contrasts_celltype_age
+nrow(contrasts_celltype_age)
+
+### get fold change in whole cohort for pathway analysis
+## run DE 
+
+diff_exp_all<-lapply(1:nrow(contrasts_celltype_age), function(x){
+  de<-FindMarkers(d10x, ident.1 = contrasts_celltype_age[x,1], ident.2 = contrasts_celltype_age[x,2], test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
+  print(paste(contrasts_celltype_age[x,1],"vs", contrasts_celltype_age[x,2],":", nrow(de), sep=" "))
+  de$gene<-rownames(de)
+  rownames(de)<-NULL
+  de<-de[,c(6,1:5)]
+  de$cell.1<-contrasts_celltype_age[x,1]
+  de$cell.2<-contrasts_celltype_age[x,2]
+  de})
+
+
+diff_exp_all<-do.call(rbind, diff_exp_all)
+
+
 #########
-## Plot DE Genes
+## pathway adult versus ped in KC and RR
 #########
-load(here("data","adult_ped_integrated.rds"))
+source("R_functions/GSEA_function_tmp.R")
+GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
 
-d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_rough %in% c("Myeloid"))
-d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
-d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+pathway_plt<-function(de){
+  gene_list = de$avg_log2FC
+  names(gene_list) = de$gene
+  gene_list = sort(gene_list, decreasing = TRUE)
+  gene_list = gene_list[!duplicated(names(gene_list))]
+  
+  res = GSEA(gene_list, GO_file, pval = 0.05)
+  
+  plt_path<-res$Results
+  plt_path$pathway<-sapply(1:nrow(plt_path), function(x) strsplit(plt_path$pathway[x], "%")[[1]][1])
+  plt_path$Enrichment_Cell<-"Up-regulated in \nAdult"
+  plt_path$Enrichment_Cell[which(plt_path$Enrichment=="Down-regulated")]<-"Up-regulated in \nPediatric"
+  
+  plt_path$label<-lapply(1:nrow(plt_path), function(x) paste0(plt_path$leadingEdge[x][[1]][1:4], collapse = ", "))
+  
+  plt_path$direction_label<-as.factor(plt_path$Enrichment)
+  levels(plt_path$direction_label)<-c(0.1,-0.1)
+  plt_path$direction_label<-as.numeric(as.character(plt_path$direction_label))
+  
+  # top and bottom 15
+  plt_path<-rbind(plt_path[1:15,], plt_path[(nrow(plt_path)-15):(nrow(plt_path)),])
+  
+  ggplot(plt_path, aes(NES, reorder(pathway, NES)))+geom_point(aes(size=size, fill=Enrichment_Cell), shape=21)+
+    theme_bw()+th_present+ylab("")+xlab("Normalized Enrichment Score")+
+    geom_text(aes(label=label),hjust="inward",  nudge_x = plt_path$direction_label, color="grey50", size=3)+
+    geom_vline(xintercept = 0, color="grey40")+scale_fill_manual(values=c("#fd8d3c","#6baed6"))+ 
+    guides(fill = guide_legend(override.aes = list(size=5)))}
 
-d10x.combined_NK_T_B<-subset(d10x.combined, subset = CellType_rough %in% c("CD3_Tcell","gdTcell","nkTcell"))
-d10x.combined_NK_T_B <- RunPCA(d10x.combined_NK_T_B, npcs = 30, verbose = FALSE)
-d10x.combined_NK_T_B <- RunUMAP(d10x.combined_NK_T_B, reduction = "pca", dims = 1:30)
-gc()
+RR_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="RR Myeloid_Adult"),])
+save_plts(RR_GSEA, "GSEA_adult_ped_recently_recruited", w=20,h=10)
 
+KC_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="KC Like_Adult"),])
+save_plts(KC_GSEA, "GSEA_adult_ped_KClike", w=20,h=10)
 
-umapgene<-FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = "SERPINA1", ncol = 2, split="AgeGroup")
-save_plts(umapgene, "SERPINA1_umap_tcell_agesplit", w=12,h=5)
-violingene<-VlnPlot(subset(d10x, subset = CellType_rough == c( "CD3+ T-cells", "NK-like cells",  "gd T-cells" )) , features = c("SERPINA1"), pt.size = 0, log=T, split.by = "AgeGroup",  group.by= "CellType_rough")+fillscale_age
-save_plts(violingene, "SERPINA1_violin_tcell_agesplit", w=4,h=4)
+NK_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="NK-like cells_Adult"),])
+save_plts(NK_GSEA, "GSEA_adult_ped_NKlike", w=20,h=10)
 
-umapgene<-FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = "ADH1B", ncol = 2, split="AgeGroup")
-save_plts(umapgene, "ADH1B_umap_tcell_agesplit", w=12,h=5)
-violingene<-VlnPlot(subset(d10x, subset = CellType_rough == c( "CD3+ T-cells", "NK-like cells",  "gd T-cells" )) , features = c("ADH1B"), pt.size = 0, log=T, split.by = "AgeGroup",  group.by= "CellType_rough")+fillscale_age
-save_plts(violingene, "ADH1B_violin_tcell_agesplit", w=4,h=4)
-
-umapgene<-FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = "SAA1", ncol = 2, split="AgeGroup")
-save_plts(umapgene, "SAA1_umap_tcell_agesplit", w=12,h=5)
-violingene<-VlnPlot(subset(d10x, subset = CellType_rough == c( "CD3+ T-cells", "NK-like cells",  "gd T-cells" )) , features = c("SAA1"), pt.size = 0, log=T, split.by = "AgeGroup",  group.by= "CellType_rough")+fillscale_age
-save_plts(violingene, "SAA1_violin_tcell_agesplit", w=4,h=4)
-
-umapgene<-FeaturePlot(d10x.combined_NK_T_B, reduction = "umap", features = "KLRG1", ncol = 2, split="AgeGroup")
-save_plts(umapgene, "KLRG1_umap_tcell_agesplit", w=12,h=5)
-violingene<-VlnPlot(subset(d10x, subset = CellType_rough == c( "CD3+ T-cells", "NK-like cells",  "gd T-cells" )) , features = c("KLRG1"), pt.size = 0, log=T, split.by = "AgeGroup",  group.by= "CellType_rough")+fillscale_age
-save_plts(violingene, "KLRG1_violin_tcell_agesplit", w=4,h=4)
-
-
-
-umapgene<-FeaturePlot(d10x.combined_myeloid, reduction = "umap", features = "ALDOB", ncol = 2, split="AgeGroup")
-umapgene
-umapgene<-FeaturePlot(d10x.combined, reduction = "umap", features = "SAA1", ncol = 2, split="AgeGroup")
-umapgene
-save_plts(umapgene, "KLRG1_umap_tcell_agesplit", w=12,h=5)
-
-
-# violingene<-VlnPlot(subset(d10x, subset = CellType_rough == c( "CD3+ T-cells", "NK-like cells",  "gd T-cells" )) , features = c("KLRG1"), pt.size = 0, log=T, split.by = "AgeGroup",  group.by= "CellType_rough")+fillscale_age
-# save_plts(violingene, "KLRG1_violin_tcell_agesplit", w=4,h=4)
+HSC_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="HSC_Adult"),])
+save_plts(HSC_GSEA, "GSEA_adult_ped_HSClike", w=20,h=10)
 
 
-# #
-# #
-# #
-# # # ### Top DE genes
-# # diff_exp_all %>%
-# #   group_by(cell.1) %>%
-# #   top_n(n = 10, wt = abs(avg_log2FC)) -> top10
-# #
-# # top_DE<-as.data.frame(top10)
-# #
-# # Idents(d10x) <- d10x$AgeGroup
-# #
-# # label_blank<-lapply(1:length(cell_types), function(x){
-# #   ggplot()+geom_blank()+theme_void()+ggtitle(cell_types[x])+ theme(plot.title = element_text(hjust = 0.5,vjust = -30))  })
-# # label_blank<-plot_grid(plotlist = label_blank, ncol=1)
-# #
-# # plot_list_top<-lapply(1:length(cell_types), function(x){
-# #   plots <- VlnPlot(subset(d10x, subset = CellType_rough == cell_types[x]) , features = top_DE[grep(cell_types[x],top_DE$cell.1),"gene"], pt.size = 0, log=T)
-# #   plots <- lapply(X = plots, FUN = function(p) p + fillscale_age +xlab("")+ theme(plot.title = element_text(size = 15)))
-# #   plot_grid(plotlist = plots, nrow=1)})
-# # top_DE_plot<-plot_grid(plotlist = plot_list_top, nrow=length(cell_types))
-# #
-# # plot_grid(label_blank, top_DE_plot, rel_widths=c(0.1,1))
-# #
-# # ggsave2(here("figures", "TopDE_adult_ped.pdf"), w=20,h=20)
-# # ggsave2(here("figures/jpeg", "TopDE_adult_ped.jpeg"), w=20,h=20,bg="white")
-# #
+
+## statistically significant
+load(file=here("data","adult_ped_diff_motecarlo_100_KC_RRonly.RData"))
+
+sig_MC<-DE_monte_carlo[which(DE_monte_carlo$monte_carlo_sig<0.05),]
+
+diff_exp_all[which(diff_exp_all$gene%in%sig_MC$gene & diff_exp_all$avg_log2FC>0),]
+diff_exp_all[which(diff_exp_all$gene%in%sig_MC$gene & diff_exp_all$avg_log2FC<0),]
+
+
+vol_celltype<-function(cellType){
+  diff_exp_all_celltype<-diff_exp_all[grep(cellType, diff_exp_all$cell.1),]
+  volcano<-data.frame(gene=diff_exp_all_celltype$gene,Pvalue=diff_exp_all_celltype$p_val, Delta_Beta=diff_exp_all_celltype$avg_log2FC)
+  
+  #Thresholds 
+  dB<-1 #delta beta cutoff
+  Pv<-1.8e-07 #Pvalue cutoff
+  
+  volcano<-volcano[complete.cases(volcano),]
+  
+  ## positive delta beta is hypomethylated (code for volcano should be right now, should colors change?)
+  color3<-sapply(1:nrow(volcano), function(x) if(volcano$Pvalue[x]<=Pv){
+    if(abs(volcano$Delta_Beta[x])>dB){
+      if(volcano$Delta_Beta[x]>dB){"Higher Expression in Adults\n(with Potential Biological Impact)"}else{"Higher Expression in Pediatric\n(with Potential Biological Impact)"}
+    }else{if(volcano$Delta_Beta[x]>0){"Higher Expression in Adults"}else{"Higher Expression in Pediatric"}}}else{"Not Significantly Different"})
+  
+  volcano$Interesting_CpG3<-color3
+  
+  
+  # COLORS! define here so they are consistent between plots
+  # so even if you don't have CpGs in a color catagory the pattern will be maintained
+  myColors <- c(muted("red", l=80, c=30),"red",muted("blue", l=70, c=40),"blue", "grey")
+  
+  color_possibilities<-c("Higher Expression in Adults",
+                         "Higher Expression in Adults\n(with Potential Biological Impact)",
+                         "Higher Expression in Pediatric",
+                         "Higher Expression in Pediatric\n(with Potential Biological Impact)",
+                         "Not Significantly Different")
+  
+  names(myColors) <- color_possibilities
+  colscale <- scale_color_manual(name = "Direction of Change",
+                                 values = myColors, drop = FALSE)
+  fillscale <- scale_fill_manual(name = "Direction of Change",
+                                 values = myColors, drop = FALSE)
+  
+  
+  sig_MC_celltype<-sig_MC[grep(cellType,sig_MC$cell),]
+  volcano_label<-volcano[which(volcano$gene%in%sig_MC_celltype$gene),]
+  volcano$sig<-"not_sig"
+  volcano$sig[which(volcano$gene%in%sig_MC_celltype$gene)]<-"MC_sig"
+  
+  ggplot(volcano, aes(Delta_Beta, -log10(Pvalue), fill=Interesting_CpG3, color=sig))+
+    geom_point(shape=21, size=1)+theme_bw()+
+    fillscale+scale_color_manual(values=c("black","white"))+guides(color = "none")+
+    geom_vline(xintercept=c(-dB,dB), color="grey60")+
+    geom_hline(yintercept=-log10(Pv), color="grey60")+
+    ylab("P Value (-log10)")+xlab("Differential Expression\n(Fold change)")+
+    theme(plot.margin=unit(c(1,1,1,2),"cm"))+ 
+    guides(fill = guide_legend(override.aes = list(size = 4)))+
+    geom_text(aes(label=gene),volcano_label,color="black",vjust=4, hjust=1,size=3)
+  
+  ggsave(file=paste(here("figures/"),cellType,"_differential_Ped_adult.pdf", sep=""), h=8, w=10)
+  ggsave(file=paste(here("figures/jpeg/"),cellType,"_differential_Ped_adult.jpeg", sep=""), h=8, w=10)}
+
+vol_celltype("RR")
+vol_celltype("KC")
+
+diff_exp_all_celltype<-merge(diff_exp_all[grep("RR", diff_exp_all$cell.1),], diff_exp_all[grep("KC", diff_exp_all$cell.1),], by="gene",  suffixes = c("_RR","_KC"))
+
+
+sig_MC_RR<-sig_MC[grep("RR",sig_MC$cell),]
+sig_MC_KC<-sig_MC[grep("KC",sig_MC$cell),]
+
+
+diff_exp_all_celltype$sig<-sapply(1:nrow(diff_exp_all_celltype), function(x){
+  if(diff_exp_all_celltype$gene[x]%in%sig_MC_RR$gene & diff_exp_all_celltype$gene[x]%in%sig_MC_KC$gene){"both"}else{
+    if(diff_exp_all_celltype$gene[x]%in%sig_MC_RR$gene){"RR only"}else{
+      if(diff_exp_all_celltype$gene[x]%in%sig_MC_KC$gene){"KC only"}else{"NS"}
+    }
+  }
+})
+
+diff_exp_all_celltype_label<-diff_exp_all_celltype[which(diff_exp_all_celltype$gene%in%sig_MC$gene),]
+
+
+ggplot(diff_exp_all_celltype, aes(avg_log2FC_RR, avg_log2FC_KC, color=sig))+geom_point()+th_present+theme_bw()+
+  ylab("KC Differential Expression\n(Fold change)")+xlab("RR Differential Expression\n(log2 Fold change)")+
+  scale_color_manual(values = c("red","#f7057d","grey","#b80783"))+
+  geom_text(aes(label=gene),diff_exp_all_celltype_label,color="black",vjust=-0.75, hjust=1,size=3)+
+  geom_vline(xintercept = c(-1,1), color="grey")+  geom_hline(yintercept = c(-1,1), color="grey")+
+  ylim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
+  xlim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
+  annotate("text", x=2, y=3.6, label="Higher Expression in Adults")+
+  annotate("text", x=-3.5, y=-3.8, label="Higher Expression in Peds")
+ggsave(file=here("figures/FC_correlation_KC_RR_differential_Ped_adult.pdf"), h=7, w=8)
+ggsave(file=here("figures/jpeg/FC_correlation_KC_RR_differential_Ped_adult.jpeg"), h=7, w=8)
+
+
+
+
+
+diff_exp_all[which(diff_exp_all$gene%in%sig_MC_RR$gene),]

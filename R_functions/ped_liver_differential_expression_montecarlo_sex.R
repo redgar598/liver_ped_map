@@ -28,7 +28,7 @@ source("R_functions/pretty_plots.R")
 
 ## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
 # but not normalized or scaled
-d10x<-readRDS(file = here("data","d10x_F_ped_raw.rds"))
+d10x<-readRDS(file = here("data","d10x_adult_ped_raw.rds"))
 
 
 ######
