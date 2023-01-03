@@ -54,19 +54,36 @@ table(d10x$CellType_refined, d10x$AgeGroup)
 ##########
 ## Load DE Results
 ##########
-cell_types<-unique(as.character(cell_label$CellType_refined))
+cell_types<-unique(as.character(d10x$CellType_refined))
+cell_types[which(cell_types=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
+cell_types[which(cell_types=="LSEC")]<-"LSEC_nothep"
+cell_types[which(cell_types=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
+cell_types[which(cell_types=="Neutrophil")]<-"Neutrophil_notDEFA"
 cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
-cell_types[grep("CD3",cell_types)]<-"CD3"
-cell_types[grep("DEFA",cell_types)]<-"DEFA"
 
-cell_types<-cell_types[c(1,2,3,4,6,7,9,11,12)]
 
 DE_monte_carlo<-do.call(rbind, lapply(cell_types, function(celltype){
+  print(celltype)
   load(here("data",paste(celltype,"adult_ped_diff_motecarlo_1000.RData",sep="_")))
   DE_monte_carlo}))
 
 DE_monte_carlo_sig<-DE_monte_carlo[which(DE_monte_carlo$monte_carlo_sig<0.001),]
 
+table(DE_monte_carlo_sig$cell)
+table(DE_monte_carlo_sig$gene)[which(table(DE_monte_carlo_sig$gene)>0)]
+length(unique(DE_monte_carlo_sig$gene))
+sig_genes<-table(DE_monte_carlo_sig$gene)[which(table(DE_monte_carlo_sig$gene)>0)]
+ord_name<-names(sig_genes[rev(order(sig_genes))])
+
+summary_tbl<-as.data.frame(DE_monte_carlo_sig %>%
+  select(gene, cell) %>% 
+  group_by(gene) %>%
+  mutate(all_cells = paste(cell, collapse = " | "))%>%
+  select(gene, all_cells))
+summary_tbl<-summary_tbl[!duplicated(summary_tbl),]
+summary_tbl$all_cells<-gsub("\n"," ", summary_tbl$all_cells)
+
+write.csv(file=here("data","Significant_genes_adult_ped.csv"),summary_tbl[match(ord_name,summary_tbl$gene),])
 
 ############
 ## Look at hits
@@ -99,30 +116,29 @@ DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%IFNa),]
 DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%IFNg),]
 DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%type1_IFN),]
 
+
+
 ###########
 ## Plot violins
 ###########
 Idents(d10x) <- "AgeGroup"
 
-d10x@meta.data$CellType_rough<-as.factor(d10x@meta.data$CellType_rough)
-levels(d10x@meta.data$CellType_rough)<-c("CD3+ T-cells","Cholangiocytes",
-                                         "gd T-cells","Hepatocytes",
-                                         "HSC","LSEC","Myeloid cells","NK-like cells")
-
 DE_monte_carlo_sig$cell<-as.factor(DE_monte_carlo_sig$cell)
-levels(DE_monte_carlo_sig$cell)<-c("CD3+ T-cells","Cholangiocytes",
-                             "gd T-cells",#"Hepatocytes",
-                             "HSC","LSEC","Myeloid cells","NK-like cells")
+levels(DE_monte_carlo_sig$cell)<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","KC Like",
+                                   "LSEC\n(Hepatocyte Like)","LSEC","Mature B-cells","Neutrophil\n(DEFA+)","Neutrophil", "NK-like cells",
+                                   "Plasma cells","RR Myeloid") 
 
 cell_types<-as.factor(cell_types)
-levels(cell_types)<-c("CD3+ T-cells","Cholangiocytes",
-                      "gd T-cells",#"Hepatocytes",
-                      "HSC","LSEC","Myeloid cells","NK-like cells")
+levels(cell_types)<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","KC Like",
+                      "LSEC\n(Hepatocyte Like)","LSEC","Mature B-cells","Neutrophil\n(DEFA+)","Neutrophil", "NK-like cells",
+                      "Plasma cells","RR Myeloid") 
+
+
 
 plot_key_genes<-function(keygenes, label){
   all_plots<-lapply(1:length(keygenes), function(y){
     plots<-lapply(1:length(cell_types),function(x){
-      p<-VlnPlot(subset(d10x, subset = CellType_rough == as.character(cell_types[x])) , features = keygenes[y], pt.size = 0, log=T)
+      p<-VlnPlot(subset(d10x, subset = CellType_refined == as.character(cell_types[x])) , features = keygenes[y], pt.size = 0, log=T)
       p<-if( (as.character(cell_types[x]) %in% as.character(DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene==keygenes[y]),]$cell))  ){
         p+theme(plot.background = element_rect(color = "black",size = 2)) +fillscale_age +xlab("") + ylab("")+ theme(legend.position="none")}else{
           p+fillscale_age +xlab("") + ylab("")+ theme(legend.position="none")
@@ -137,11 +153,18 @@ plot_key_genes<-function(keygenes, label){
   
   plot_grid(label_blank, plot_grid(plotlist=all_plots, ncol=length(keygenes)), rel_widths=c(0.1,1))
   wid<-length(keygenes)*3
-  ggsave2(paste0(here("figures/"), label, "_adult_ped.pdf"), w=wid,h=20)
-  ggsave2(paste0(here("figures/jpeg/"),label, "_adult_ped.jpeg"), w=wid,h=20,bg="white")}
+  ggsave2(paste0(here("figures/"), label, "_adult_ped.pdf"), w=wid,h=30)
+  ggsave2(paste0(here("figures/jpeg/"),label, "_adult_ped.jpeg"), w=wid,h=30,bg="white")}
 
 
-plot_key_genes(DE_monte_carlo_sig[which(DE_monte_carlo_sig$cell=="Myeloid cells"),]$gene, "Myeloid_DE_Genes")
+#### IFNg
+IFNg_sig<-unique(as.character(DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%IFNg),]$gene))
+plot_key_genes(IFNg_sig, "IFNg_sig")
+
+#### IFNa
+IFNa_sig<-unique(as.character(DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%IFNa),]$gene))
+plot_key_genes(IFNa_sig, "IFNa_sig")
+
 
 table(DE_monte_carlo_sig$gene)[order(table(DE_monte_carlo_sig$gene))]
 plot_key_genes(c("CRP","SAA2","ALB","APOE"), "DE_unique_to_celltypes")
