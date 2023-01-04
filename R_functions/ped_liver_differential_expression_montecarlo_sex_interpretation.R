@@ -47,10 +47,10 @@ d10x <- AddMetaData(d10x, metadata = cell_label)
 d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
 
 ## testing factor
-d10x$cell_age<-paste(d10x$CellType_refined, d10x$AgeGroup, sep = "_")
-Idents(d10x) <- "cell_age"
+d10x$cell_sex<-paste(as.character(d10x$CellType_refined), d10x$Sex, sep = "_")
+Idents(d10x) <- "cell_sex"
 
-table(d10x$CellType_refined, d10x$AgeGroup)
+table(d10x$CellType_refined, d10x$Sex)
 
 ##########
 ## Load DE Results
@@ -65,7 +65,7 @@ cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
 
 DE_monte_carlo<-do.call(rbind, lapply(cell_types, function(celltype){
   print(celltype)
-  load(here("data",paste(celltype,"adult_ped_diff_motecarlo_1000.RData",sep="_")))
+  load(here("data",paste(celltype,"sex_diff_motecarlo_1000.RData",sep="_")))
   DE_monte_carlo}))
 
 DE_monte_carlo_sig<-DE_monte_carlo[which(DE_monte_carlo$monte_carlo_sig<0.001),]
@@ -77,14 +77,14 @@ sig_genes<-table(DE_monte_carlo_sig$gene)[which(table(DE_monte_carlo_sig$gene)>0
 ord_name<-names(sig_genes[rev(order(sig_genes))])
 
 summary_tbl<-as.data.frame(DE_monte_carlo_sig %>%
-  select(gene, cell) %>% 
-  group_by(gene) %>%
-  mutate(all_cells = paste(cell, collapse = " | "))%>%
-  select(gene, all_cells))
+                             select(gene, cell) %>% 
+                             group_by(gene) %>%
+                             mutate(all_cells = paste(cell, collapse = " | "))%>%
+                             select(gene, all_cells))
 summary_tbl<-summary_tbl[!duplicated(summary_tbl),]
 summary_tbl$all_cells<-gsub("\n"," ", summary_tbl$all_cells)
 
-write.csv(file=here("data","Significant_genes_adult_ped.csv"),summary_tbl[match(ord_name,summary_tbl$gene),])
+write.csv(file=here("data","Significant_genes_sex.csv"),summary_tbl[match(ord_name,summary_tbl$gene),])
 
 ############
 ## Look at hits
@@ -122,12 +122,16 @@ DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%type1_IFN),]
 ###########
 ## Plot violins
 ###########
-Idents(d10x) <- "AgeGroup"
+Idents(d10x) <- "Sex"
 
 DE_monte_carlo_sig$cell<-as.factor(DE_monte_carlo_sig$cell)
+# levels(DE_monte_carlo_sig$cell)<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","KC Like",
+#                                    "LSEC\n(Hepatocyte Like)","LSEC","Mature B-cells","Neutrophil\n(DEFA+)","Neutrophil", "NK-like cells",
+#                                    "Plasma cells","RR Myeloid") 
 levels(DE_monte_carlo_sig$cell)<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","KC Like",
-                                   "LSEC\n(Hepatocyte Like)","LSEC","Mature B-cells","Neutrophil\n(DEFA+)","Neutrophil", "NK-like cells",
-                                   "Plasma cells","RR Myeloid") 
+                                   "LSEC\n(Hepatocyte Like)","LSEC","Mature B-cells","NK-like cells",
+                                   "RR Myeloid") 
+
 
 cell_types<-as.factor(cell_types)
 levels(cell_types)<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","KC Like",
@@ -141,7 +145,7 @@ plot_key_genes<-function(keygenes, label){
     plots<-lapply(1:length(cell_types),function(x){
       p<-VlnPlot(subset(d10x, subset = CellType_refined == as.character(cell_types[x])) , features = keygenes[y], pt.size = 0, log=T)
       p<-if( (as.character(cell_types[x]) %in% as.character(DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene==keygenes[y]),]$cell))  ){
-        p+theme(plot.background = element_rect(color = "black",size = 2)) +fillscale_age +xlab("") + ylab("")+ theme(legend.position="none")}else{
+        p+theme(plot.background = element_rect(color = "black",size = 2)) +xlab("") + ylab("")+ theme(legend.position="none")}else{
           p+fillscale_age +xlab("") + ylab("")+ theme(legend.position="none")
         }
       p})
@@ -154,25 +158,13 @@ plot_key_genes<-function(keygenes, label){
   
   plot_grid(label_blank, plot_grid(plotlist=all_plots, ncol=length(keygenes)), rel_widths=c(0.1,1))
   wid<-length(keygenes)*3
-  ggsave2(paste0(here("figures/"), label, "_adult_ped.pdf"), w=wid,h=30)
-  ggsave2(paste0(here("figures/jpeg/"),label, "_adult_ped.jpeg"), w=wid,h=30,bg="white")}
+  ggsave2(paste0(here("figures/"), label, "_sex.pdf"), w=wid,h=30)
+  ggsave2(paste0(here("figures/jpeg/"),label, "_sex.jpeg"), w=wid,h=30,bg="white")}
 
 
-#### IFNg
-IFNg_sig<-unique(as.character(DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%IFNg),]$gene))
-plot_key_genes(IFNg_sig, "IFNg_sig")
-
-#### IFNa
-IFNa_sig<-unique(as.character(DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%IFNa),]$gene))
-plot_key_genes(IFNa_sig, "IFNa_sig")
-
-
-table(DE_monte_carlo_sig$gene)[order(table(DE_monte_carlo_sig$gene))]
-plot_key_genes(c("CRP","SAA2","ALB","APOE"), "DE_unique_to_celltypes")
-
-plot_key_genes(myeloid_immune_supressive, "myeloid_immune_supressive_montecarlo")
-plot_key_genes(inflammatory_macs, "inflammatory_macs_montecarlo")
-plot_key_genes(exhausted_tcells, "exhausted_tcells_montecarlo")
+#### All sig IFN (a,g 1)
+IFN_sig<-unique(as.character(DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%c(IFNg,IFNa, type1_IFN)),]$gene))
+plot_key_genes(IFN_sig, "IFNg_sig")
 
 
 
@@ -186,15 +178,15 @@ levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC")]<-"LS
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil")]<-"Neutrophil_notDEFA"
 
-d10x$cell_age<-paste(d10x$CellType_refined, d10x$AgeGroup, sep = "_")
-Idents(d10x) <- "cell_age"
+d10x$cell_sex<-paste(as.character(d10x$CellType_refined), d10x$Sex, sep = "_")
+Idents(d10x) <- "cell_sex"
 
 cell_types<-unique(as.character(d10x$CellType_refined))
 cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
 cell_types[grep("CD3",cell_types)]<-"CD3"
 
 contrasts_celltype_age<-do.call(rbind,lapply(1:length(cell_types), function(x){
-  combinations(n = 2, r = 2, v = d10x$cell_age[grep(cell_types[x],d10x$cell_age)], repeats.allowed = FALSE)}))
+  combinations(n = 2, r = 2, v = d10x$cell_sex[grep(cell_types[x],d10x$cell_sex)], repeats.allowed = FALSE)}))
 contrasts_celltype_age
 nrow(contrasts_celltype_age)
 
@@ -231,8 +223,8 @@ pathway_plt<-function(de){
   
   plt_path<-res$Results
   plt_path$pathway<-sapply(1:nrow(plt_path), function(x) strsplit(plt_path$pathway[x], "%")[[1]][1])
-  plt_path$Enrichment_Cell<-"Up-regulated in \nAdult"
-  plt_path$Enrichment_Cell[which(plt_path$Enrichment=="Down-regulated")]<-"Up-regulated in \nPediatric"
+  plt_path$Enrichment_Cell<-"Up-regulated in \nFemales"
+  plt_path$Enrichment_Cell[which(plt_path$Enrichment=="Down-regulated")]<-"Up-regulated in \nMales"
   
   plt_path$label<-lapply(1:nrow(plt_path), function(x) paste0(plt_path$leadingEdge[x][[1]][1:4], collapse = ", "))
   
@@ -249,17 +241,16 @@ pathway_plt<-function(de){
     geom_vline(xintercept = 0, color="grey40")+scale_fill_manual(values=c("#fd8d3c","#6baed6"))+ 
     guides(fill = guide_legend(override.aes = list(size=5)))}
 
-RR_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="RR Myeloid_Adult"),])
-save_plts(RR_GSEA, "GSEA_adult_ped_recently_recruited", w=20,h=10)
+RR_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="RR Myeloid_F"),])
+save_plts(RR_GSEA, "GSEA_sex_recently_recruited", w=20,h=10)
 
-KC_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="KC Like_Adult"),])
-save_plts(KC_GSEA, "GSEA_adult_ped_KClike", w=20,h=10)
+KC_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="KC Like_F"),])
+save_plts(KC_GSEA, "GSEA_sex_ped_KClike", w=20,h=10)
 
-NK_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="NK-like cells_Adult"),])
-save_plts(NK_GSEA, "GSEA_adult_ped_NKlike", w=20,h=10)
+gdT_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="gd T-cells_F"),])
+save_plts(gdT_GSEA, "GSEA_sex_ped_gdT", w=20,h=10)
 
-HSC_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="HSC_Adult"),])
-save_plts(HSC_GSEA, "GSEA_adult_ped_HSClike", w=20,h=10)
+
 
 
 
@@ -277,8 +268,8 @@ vol_celltype<-function(cellType){
   ## positive delta beta is hypomethylated (code for volcano should be right now, should colors change?)
   color3<-sapply(1:nrow(volcano), function(x) if(volcano$Pvalue[x]<=Pv){
     if(abs(volcano$Delta_Beta[x])>dB){
-      if(volcano$Delta_Beta[x]>dB){"Higher Expression in Adults\n(with Potential Biological Impact)"}else{"Higher Expression in Pediatric\n(with Potential Biological Impact)"}
-    }else{if(volcano$Delta_Beta[x]>0){"Higher Expression in Adults"}else{"Higher Expression in Pediatric"}}}else{"Not Significantly Different"})
+      if(volcano$Delta_Beta[x]>dB){"Higher Expression in Females\n(with Potential Biological Impact)"}else{"Higher Expression in Males\n(with Potential Biological Impact)"}
+    }else{if(volcano$Delta_Beta[x]>0){"Higher Expression in Females"}else{"Higher Expression in Males"}}}else{"Not Significantly Different"})
   
   volcano$Interesting_CpG3<-color3
   
@@ -287,10 +278,10 @@ vol_celltype<-function(cellType){
   # so even if you don't have CpGs in a color catagory the pattern will be maintained
   myColors <- c(muted("red", l=80, c=30),"red",muted("blue", l=70, c=40),"blue", "grey")
   
-  color_possibilities<-c("Higher Expression in Adults",
-                         "Higher Expression in Adults\n(with Potential Biological Impact)",
-                         "Higher Expression in Pediatric",
-                         "Higher Expression in Pediatric\n(with Potential Biological Impact)",
+  color_possibilities<-c("Higher Expression in Females",
+                         "Higher Expression in Females\n(with Potential Biological Impact)",
+                         "Higher Expression in Males",
+                         "Higher Expression in Males\n(with Potential Biological Impact)",
                          "Not Significantly Different")
   
   names(myColors) <- color_possibilities
@@ -315,14 +306,14 @@ vol_celltype<-function(cellType){
     guides(fill = guide_legend(override.aes = list(size = 4)))+
     geom_text(aes(label=gene),volcano_label,color="black",vjust=4, hjust=1,size=3)
   
-  ggsave(file=paste(here("figures/"),cellType,"_differential_Ped_adult.pdf", sep=""), h=8, w=10)
-  ggsave(file=paste(here("figures/jpeg/"),cellType,"_differential_Ped_adult.jpeg", sep=""), h=8, w=10)}
+  ggsave(file=paste(here("figures/"),cellType,"_differential_sex.pdf", sep=""), h=8, w=10)
+  ggsave(file=paste(here("figures/jpeg/"),cellType,"_differential_sex.jpeg", sep=""), h=8, w=10)}
 
 
 vol_celltype("RR")
 vol_celltype("KC")
 vol_celltype("NK")
-vol_celltype("HSC")
+vol_celltype("gd")
 
 ######
 ## FC correlation plot RR-KC
@@ -340,7 +331,7 @@ diff_exp_all_celltype$sig<-sapply(1:nrow(diff_exp_all_celltype), function(x){
   }
 })
 
-diff_exp_all_celltype_label<-diff_exp_all_celltype[which(diff_exp_all_celltype$gene%in%c(sig_MC_KC$gene,sig_MC_RR$gene)),]
+diff_exp_all_celltype_label<-diff_exp_all_celltype[which(diff_exp_all_celltype$gene%in%c(sig_MC_RR$gene,sig_MC_KC$gene)),]
 
 
 ggplot(diff_exp_all_celltype, aes(avg_log2FC_RR, avg_log2FC_KC, color=sig))+geom_point()+th_present+theme_bw()+
@@ -350,10 +341,10 @@ ggplot(diff_exp_all_celltype, aes(avg_log2FC_RR, avg_log2FC_KC, color=sig))+geom
   geom_vline(xintercept = c(-1,1), color="grey")+  geom_hline(yintercept = c(-1,1), color="grey")+
   ylim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
   xlim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
-  annotate("text", x=2, y=3.6, label="Higher Expression in Adults")+
-  annotate("text", x=-3.5, y=-3.8, label="Higher Expression in Peds")
-ggsave(file=here("figures/FC_correlation_KC_RR_differential_Ped_adult.pdf"), h=7, w=8)
-ggsave(file=here("figures/jpeg/FC_correlation_KC_RR_differential_Ped_adult.jpeg"), h=7, w=8)
+  annotate("text", x=2, y=3.6, label="Higher Expression in Females")+
+  annotate("text", x=-3.5, y=-3.8, label="Higher Expression in Males")
+ggsave(file=here("figures/FC_correlation_KC_RR_differential_sex.pdf"), h=7, w=8)
+ggsave(file=here("figures/jpeg/FC_correlation_KC_RR_differential_sex.jpeg"), h=7, w=8)
 
 
 
@@ -374,7 +365,7 @@ diff_exp_all_celltype$sig<-sapply(1:nrow(diff_exp_all_celltype), function(x){
   }
 })
 
-diff_exp_all_celltype_label<-diff_exp_all_celltype[which(diff_exp_all_celltype$gene%in%c(sig_MC_KC$gene,sig_MC_NK$gene)),]
+diff_exp_all_celltype_label<-diff_exp_all_celltype[which(diff_exp_all_celltype$gene%in%c(sig_MC_NK$gene,sig_MC_KC$gene)),]
 
 ggplot(diff_exp_all_celltype, aes(avg_log2FC_NK, avg_log2FC_KC, color=sig))+geom_point()+th_present+theme_bw()+
   ylab("KC Differential Expression\n(Fold change)")+xlab("NK Differential Expression\n(log2 Fold change)")+
@@ -383,10 +374,10 @@ ggplot(diff_exp_all_celltype, aes(avg_log2FC_NK, avg_log2FC_KC, color=sig))+geom
   geom_vline(xintercept = c(-1,1), color="grey")+  geom_hline(yintercept = c(-1,1), color="grey")+
   ylim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
   xlim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
-  annotate("text", x=2, y=3.6, label="Higher Expression in Adults")+
-  annotate("text", x=-3.5, y=-3.8, label="Higher Expression in Peds")
-ggsave(file=here("figures/FC_correlation_KC_NK_differential_Ped_adult.pdf"), h=7, w=8)
-ggsave(file=here("figures/jpeg/FC_correlation_KC_NK_differential_Ped_adult.jpeg"), h=7, w=8)
+  annotate("text", x=2, y=3.6, label="Higher Expression in Females")+
+  annotate("text", x=-3.5, y=-3.8, label="Higher Expression in Males")
+ggsave(file=here("figures/FC_correlation_KC_NK_differential_sex.pdf"), h=7, w=8)
+ggsave(file=here("figures/jpeg/FC_correlation_KC_NK_differential_sex.jpeg"), h=7, w=8)
 
 ######
 ## FC correlation plot RR-NK
@@ -404,18 +395,18 @@ diff_exp_all_celltype$sig<-sapply(1:nrow(diff_exp_all_celltype), function(x){
   }
 })
 
-diff_exp_all_celltype_label<-diff_exp_all_celltype[which(diff_exp_all_celltype$gene%in%c(sig_MC_RR$gene,sig_MC_NK$gene)),]
+diff_exp_all_celltype_label<-diff_exp_all_celltype[which(diff_exp_all_celltype$gene%in%c(sig_MC_NK$gene,sig_MC_RR$gene)),]
 
 ggplot(diff_exp_all_celltype, aes(avg_log2FC_NK, avg_log2FC_RR, color=sig))+geom_point()+th_present+theme_bw()+
   ylab("RR Differential Expression\n(Fold change)")+xlab("NK Differential Expression\n(log2 Fold change)")+
-  scale_color_manual(values = c("red","#f7057d","grey"))+
+  scale_color_manual(values = c("red","grey"))+
   geom_text(aes(label=gene),diff_exp_all_celltype_label,color="black",vjust=-0.75, hjust=1,size=3)+
   geom_vline(xintercept = c(-1,1), color="grey")+  geom_hline(yintercept = c(-1,1), color="grey")+
   ylim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
   xlim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
-  annotate("text", x=2, y=3.6, label="Higher Expression in Adults")+
-  annotate("text", x=-3.5, y=-3.8, label="Higher Expression in Peds")
-ggsave(file=here("figures/FC_correlation_RR_NK_differential_Ped_adult.pdf"), h=7, w=8)
-ggsave(file=here("figures/jpeg/FC_correlation_RR_NK_differential_Ped_adult.jpeg"), h=7, w=8)
+  annotate("text", x=2, y=3.6, label="Higher Expression in Females")+
+  annotate("text", x=-3.5, y=-3.8, label="Higher Expression in Males")
+ggsave(file=here("figures/FC_correlation_RR_NK_differential_sex.pdf"), h=7, w=8)
+ggsave(file=here("figures/jpeg/FC_correlation_RR_NK_differential_sex.jpeg"), h=7, w=8)
 
 
