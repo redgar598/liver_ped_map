@@ -145,6 +145,7 @@ if(length(sig_gene_count)==0){NA}else{
 
 #DE_monte_carlo<-do.call(rbind, DE_monte_carlo)
 DE_monte_carlo<-sig_gene_count
+head(DE_monte_carlo)
 DE_monte_carlo<-DE_monte_carlo[which(!(is.na(DE_monte_carlo$gene))),]
 
 save(DE_monte_carlo, file=here("data",paste(cell_type,"sex_diff_motecarlo_1000.RData",sep="_")))
