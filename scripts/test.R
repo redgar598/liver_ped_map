@@ -1,151 +1,105 @@
-#'---
-#'title: scRNAseq Differential Expression
-#'author: Rachel Edgar
-#'date: "`r Sys.Date()`"
-#'---
-
-
-
-#'### Load libraries
-library(dplyr)
-library(Seurat)
-library(patchwork)
+### Load libraries
 library(here)
+library(Seurat)
 library(ggplot2)
-library(reshape2)
+library(dplyr)
+library(scales)
 library(gridExtra)
-#library(limma)
-library(cowplot)
+library(reshape2)
 library(gtools)
-#library(ggsignif)
+library(SoupX)
+library(colorspace)
+library(cowplot)
+library(DropletQC)
 
 
-options(stringsAsFactors = FALSE)
+
 
 source("scripts/00_pretty_plots.R")
+source("scripts/00_entropy_d10x.R")
+
+#dataset_loc <- here("/media/redgar/Seagate Portable Drive/ped_liver_map_raw")
+dataset_loc <- here("../../../projects/macparland/RE/PediatricAdult/ped_liver_map_raw")
+
+samples<-list.files(dataset_loc)
+samples<-samples[-grep("data_transfer",samples)]
+print(samples)
+
+#meta<-read.table(here("data/data_transfer_updated_jan16_2023.csv"), header=T, sep=",")
+meta<-read.table(here(dataset_loc,"data_transfer_updated_jan16_2023.csv"), header=T, sep=",")
 
 
+y=1
 
-## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
-# but not normalized or scaled
-d10x<-readRDS(file = here("data","d10x_adult_ped_raw.rds"))
-
-
-######
-## add cell type labels
-######
-load(here("data","adult_ped_cellRefined.rds"))
-
-cell_label$index<-rownames(cell_label)
-cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
-identical(colnames(d10x), cell_label$index)
-
-d10x <- AddMetaData(d10x, metadata = cell_label)
-
-
-
-
-##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
-# This is log(TP10K+1)
-d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
-
-
-## testing factor
-table(d10x$CellType_refined, d10x$AgeGroup)
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC")]<-"LSEC_nothep"
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil")]<-"Neutrophil_notDEFA"
-
-
-d10x$cell_age<-paste(d10x$CellType_refined, d10x$AgeGroup, sep = "_")
-Idents(d10x) <- "cell_age"
-
-
-#MAST (Finak et al., 2015), which fits a hurdle model to the expression of each gene,
-#consisting of logistic regression for the zero process (i.e., whether the gene is expressed) #
-#and linear regression for the continuous process (i.e., the expression level). 
-
-cell_types<-unique(as.character(d10x$CellType_refined))
-cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
-cell_types[grep("CD3",cell_types)]<-"CD3"
-
-contrasts_celltype_age<-do.call(rbind,lapply(1:length(cell_types), function(x){
-  combinations(n = 2, r = 2, v = d10x$cell_age[grep(cell_types[x],d10x$cell_age)], repeats.allowed = FALSE)}))
-
-contrasts_celltype_age
-
-nrow(contrasts_celltype_age)
-
-###########
-## Monte carlo the DE
-###########
-
-
-d10x_adult<-subset(d10x, subset = AgeGroup == "Adult")
-ncol(d10x_adult)
-d10x_ped<-subset(d10x, subset = AgeGroup == "Ped")
-ncol(d10x_ped)
-
-
-cell_type<-"Neutrophil_notDEFA"
-
-
-samp_num=1000
-
-
-#DE_monte_carlo<-lapply(cell_types, function(cell_type){
-
-contrasts_celltype<-contrasts_celltype_age[grep(cell_type, contrasts_celltype_age)]
-
-cell_type<-as.character(unique(d10x$CellType_refined)[grep(cell_type,unique(d10x$CellType_refined))])
-
-
-d10x_adult_celltype<-subset(d10x_adult, subset = CellType_refined == cell_type)
-ncol(d10x_adult_celltype)
-d10x_ped_celltype<-subset(d10x_ped, subset = CellType_refined == cell_type)
-ncol(d10x_ped_celltype)
-
-
-de_lists<-sapply(1:samp_num, function(x){
-  set.seed(x)
+  caud<-meta$Sample_ID[which(meta$file == samples[y])]
+  print(caud)
+  print(file.path(dataset_loc,paste(samples[y],"/outs", sep=""),"filtered_feature_bc_matrix"))
+  d10x <- Read10X(file.path(dataset_loc,paste(samples[y],"/outs", sep=""),"filtered_feature_bc_matrix"))
+  colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),caud,sep="-")
+  # print(dim(d10x))
+  #' Initialize the Seurat object with the raw (non-normalized data).
+  d10x<-CreateSeuratObject(counts = d10x, project = "ped_adult_map", min.cells = 0, min.features = 0)
   
-  ## make downsampled
-  if(ncol(d10x_adult_celltype)<ncol(d10x_ped_celltype)){
-    ped_cells_random <- d10x_ped_celltype[, sample(colnames(d10x_ped_celltype), size = ncol(d10x_adult_celltype), replace=F)]
-    d10_DE<-merge(d10x_adult_celltype, ped_cells_random)
-  }else{
-    adult_cells_random <- d10x_adult_celltype[, sample(colnames(d10x_adult_celltype), size = ncol(d10x_ped_celltype), replace=F)]
-    d10_DE<-merge(d10x_ped_celltype, adult_cells_random)}
+  ## SoupX needs clusters so quickly make clusters for each sample
+  d10x    <- SCTransform(d10x, verbose = F)
+  d10x    <- RunPCA(d10x, verbose = F)
+  d10x    <- RunUMAP(d10x, dims = 1:30, verbose = F)
+  d10x    <- FindNeighbors(d10x, dims = 1:30, verbose = F)
+  d10x    <- FindClusters(d10x, verbose = T)
+  meta_clusters    <- d10x@meta.data
   
-  ## run DE 
-  de<-FindMarkers(d10_DE, ident.1 = contrasts_celltype[1], ident.2 = contrasts_celltype[2], test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
-  print(paste(contrasts_celltype[1],"vs", contrasts_celltype[2],":", nrow(de), sep=" "))
-  de$gene<-rownames(de)
-  rownames(de)<-NULL
-  de<-de[,c(6,1:5)]
-  de$cell.1<-contrasts_celltype[1]
-  de$cell.2<-contrasts_celltype[2]
+  sc = load10X(file.path(dataset_loc,paste(samples[y],"/outs", sep="")))
+  sc = setClusters(sc, setNames(meta_clusters$seurat_clusters, rownames(meta_clusters)))
   
-  de[which(de$p_val_adj < 0.005 & abs(de$avg_log2FC) > 1),]$gene
-})
-
-sig_gene_count<-unlist(de_lists)
-if(length(sig_gene_count)==0){NA}else{
-  sig_gene_count<-as.data.frame(table(sig_gene_count))
-  colnames(sig_gene_count)<-c("gene","sig_count")
+  ######
+  ## Load data and estimate soup profile
+  ######
+  # Estimate rho
+  sc = autoEstCont(sc)
+  #Genes with highest expression in background. These are often enriched for ribosomal proteins.
+  print(head(sc$soupProfile[order(sc$soupProfile$est, decreasing = T), ], n = 20))
+  # Clean the data
+  sc = adjustCounts(sc)
   
-  sig_gene_count$monte_carlo_sig<-sapply(1:nrow(sig_gene_count),function(x){
-    1-(sig_gene_count$sig_count[x]+1)/(samp_num+1)
-  })
+  d10x = CreateSeuratObject(sc)
   
-  sig_gene_count$cell<-cell_type
-  sig_gene_count}#})
-
-#DE_monte_carlo<-do.call(rbind, DE_monte_carlo)
-DE_monte_carlo<-sig_gene_count
-DE_monte_carlo<-DE_monte_carlo[which(!(is.na(DE_monte_carlo$gene))),]
-
-save(DE_monte_carlo, file=here("data",paste(cell_type,"adult_ped_diff_motecarlo_1000.RData",sep="_")))
-
-
+  
+  #add meta data to each seurat object
+  meta_cell<-data.frame(cell=colnames(d10x), individual=caud)
+  meta_cell_add<-merge(meta_cell, meta, by.x="individual", by.y="Sample_ID")
+  meta_cell_add<-meta_cell_add[match(colnames(d10x), meta_cell_add$cell),]
+  print(identical(meta_cell_add$cell, colnames(d10x)))
+  rownames(meta_cell_add)<-meta_cell_add$cell
+  d10x<- AddMetaData(d10x, meta_cell_add)
+  
+  
+  
+  ######
+  ## dropletQC
+  ######
+  nf1 <- nuclear_fraction_tags(
+    outs = file.path(dataset_loc,paste(samples[y],"/outs", sep="")),
+    tiles = 1, cores = 1, verbose = FALSE)
+  head(nf1)
+  
+  print(identical(rownames(nf1), colnames(d10x)))
+  d10x<- AddMetaData(d10x, nf1)
+  d10x
+  
+  nf.umi <- data.frame(nf=d10x$nuclear_fraction,
+                       umi=d10x$nCount_RNA)
+  
+  # Run identify_empty_drops
+  empty_drop <- identify_empty_drops(nf_umi=nf.umi)
+  empty_drop$individual<-d10x$individual
+  empty_drop_damagedcell <- identify_damaged_cells(empty_drop, verbose = FALSE, output_plots = F)
+  
+  head(empty_drop_damagedcell[[1]])
+  table(empty_drop_damagedcell[[1]]$cell_status)
+  
+  print(identical(rownames(empty_drop_damagedcell[[1]]), colnames(d10x)))
+  d10x<- AddMetaData(d10x, empty_drop_damagedcell[[1]])
+  d10x$nf<-NULL
+  d10x$umi<-NULL
+  d10x
+print(head(d10x))

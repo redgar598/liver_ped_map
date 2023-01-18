@@ -22,6 +22,7 @@ source("scripts/00_entropy_d10x.R")
 dataset_loc <- here("../../../projects/macparland/RE/PediatricAdult/ped_liver_map_raw")
 
 samples<-list.files(dataset_loc)
+samples<-samples[-grep("data_transfer",samples)]
 print(samples)
 
 #meta<-read.table(here("data/data_transfer_updated_jan16_2023.csv"), header=T, sep=",")
