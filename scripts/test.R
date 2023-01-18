@@ -26,7 +26,6 @@ source("scripts/00_pretty_plots.R")
 
 
 
-
 ## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
 # but not normalized or scaled
 d10x<-readRDS(file = here("data","d10x_adult_ped_raw.rds"))
@@ -52,15 +51,15 @@ d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNorm
 
 
 ## testing factor
+table(d10x$CellType_refined, d10x$AgeGroup)
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC")]<-"LSEC_nothep"
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil")]<-"Neutrophil_notDEFA"
 
+
 d10x$cell_age<-paste(d10x$CellType_refined, d10x$AgeGroup, sep = "_")
 Idents(d10x) <- "cell_age"
-
-table(d10x$CellType_refined, d10x$AgeGroup)
 
 
 #MAST (Finak et al., 2015), which fits a hurdle model to the expression of each gene,
@@ -89,50 +88,50 @@ d10x_ped<-subset(d10x, subset = AgeGroup == "Ped")
 ncol(d10x_ped)
 
 
-### paralize
-command_args <- commandArgs(trailingOnly = TRUE)
-cell_type_indx <- as.numeric(command_args[1])
-cell_type<-cell_types[cell_type_indx]
+cell_type<-"Neutrophil_notDEFA"
+
 
 samp_num=1000
 
 
 #DE_monte_carlo<-lapply(cell_types, function(cell_type){
-  
-  contrasts_celltype<-contrasts_celltype_age[grep(cell_type, contrasts_celltype_age)]
-  cell_type<-as.character(unique(d10x$CellType_refined)[grep(cell_type,unique(d10x$CellType_refined))])
-  
-  d10x_adult_celltype<-subset(d10x_adult, subset = CellType_refined == cell_type)
-  ncol(d10x_adult_celltype)
-  d10x_ped_celltype<-subset(d10x_ped, subset = CellType_refined == cell_type)
-  ncol(d10x_ped_celltype)
 
+contrasts_celltype<-contrasts_celltype_age[grep(cell_type, contrasts_celltype_age)]
+
+cell_type<-as.character(unique(d10x$CellType_refined)[grep(cell_type,unique(d10x$CellType_refined))])
+
+
+d10x_adult_celltype<-subset(d10x_adult, subset = CellType_refined == cell_type)
+ncol(d10x_adult_celltype)
+d10x_ped_celltype<-subset(d10x_ped, subset = CellType_refined == cell_type)
+ncol(d10x_ped_celltype)
+
+
+de_lists<-sapply(1:samp_num, function(x){
+  set.seed(x)
   
-  de_lists<-sapply(1:samp_num, function(x){
-    set.seed(x)
-    
-    ## make downsampled
-    if(ncol(d10x_adult_celltype)<ncol(d10x_ped_celltype)){
-      ped_cells_random <- d10x_ped_celltype[, sample(colnames(d10x_ped_celltype), size = ncol(d10x_adult_celltype), replace=F)]
-      d10_DE<-merge(d10x_adult_celltype, ped_cells_random)
-    }else{
-      adult_cells_random <- d10x_adult_celltype[, sample(colnames(d10x_adult_celltype), size = ncol(d10x_ped_celltype), replace=F)]
-      d10_DE<-merge(d10x_ped_celltype, adult_cells_random)}
-    
-    ## run DE 
-    de<-FindMarkers(d10_DE, ident.1 = contrasts_celltype[1], ident.2 = contrasts_celltype[2], test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
-    print(paste(contrasts_celltype[1],"vs", contrasts_celltype[2],":", nrow(de), sep=" "))
-    de$gene<-rownames(de)
-    rownames(de)<-NULL
-    de<-de[,c(6,1:5)]
-    de$cell.1<-contrasts_celltype[1]
-    de$cell.2<-contrasts_celltype[2]
-    
-    de[which(de$p_val_adj < 0.005 & abs(de$avg_log2FC) > 1),]$gene
-    })
+  ## make downsampled
+  if(ncol(d10x_adult_celltype)<ncol(d10x_ped_celltype)){
+    ped_cells_random <- d10x_ped_celltype[, sample(colnames(d10x_ped_celltype), size = ncol(d10x_adult_celltype), replace=F)]
+    d10_DE<-merge(d10x_adult_celltype, ped_cells_random)
+  }else{
+    adult_cells_random <- d10x_adult_celltype[, sample(colnames(d10x_adult_celltype), size = ncol(d10x_ped_celltype), replace=F)]
+    d10_DE<-merge(d10x_ped_celltype, adult_cells_random)}
   
-  sig_gene_count<-unlist(de_lists)
-  if(length(sig_gene_count)==0){NA}else{
+  ## run DE 
+  de<-FindMarkers(d10_DE, ident.1 = contrasts_celltype[1], ident.2 = contrasts_celltype[2], test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
+  print(paste(contrasts_celltype[1],"vs", contrasts_celltype[2],":", nrow(de), sep=" "))
+  de$gene<-rownames(de)
+  rownames(de)<-NULL
+  de<-de[,c(6,1:5)]
+  de$cell.1<-contrasts_celltype[1]
+  de$cell.2<-contrasts_celltype[2]
+  
+  de[which(de$p_val_adj < 0.005 & abs(de$avg_log2FC) > 1),]$gene
+})
+
+sig_gene_count<-unlist(de_lists)
+if(length(sig_gene_count)==0){NA}else{
   sig_gene_count<-as.data.frame(table(sig_gene_count))
   colnames(sig_gene_count)<-c("gene","sig_count")
   

@@ -15,6 +15,7 @@ library(cowplot)
 
 
 source("scripts/00_pretty_plots.R")
+source("scripts/00_entropy_d10x.R")
 
 
 dataset_loc <- here("../../../projects/macparland/RE/PediatricAdult")
@@ -706,7 +707,6 @@ myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size
 myeloid_cluster_umap
 save_plts(myeloid_cluster_umap, "myeloid_cluster_umap_labelled", w=7,h=5)
 
-source(here("R_functions/entropy_d10x.R"))
 plt_entropy_individual<-entropy_d10(d10x.combined_myeloid, "individual")
 entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_myeloid)
 save_plts(entropy_individual, "entropy_individual_myeloid", w=15,h=10)
@@ -765,7 +765,6 @@ bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.2
 bcell_cluster_umap
 save_plts(bcell_cluster_umap, "BCell_cluster_umap_labelled", w=6,h=4)
 
-source(here("R_functions/entropy_d10x.R"))
 plt_entropy_individual<-entropy_d10(d10x.combined_bcell, "individual")
 entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_bcell)
 save_plts(entropy_individual, "entropy_individual_bcell", w=15,h=10)
@@ -846,7 +845,6 @@ lapply(1:nrow(cell_rough),function(x){
 table(d10x.combined_NK_T@meta.data$CellType_rough)
 
 
-source(here("R_functions/entropy_d10x.R"))
 plt_entropy_individual<-entropy_d10(d10x.combined_NK_T, "individual")
 entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_NK_T)
 save_plts(entropy_individual, "entropy_individual_tcell", w=15,h=10)
@@ -907,8 +905,6 @@ save_plts(age_split, "age_roughCell_facet_rPCA_UMAP_refined", w=10,h=5)
 ##############
 ### entropy in clusters
 ##############
-source(here("R_functions/entropy_d10x.R"))
-
 plt_entropy_individual<-entropy_d10(d10x.combined, "individual")
 plt_entropy_age<-entropy_d10(d10x.combined, "AgeGroup")
 plt_entropy_chem<-entropy_d10(d10x.combined, "Chemistry")

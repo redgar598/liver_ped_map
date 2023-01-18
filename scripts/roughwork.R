@@ -1,3 +1,59 @@
+# install.packages("devtools")
+devtools::install_github("powellgenomicslab/DropletQC", build_vignettes = TRUE)
+
+#sudo apt install cmake
+install.packages("nloptr")
+
+devtools::install_github("powellgenomicslab/DropletQC", build_vignettes = TRUE)
+
+
+library(DropletQC)
+
+
+
+
+
+
+load(here("data","adult_ped_integrated_refinedlabels.rds"))
+d10x<-subset(d10x.combined, subset = individual %in% c("C96_caud3pr"))
+rm(d10x.combined)
+gc()
+
+
+nf1 <- nuclear_fraction_tags(
+  outs = "/media/redgar/Seagate Portable Drive/MacParland_Diana__C96_Frozen_Liver_220919_3pr_V3_1/outs",
+  tiles = 1, cores = 1, verbose = FALSE)
+head(nf1)
+
+                            nf_cell<-nf1
+                            rownames(nf_cell)<-paste(rownames(nf_cell), "_10", sep="")
+                            nf_cell<-nf_cell[which(rownames(nf_cell) %in% colnames(d10x)),]
+                            
+                            grep("AAACCCAGTGCGTCGT",d10x.combined$cell)
+
+#add nuclear fraction data
+nf_cell<-nf1[which(rownames(nf1) %in% colnames(d10x)),]
+nf_cell<-nf_cell[match(colnames(d10x), rownames(nf_cell)),]
+print(identical(rownames(nf_cell), colnames(d10x)))
+rownames(meta_cell_add)<-meta_cell_add$cell
+d10x<- AddMetaData(d10x, meta_cell_add)
+d10x
+
+
+
+# Run identify_empty_drops
+gbm.ed <- identify_empty_drops(nf_umi=gbm.nf.umi)
+head(gbm.ed)
+
+
+# Identify damaged cells
+gbm.ed.dc <- identify_damaged_cells(gbm.ed, verbose = FALSE, output_plots = TRUE)
+
+
+
+
+################################################################################################################################################
+
 ### Load libraries
 library(here)
 library(Seurat)
@@ -10,32 +66,33 @@ library(gtools)
 library(SoupX)
 library(colorspace)
 library(cowplot)
+library(DropletQC)
 
 
 
 
 source("scripts/00_pretty_plots.R")
+source("scripts/00_entropy_d10x.R")
 
-
-dataset_loc <- here("../../../projects/macparland/RE/PediatricAdult")
+#dataset_loc <- here("/media/redgar/Seagate Portable Drive/ped_liver_map_raw")
+dataset_loc <- here("../../../projects/macparland/RE/PediatricAdult/ped_liver_map_raw")
 
 samples<-list.files(dataset_loc)
-samples<-samples[-grep("meta",samples)]
 print(samples)
 
-#meta<-read.table(here("data/input_metadata.txt"), header=T)
-meta<-read.table(here(dataset_loc,"input_metadata.txt"), header=T)
-meta$Sample_ID[which(meta$Sample_ID=="C85_caud3pr")]<-"C85_caud5pr"
-
+#meta<-read.table(here("data/data_transfer_updated_jan16_2023.csv"), header=T, sep=",")
+meta<-read.table(here(dataset_loc,"data_transfer_updated_jan16_2023.csv"), header=T, sep=",")
 
 d10x.list <- sapply(1:length(samples), function(y){
-  print(file.path(dataset_loc,paste(samples[y], sep=""),"filtered_feature_bc_matrix"))
-  d10x <- Read10X(file.path(dataset_loc,paste(samples[y], sep=""),"filtered_feature_bc_matrix"))
-  colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),samples[y],sep="-")
+  caud<-meta$Sample_ID[which(meta$file == samples[y])]
+  print(caud)
+  print(file.path(dataset_loc,paste(samples[y],"/outs", sep=""),"filtered_feature_bc_matrix"))
+  d10x <- Read10X(file.path(dataset_loc,paste(samples[y],"/outs", sep=""),"filtered_feature_bc_matrix"))
+  colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),caud,sep="-")
   # print(dim(d10x))
   #' Initialize the Seurat object with the raw (non-normalized data).
   d10x<-CreateSeuratObject(counts = d10x, project = "ped_adult_map", min.cells = 0, min.features = 0)
-
+  
   ## SoupX needs clusters so quickly make clusters for each sample
   d10x    <- SCTransform(d10x, verbose = F)
   d10x    <- RunPCA(d10x, verbose = F)
@@ -43,10 +100,10 @@ d10x.list <- sapply(1:length(samples), function(y){
   d10x    <- FindNeighbors(d10x, dims = 1:30, verbose = F)
   d10x    <- FindClusters(d10x, verbose = T)
   meta_clusters    <- d10x@meta.data
-
-  sc = load10X(file.path(dataset_loc,paste(samples[y], sep="")))
+  
+  sc = load10X(file.path(dataset_loc,paste(samples[y],"/outs", sep="")))
   sc = setClusters(sc, setNames(meta_clusters$seurat_clusters, rownames(meta_clusters)))
-
+  
   ######
   ## Load data and estimate soup profile
   ######
@@ -56,16 +113,47 @@ d10x.list <- sapply(1:length(samples), function(y){
   print(head(sc$soupProfile[order(sc$soupProfile$est, decreasing = T), ], n = 20))
   # Clean the data
   sc = adjustCounts(sc)
-
+  
   d10x = CreateSeuratObject(sc)
 
+  
   #add meta data to each seurat object
-  meta_cell<-data.frame(cell=colnames(d10x), individual=samples[y])
+  meta_cell<-data.frame(cell=colnames(d10x), individual=caud)
   meta_cell_add<-merge(meta_cell, meta, by.x="individual", by.y="Sample_ID")
   meta_cell_add<-meta_cell_add[match(colnames(d10x), meta_cell_add$cell),]
   print(identical(meta_cell_add$cell, colnames(d10x)))
   rownames(meta_cell_add)<-meta_cell_add$cell
   d10x<- AddMetaData(d10x, meta_cell_add)
+
+  
+  
+  ######
+  ## dropletQC
+  ######
+  nf1 <- nuclear_fraction_tags(
+    outs = file.path(dataset_loc,paste(samples[y],"/outs", sep="")),
+    tiles = 1, cores = 1, verbose = FALSE)
+  head(nf1)
+  
+  print(identical(rownames(nf1), colnames(d10x)))
+  d10x<- AddMetaData(d10x, nf1)
+  d10x
+ 
+  nf.umi <- data.frame(nf=d10x$nuclear_fraction,
+                           umi=d10x$nCount_RNA)
+  
+  # Run identify_empty_drops
+  empty_drop <- identify_empty_drops(nf_umi=nf.umi)
+  empty_drop$individual<-d10x$individual
+  empty_drop_damagedcell <- identify_damaged_cells(empty_drop, verbose = FALSE, output_plots = F)
+  
+  head(empty_drop_damagedcell[[1]])
+  table(empty_drop_damagedcell[[1]]$cell_status)
+  
+  print(identical(rownames(empty_drop_damagedcell[[1]]), colnames(d10x)))
+  d10x<- AddMetaData(d10x, empty_drop_damagedcell[[1]])
+  d10x$nf<-NULL
+  d10x$umi<-NULL
   d10x
 })
 
@@ -147,7 +235,7 @@ save_plts(MT_plt_individual, "percentMT_plt_individual", w=8,h=4)
 d10x.list.raw<-d10x.list
 
 invisible(lapply(1:length(d10x.list), function(x){
-  d10x.list[[x]] <<- subset(d10x.list[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 25)
+  d10x.list[[x]] <<- subset(d10x.list[[x]], subset = nFeature_RNA > 500 & nFeature_RNA < 6000 & percent.mt < 40)
 }))
 
 d10x.list
@@ -367,10 +455,10 @@ DotPlot(d10x.combined, features = c( "PTPRC", "CD68", "MARCO","CD5L","VSIG4", "M
 
 ## NK/T/B cells
 DotPlot(d10x.combined, features = c("PTPRC", "CD2", "CD3E", "IL7R", "KLRB1",
-                                     "NKG7", "GZMA", "GZMB", "GZMK" , "PRF1","CD4", "CD8A","CD247", "TRAC","TRDC", "TRGC1", "TRGC2", "TRBC1",
-                                     "TRBC2", "S1PR1", "CD28", "CD27", "SELL", "CCR7", "CXCR4","CCR4","FAS",
-                                     "FOXP3", "CTLA4", "LAG3", "TNFRSF4","TNFRSF18", "ICOS" ,"CD69", "CD79A", "CD79B", "IGHG1", "MS4A1",
-                                     "LTB", "CD52", "IGHD", "CD19", "ID3"), cols=c("blue", "red")) + RotatedAxis()
+                                    "NKG7", "GZMA", "GZMB", "GZMK" , "PRF1","CD4", "CD8A","CD247", "TRAC","TRDC", "TRGC1", "TRGC2", "TRBC1",
+                                    "TRBC2", "S1PR1", "CD28", "CD27", "SELL", "CCR7", "CXCR4","CCR4","FAS",
+                                    "FOXP3", "CTLA4", "LAG3", "TNFRSF4","TNFRSF18", "ICOS" ,"CD69", "CD79A", "CD79B", "IGHG1", "MS4A1",
+                                    "LTB", "CD52", "IGHD", "CD19", "ID3"), cols=c("blue", "red")) + RotatedAxis()
 
 # LEC and LSEC
 DotPlot(d10x.combined, features = c("CALCRL", "VWF", "RAMP2", "STAB2", "LYVE1", "PECAM1", "ENG", "FCGR2B", "F8", "SPARCL1", "ID1", "SOX18", "CD32B", "ID3"), cols=c("blue", "red")) + RotatedAxis()
@@ -379,9 +467,9 @@ DotPlot(d10x.combined, features = c("CALCRL", "VWF", "RAMP2", "STAB2", "LYVE1", 
 #Hepatocytes
 ######
 DotPlot(d10x.combined, features=c("ALB", "HAMP", "ARG1", "PCK1", "AFP", "BCHE", "HAL", "SCD", "CPS1", "CYP3A4",
-                                   "ELF3", "CRP", "GSTA2", "AKR1C1", "MGST1", "CYP3A5", "ALDH1A1", "ADH1A", "CYP2E1",
-                                   "GLS2", "SDS", "GLUL", "AKR1D1", "HPR",
-                                   "HMGCS1", "IGSF23", "ACSS2", "G6PC", "ID3"),
+                                  "ELF3", "CRP", "GSTA2", "AKR1C1", "MGST1", "CYP3A5", "ALDH1A1", "ADH1A", "CYP2E1",
+                                  "GLS2", "SDS", "GLUL", "AKR1D1", "HPR",
+                                  "HMGCS1", "IGSF23", "ACSS2", "G6PC", "ID3"),
         cols=c("blue", "red")) + RotatedAxis()
 
 
@@ -397,8 +485,8 @@ DotPlot(d10x.combined,features = c( "EPCAM", "SOX9", "KRT1", "KRT7", "ANXA4", "K
 DotPlot(d10x.combined,features = c( "RBP1", "LRAT", "PDE3B", "ACTA2", "AOX1", "PDE3D", "PDE4D", "SPARC", "TAGLN", "COL1A1", "COL1A2", "COL3A1", "TIMP1", "DCN", "MYL9", "TPM2", "MEG3", "BGN", "IGFBP7", "IGFBP3", "CYR61", "IGFBP6", "CCL2", "COLEC11", "CTGF", "HGF", "ID3"), cols=c("blue", "red")) + RotatedAxis()
 FeaturePlot(d10x.combined, reduction = "umap", features = c("PTPRC", "CD3D", "CD68", "CD79A","TRDC", "NKG7", "KRT7", "CALCRL", "ACTA2", "MS4A1", "CYP3A4", "SCD", "FCN2", "CD4", "CD8A", "FCER1A", "MARCO", "LYZ", "VSIG4", "FOLR2", "ID3"), ncol = 4)
 key_markers<-FeaturePlot(d10x.combined, reduction = "umap", features = c("EPCAM", "SOX9", "SELL", "PTPRC",
-                                                            "TRDC", "NKG7", "CALCRL", "VWF",
-                                                            "MARCO", "LYZ","COL1A1","IGFBP3"), ncol = 4)
+                                                                         "TRDC", "NKG7", "CALCRL", "VWF",
+                                                                         "MARCO", "LYZ","COL1A1","IGFBP3"), ncol = 4)
 save_plts(key_markers, "markers_rPCA_UMAP", w=25,h=20)
 
 
@@ -452,12 +540,12 @@ cluster_marker_mean<-function(gene_list, type){
 }
 
 cell_rough<-cbind(cluster_marker_mean(Macrophage_genes, "Myeloid"),
-      cluster_marker_mean(NK_T_genes, "NK_T"),
-      cluster_marker_mean(LEC_genes, "LEC"),
-      cluster_marker_mean(Hepatocyte_genes, "Hepatocyte"),
-      cluster_marker_mean(Cholangiocytes_genes, "Cholangiocytes"),
-      cluster_marker_mean(HSCs_genes, "HSC"),
-      cluster_marker_mean(B_genes, "B_cell"))
+                  cluster_marker_mean(NK_T_genes, "NK_T"),
+                  cluster_marker_mean(LEC_genes, "LEC"),
+                  cluster_marker_mean(Hepatocyte_genes, "Hepatocyte"),
+                  cluster_marker_mean(Cholangiocytes_genes, "Cholangiocytes"),
+                  cluster_marker_mean(HSCs_genes, "HSC"),
+                  cluster_marker_mean(B_genes, "B_cell"))
 
 
 cell_rough$CellType_rough<-sapply(1:nrow(cell_rough), function(x) {
@@ -491,9 +579,9 @@ d10x.combined<- AddMetaData(d10x.combined, plt_summary)
 d10x.combined
 table(d10x.combined$CellType_rough)
 
-      
 
-                
+
+
 ##############
 ## Save integrated to look local
 ##############
@@ -602,8 +690,8 @@ d10x.combined@meta.data %>%
 ##############
 ## diff in ped (none in ped?)
 hep_age<-FeaturePlot(d10x.combined, reduction = "umap", features = c("ALB", "CPS1", "CYP3A4",
-                                                            "MGST1", "CYP2E1"),
-            ncol = 2, split.by='AgeGroup')
+                                                                     "MGST1", "CYP2E1"),
+                     ncol = 2, split.by='AgeGroup')
 save_plts(hep_age, "hep_markers_age_rPCA_UMAP", w=6,h=14)
 
 ##############
@@ -706,7 +794,6 @@ myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size
 myeloid_cluster_umap
 save_plts(myeloid_cluster_umap, "myeloid_cluster_umap_labelled", w=7,h=5)
 
-source(here("R_functions/entropy_d10x.R"))
 plt_entropy_individual<-entropy_d10(d10x.combined_myeloid, "individual")
 entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_myeloid)
 save_plts(entropy_individual, "entropy_individual_myeloid", w=15,h=10)
@@ -765,7 +852,6 @@ bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.2
 bcell_cluster_umap
 save_plts(bcell_cluster_umap, "BCell_cluster_umap_labelled", w=6,h=4)
 
-source(here("R_functions/entropy_d10x.R"))
 plt_entropy_individual<-entropy_d10(d10x.combined_bcell, "individual")
 entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_bcell)
 save_plts(entropy_individual, "entropy_individual_bcell", w=15,h=10)
@@ -846,7 +932,6 @@ lapply(1:nrow(cell_rough),function(x){
 table(d10x.combined_NK_T@meta.data$CellType_rough)
 
 
-source(here("R_functions/entropy_d10x.R"))
 plt_entropy_individual<-entropy_d10(d10x.combined_NK_T, "individual")
 entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_NK_T)
 save_plts(entropy_individual, "entropy_individual_tcell", w=15,h=10)
@@ -866,10 +951,10 @@ d10x.combined@meta.data$CellType_refined<-sapply(1:nrow(d10x.combined@meta.data)
   }else{
     if(rownames(d10x.combined@meta.data)[x]%in%rownames(d10x.combined_bcell@meta.data)){
       d10x.combined_bcell@meta.data$CellType_rough[which(rownames(d10x.combined_bcell@meta.data)==rownames(d10x.combined@meta.data)[x])]
-  }else{
-    if(rownames(d10x.combined@meta.data)[x]%in%rownames(d10x.combined_NK_T@meta.data)){
-      d10x.combined_NK_T@meta.data$CellType_rough[which(rownames(d10x.combined_NK_T@meta.data)==rownames(d10x.combined@meta.data)[x])]
-    }else{d10x.combined@meta.data$CellType_rough[x]}}}})
+    }else{
+      if(rownames(d10x.combined@meta.data)[x]%in%rownames(d10x.combined_NK_T@meta.data)){
+        d10x.combined_NK_T@meta.data$CellType_rough[which(rownames(d10x.combined_NK_T@meta.data)==rownames(d10x.combined@meta.data)[x])]
+      }else{d10x.combined@meta.data$CellType_rough[x]}}}})
 
 d10x.combined@meta.data$CellType_refined<-as.factor(d10x.combined@meta.data$CellType_refined)
 levels(d10x.combined@meta.data$CellType_refined)<-c("B-cells\n(Hepatocyte Like)","CD3+ T-cells","Cholangiocytes",
@@ -907,8 +992,6 @@ save_plts(age_split, "age_roughCell_facet_rPCA_UMAP_refined", w=10,h=5)
 ##############
 ### entropy in clusters
 ##############
-source(here("R_functions/entropy_d10x.R"))
-
 plt_entropy_individual<-entropy_d10(d10x.combined, "individual")
 plt_entropy_age<-entropy_d10(d10x.combined, "AgeGroup")
 plt_entropy_chem<-entropy_d10(d10x.combined, "Chemistry")

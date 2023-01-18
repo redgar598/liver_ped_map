@@ -10,7 +10,7 @@ library(gtools)
 library(colorspace)
 
 
-source("R_functions/pretty_plots.R")
+source("scripts/00_pretty_plots.R")
 
 
 load(here("data","adult_ped_integrated_refinedlabels.rds"))
