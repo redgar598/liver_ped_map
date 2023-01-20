@@ -87,9 +87,9 @@ done
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/
 scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_jan16_2023.csv t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw
 
-scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sai__C98_3pr_V3_1 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
-
-
+scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Diana__SingleCell_C92_10Feb22_3pr_V3_1 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sonya__C70_Caudate_5pr t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/McGilvray_Sonya__C64_Enriched_5pr t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 
 
 ## general file moving moving files

@@ -58,10 +58,8 @@ d10x.list <- sapply(1:length(samples), function(y){
   print(head(sc$soupProfile[order(sc$soupProfile$est, decreasing = T), ], n = 20))
   # Clean the data
   sc = adjustCounts(sc)
-  
   d10x = CreateSeuratObject(sc)
 
-  
   #add meta data to each seurat object
   meta_cell<-data.frame(cell=colnames(d10x), individual=caud)
   meta_cell_add<-merge(meta_cell, meta, by.x="individual", by.y="Sample_ID")
@@ -70,36 +68,40 @@ d10x.list <- sapply(1:length(samples), function(y){
   rownames(meta_cell_add)<-meta_cell_add$cell
   d10x<- AddMetaData(d10x, meta_cell_add)
 
-  
-  
   ######
   ## dropletQC
   ######
-  nf1 <- nuclear_fraction_tags(
-    outs = file.path(dataset_loc,paste(samples[y],"/outs", sep="")),
-    tiles = 1, cores = 1, verbose = FALSE)
-  head(nf1)
+  if(file.exists(file.path(dataset_loc,paste(samples[y],"/outs", sep=""),"possorted_genome_bam.bam.bai"))){
+    nf1 <- nuclear_fraction_tags(
+      outs = file.path(dataset_loc,paste(samples[y],"/outs", sep="")),
+      tiles = 1, cores = 1, verbose = FALSE)
+    head(nf1)
   
-  print(identical(rownames(nf1), colnames(d10x)))
-  d10x<- AddMetaData(d10x, nf1)
-  d10x
- 
-  nf.umi <- data.frame(nf=d10x$nuclear_fraction,
-                           umi=d10x$nCount_RNA)
-  
-  # Run identify_empty_drops
-  empty_drop <- identify_empty_drops(nf_umi=nf.umi)
-  empty_drop$individual<-d10x$individual
-  empty_drop_damagedcell <- identify_damaged_cells(empty_drop, verbose = FALSE, output_plots = F)
-  
-  head(empty_drop_damagedcell[[1]])
-  table(empty_drop_damagedcell[[1]]$cell_status)
-  
-  print(identical(rownames(empty_drop_damagedcell[[1]]), colnames(d10x)))
-  d10x<- AddMetaData(d10x, empty_drop_damagedcell[[1]])
-  d10x$nf<-NULL
-  d10x$umi<-NULL
-  d10x
+    print(identical(rownames(nf1), colnames(d10x)))
+    d10x<- AddMetaData(d10x, nf1)
+    d10x
+   
+    nf.umi <- data.frame(nf=d10x$nuclear_fraction,
+                             umi=d10x$nCount_RNA)
+    
+    # Run identify_empty_drops
+    empty_drop <- identify_empty_drops(nf_umi=nf.umi)
+    empty_drop$individual<-d10x$individual
+    empty_drop_damagedcell <- identify_damaged_cells(empty_drop, verbose = FALSE, output_plots = F)
+    
+    head(empty_drop_damagedcell[[1]])
+    table(empty_drop_damagedcell[[1]]$cell_status)
+    
+    print(identical(rownames(empty_drop_damagedcell[[1]]), colnames(d10x)))
+    d10x<- AddMetaData(d10x, empty_drop_damagedcell[[1]])
+    d10x$nf<-NULL
+    d10x$umi<-NULL
+    print(d10x)
+    d10x}else{
+      d10x$nuclear_fraction<-NA
+      d10x$cell_status<-NA
+      print(d10x)
+      d10x}
 })
 
 d10x.list
