@@ -53,7 +53,7 @@ d10x.list <- sapply(1:length(samples), function(y){
   ## Load data and estimate soup profile
   ######
   # Estimate rho
-  sc = autoEstCont(sc)
+  sc = autoEstCont(sc, forceAccept=TRUE)
   #Genes with highest expression in background. These are often enriched for ribosomal proteins.
   print(head(sc$soupProfile[order(sc$soupProfile$est, decreasing = T), ], n = 20))
   # Clean the data
@@ -287,9 +287,11 @@ save_plts(SCT_cluster_umap, "SCT_cluster_umap", w=6,h=4)
 SCT_cluster_tsne<-DimPlot(d10x, reduction = "tsne", pt.size=0.25, label=T)
 save_plts(SCT_cluster_tsne, "SCT_cluster_tsne", w=6,h=4)
 
-
 cell_pca_SCT<-DimPlot(d10x, reduction="pca", group.by="Phase")
 save_plts(cell_pca_SCT, "cell_PCA_afterSCT", w=6,h=4)
+
+drop_pca_SCT<-DimPlot(d10x, reduction="pca", group.by="cell_status")
+save_plts(drop_pca_SCT, "cell_PCA_afterSCT_DropletQC", w=6,h=4)
 
 nFeature_UMAP_SCT<-FeaturePlot(d10x, features = "nFeature_RNA",reduction = "pca", min.cutoff = "q9", pt.size=1)
 save_plts(nFeature_UMAP_SCT, "nfeature_UMAP_afterSCT", w=6,h=4)
