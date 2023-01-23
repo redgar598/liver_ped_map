@@ -152,7 +152,7 @@ qc_plts<-ggplot(plt_QC_data, aes(nCount_RNA,nFeature_RNA,colour=percent.mt)) +
 save_plts(qc_plts, "intital_QC_plts", w=6,h=4)
 
 qc_plts_chem<-ggplot(plt_QC_data, aes(nCount_RNA,nFeature_RNA,colour=percent.mt)) +
-  geom_point() + facet_wrap(~Chemistry)+
+  geom_point() + facet_wrap(~chemistry)+
   scale_color_gradientn(colors=c("black","blue","green2","red","yellow"),name="Percent\nMitochondrial") +
   geom_hline(yintercept = 500) + xlab("Number of Total Molecules\n(nCount) ")+ylab("Number of Unique Genes\n(nFeature)")+
   geom_hline(yintercept = 6000) +theme_bw()+th
@@ -174,6 +174,18 @@ MT_plt_individual<-ggplot(plt_QC_data,aes(percent.mt)) + geom_histogram(binwidth
   geom_vline(xintercept = 25)+ theme_bw()+xlab("Percent Mitochondrial")+th
 save_plts(MT_plt_individual, "percentMT_plt_individual", w=8,h=4)
 
+
+
+nf_plts<-ggplot(plt_QC_data, aes(nuclear_fraction,log10(nCount_RNA),colour=cell_status)) +
+  geom_point() +  ylab("Number of Total Molecules\n(log 10 nCount) ")+xlab("Nuclear Fraction")+theme_bw()+th+
+  facet_wrap(~individual)
+nf_plts
+save_plts(nf_plts, "nuclear_fraction", w=6,h=4)
+
+ggplot(plt_QC_data, aes(nuclear_fraction,percent.mt,colour=cell_status)) +
+  geom_point() +  ylab("Number of Total Molecules\n(log 10 nCount) ")+xlab("Nuclear Fraction")+theme_bw()+th+
+  facet_wrap(~individual)+
+  scale_color_manual(values=c("grey","red","cornflowerblue"),name="NUclear\nFraction") 
 
 
 #'We filter cells that have unique feature counts over 6,000 or less than 500
@@ -284,7 +296,7 @@ save_plts(nFeature_UMAP_SCT, "nfeature_UMAP_afterSCT", w=6,h=4)
 
 
 
-chem_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "Chemistry", pt.size=0.25)
+chem_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "chemistry", pt.size=0.25)
 save_plts(chem_umap_sct, "chem_SCT_umap", w=6,h=4)
 
 age_umap_sct<-DimPlot(d10x, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)+fillscale_age
@@ -318,7 +330,7 @@ d10x <- merge(d10x.list[[1]], y= d10x.list[2:length(d10x.list)], merge.data=TRUE
 d10x
 
 # split the dataset into a list of two seurat objects (3' and 5')
-d10x.list.chem <- SplitObject(d10x, split.by = "Chemistry")
+d10x.list.chem <- SplitObject(d10x, split.by = "chemistry")
 
 # normalize, identify variable features and score cell cycle for each dataset independently
 s.genes <- cc.genes$s.genes
@@ -370,7 +382,7 @@ save_plts(SCT_cluster_umap, "rPCA_cluster_umap", w=6,h=4)
 SCT_cluster_tsne<-DimPlot(d10x.combined, reduction = "tsne", pt.size=0.25, label=T)
 save_plts(SCT_cluster_tsne, "rPCA_cluster_tsne", w=6,h=4)
 
-chem_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "Chemistry", pt.size=0.25)
+chem_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "chemistry", pt.size=0.25)
 save_plts(chem_umap_sct, "chem_rPCA_umap", w=6,h=4)
 
 age_umap_sct<-DimPlot(d10x.combined, reduction = "umap", group.by = "AgeGroup", pt.size=0.25)+fillscale_age
@@ -941,7 +953,7 @@ save_plts(age_split, "age_roughCell_facet_rPCA_UMAP_refined", w=10,h=5)
 ##############
 plt_entropy_individual<-entropy_d10(d10x.combined, "individual")
 plt_entropy_age<-entropy_d10(d10x.combined, "AgeGroup")
-plt_entropy_chem<-entropy_d10(d10x.combined, "Chemistry")
+plt_entropy_chem<-entropy_d10(d10x.combined, "chemistry")
 
 entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined)
 save_plts(entropy_individual, "entropy_individual_allclusters", w=15,h=10)
@@ -949,7 +961,7 @@ save_plts(entropy_individual, "entropy_individual_allclusters", w=15,h=10)
 entropy_age<-entropy_plt(plt_entropy_age, "AgeGroup", d10x.combined)
 save_plts(entropy_age, "entropy_age_allclusters", w=15,h=10)
 
-entropy_chem<-entropy_plt(plt_entropy_chem, "Chemistry", d10x.combined)
+entropy_chem<-entropy_plt(plt_entropy_chem, "chemistry", d10x.combined)
 save_plts(entropy_chem, "entropy_chemistry_allclusters", w=15,h=10)
 
 
