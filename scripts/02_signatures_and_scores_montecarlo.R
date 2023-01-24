@@ -193,13 +193,13 @@ myeloid_pval_montecarlo<-do.call(rbind, lapply(1:samp_num, function(x){
   set.seed(x)
   plt_myeloid_ped_random<-plt_myeloid_ped[sample(ped_cellcount, adult_cellcount),]
 
-supressive<-t.test(plt_myeloid_ped_random$myeloid_immune_supressive_score1, plt_myeloid_adult$myeloid_immune_supressive_score1)$p.value
-inflammatory<-t.test(plt_myeloid_ped_random$inflammatory_macs_score1, plt_myeloid_adult$inflammatory_macs_score1)$p.value
-recruit<-t.test(plt_myeloid_ped_random$recently_recruited_myeloid1, plt_myeloid_adult$recently_recruited_myeloid1)$p.value
-kuffer<-t.test(plt_myeloid_ped_random$kuffer_like_score1, plt_myeloid_adult$kuffer_like_score1)$p.value
-
-data.frame(supressive=supressive, inflammatory=inflammatory, recruit=recruit ,kuffer=kuffer)
-}))
+  supressive<-t.test(plt_myeloid_ped_random$myeloid_immune_supressive_score1, plt_myeloid_adult$myeloid_immune_supressive_score1)$p.value
+  inflammatory<-t.test(plt_myeloid_ped_random$inflammatory_macs_score1, plt_myeloid_adult$inflammatory_macs_score1)$p.value
+  recruit<-t.test(plt_myeloid_ped_random$recently_recruited_myeloid1, plt_myeloid_adult$recently_recruited_myeloid1)$p.value
+  kuffer<-t.test(plt_myeloid_ped_random$kuffer_like_score1, plt_myeloid_adult$kuffer_like_score1)$p.value
+  
+  data.frame(supressive=supressive, inflammatory=inflammatory, recruit=recruit ,kuffer=kuffer)
+  }))
 
 print(paste("Comparing the myeloid immune supressive score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
             ") in ", samp_num, " random samples at a p value of ",
