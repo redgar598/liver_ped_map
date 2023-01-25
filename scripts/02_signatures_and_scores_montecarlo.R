@@ -657,3 +657,36 @@ ggplot(plt_KCRR, aes(Age,kuffer_like_score1))+geom_point()+
   theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
   fillscale_age+stat_smooth(method="lm")+
   xlab("Age Group")+ylab("Kuffer-like Signature Score")
+
+
+
+
+##############
+## KC/RR ratio in each individual
+##############
+load(here("data","adult_ped_integrated_refinedlabels.rds"))
+
+table(d10x.combined$CellType_refined)
+
+myeloid_cells<-d10x.combined@meta.data[which(d10x.combined@meta.data$CellType_refined%in%c("KC Like","RR Myeloid")),]
+myeloid_cells$CellType_refined<-as.character(myeloid_cells$CellType_refined)
+
+sum_df<-as.data.frame(tapply(myeloid_cells$cell, list(myeloid_cells$individual, myeloid_cells$CellType_refined), length))
+sum_df$individual<-rownames(sum_df)
+sum_df$KC_RR_ratio<-sum_df$`KC Like`/sum_df$`RR Myeloid`
+
+#meta<-read.table(here("data/data_transfer_updated_jan16_2023.csv"), header=T, sep=",")
+meta<-read.table(here(dataset_loc,"data_transfer_updated_jan16_2023.csv"), header=T, sep=",")
+
+sum_df<-merge(sum_df, meta,by.x="individual", by.y="Sample_ID")
+
+t.test(sum_df$KC_RR_ratio~sum_df$AgeGroup)
+
+#myeloid_kuffer_box<-
+ggplot(sum_df, aes(AgeGroup,KC_RR_ratio))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.2,aes(fill=AgeGroup))+geom_jitter(aes(fill=AgeGroup), shape=21, width=0.1)+
+  theme_bw()+th+fillscale_age+xlab("Age Group")+ylab("KC:RR Ratio")+
+  geom_signif(comparisons = c("Adult","Ped"), color="grey50")
+
+
+#save_plts(myeloid_kuffer_box, "kuffer_box_myeloid", w=4,h=4)
