@@ -452,31 +452,31 @@ source("scripts/00_entropy_d10x.R")
 #' 
 #' 
 #' 
-#' #################
-#' ## Rough annotation
-#' ################# 
-#' Macrophage_genes<-c( "PTPRC", "CD68", "MARCO","CD5L","VSIG4", "MAF", "LYZ", "CSTA", "S100A8", "S10049",
-#'                      "CD14", "CD74", "GPBAR1", "ID3")
-#' 
-#' B_genes<-c("POU2F2","FCER2","MS4A1","LTB","CD37","CD79B","IGLC2","IGHG1","IGKC", "CD19")
-#' NK_T_genes<-c("CD3D","TRDC","SELL","IL7R","CCR7","S100A4","CD8A","GNLY","NKG7")
-#' 
-#' 
-#' LEC_genes<-c("CALCRL", "VWF", "RAMP2", "STAB2", "LYVE1", "PECAM1", "ENG", "FCGR2B", "F8", "SPARCL1",
-#'              "ID1", "SOX18", "CD32B", "ID3")
-#' Hepatocyte_genes<-c("ALB", "HAMP", "ARG1", "PCK1", "AFP", "BCHE", "HAL", "SCD", "CPS1", "CYP3A4",
-#'                     "ELF3", "CRP", "GSTA2", "AKR1C1", "MGST1", "CYP3A5", "ALDH1A1", "ADH1A", "CYP2E1",
-#'                     "GLS2", "SDS", "GLUL", "AKR1D1", "HPR",
-#'                     "HMGCS1", "IGSF23", "ACSS2", "G6PC", "ID3")
-#' Cholangiocytes_genes<-c( "EPCAM", "SOX9", "KRT1", "KRT7", "ANXA4", "KRT18", "ID3")
-#' 
-#' HSCs_genes<-c( "RBP1", "LRAT", "PDE3B", "ACTA2", "AOX1", "PDE3D", "PDE4D", "SPARC", "TAGLN", "COL1A1", "COL1A2", "COL3A1",
-#'                "TIMP1", "DCN", "MYL9", "TPM2", "MEG3", "BGN", "IGFBP7", "IGFBP3", "CYR61", "IGFBP6", "CCL2", "COLEC11",
-#'                "CTGF", "HGF", "ID3")
-#' 
-#' T_genes<-c("CD3D","IL7R","CD8A","IL32")
-#' NK_genes<-c("NKG7","CD7")
-#' gd_genes<-c("GNLY")
+#################
+## Rough annotation
+#################
+Macrophage_genes<-c( "PTPRC", "CD68", "MARCO","CD5L","VSIG4", "MAF", "LYZ", "CSTA", "S100A8", "S10049",
+                     "CD14", "CD74", "GPBAR1", "ID3")
+
+B_genes<-c("POU2F2","FCER2","MS4A1","LTB","CD37","CD79B","IGLC2","IGHG1","IGKC", "CD19")
+NK_T_genes<-c("CD3D","TRDC","SELL","IL7R","CCR7","S100A4","CD8A","GNLY","NKG7")
+
+
+LEC_genes<-c("CALCRL", "VWF", "RAMP2", "STAB2", "LYVE1", "PECAM1", "ENG", "FCGR2B", "F8", "SPARCL1",
+             "ID1", "SOX18", "CD32B", "ID3")
+Hepatocyte_genes<-c("ALB", "HAMP", "ARG1", "PCK1", "AFP", "BCHE", "HAL", "SCD", "CPS1", "CYP3A4",
+                    "ELF3", "CRP", "GSTA2", "AKR1C1", "MGST1", "CYP3A5", "ALDH1A1", "ADH1A", "CYP2E1",
+                    "GLS2", "SDS", "GLUL", "AKR1D1", "HPR",
+                    "HMGCS1", "IGSF23", "ACSS2", "G6PC", "ID3")
+Cholangiocytes_genes<-c( "EPCAM", "SOX9", "KRT1", "KRT7", "ANXA4", "KRT18", "ID3")
+
+HSCs_genes<-c( "RBP1", "LRAT", "PDE3B", "ACTA2", "AOX1", "PDE3D", "PDE4D", "SPARC", "TAGLN", "COL1A1", "COL1A2", "COL3A1",
+               "TIMP1", "DCN", "MYL9", "TPM2", "MEG3", "BGN", "IGFBP7", "IGFBP3", "CYR61", "IGFBP6", "CCL2", "COLEC11",
+               "CTGF", "HGF", "ID3")
+
+T_genes<-c("CD3D","IL7R","CD8A","IL32")
+NK_genes<-c("NKG7","CD7")
+gd_genes<-c("GNLY")
 #' 
 #' genes<-unique(c(Macrophage_genes, NK_T_genes, B_genes,LEC_genes,Hepatocyte_genes,Cholangiocytes_genes,HSCs_genes))
 #' 
