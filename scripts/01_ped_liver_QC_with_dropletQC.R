@@ -57,12 +57,26 @@ d10x.list <- sapply(1:length(samples), function(y){
   #Genes with highest expression in background. These are often enriched for ribosomal proteins.
   print(head(sc$soupProfile[order(sc$soupProfile$est, decreasing = T), ], n = 20))
   # Clean the data
-  sc = adjustCounts(sc)
-  d10x = CreateSeuratObject(sc)
+  out = adjustCounts(sc)
+  
+  ## Save a metric of soupness (ALB change after soupX)
+  DR = sc$metaData[,sc$DR]
+  df = DR
+  old = colSums(sc$toc["ALB",rownames(df),drop=FALSE])
+  new = colSums(out["ALB",rownames(df),drop=FALSE])
+  relChange = (old-new)/old
+  df$old = old
+  df$new = new
+  df$relALBChange=relChange
+  df$cell<-rownames(df)
 
+  ## make seurat object of adjusted counts
+  d10x = CreateSeuratObject(out)
+  
   #add meta data to each seurat object
   meta_cell<-data.frame(cell=colnames(d10x), individual=caud)
   meta_cell_add<-merge(meta_cell, meta, by.x="individual", by.y="Sample_ID")
+  meta_cell_add<-merge(meta_cell_add, df[,c("cell","relALBChange")], by="cell")
   meta_cell_add<-meta_cell_add[match(colnames(d10x), meta_cell_add$cell),]
   print(identical(meta_cell_add$cell, colnames(d10x)))
   rownames(meta_cell_add)<-meta_cell_add$cell
