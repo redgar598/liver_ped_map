@@ -38,7 +38,7 @@ d10x<-readRDS(file = here("data","d10x_adult_ped_raw.rds"))
 ######
 ## add cell type labels
 ######
-load(here("data","adult_ped_cellRough.rds"))
+load(here("data","adult_ped_cellRefined_withDropletQC.rds"))
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
@@ -113,7 +113,7 @@ rm(d10x)
 gc()
 
 ### load integrate for UMAP etc
-load(here("data","adult_ped_integrated_refinedlabels.rds"))
+load(here("data","adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 score_data<-score_data[match(rownames(d10x.combined@meta.data),rownames(score_data)),]
 identical(rownames(d10x.combined@meta.data),rownames(score_data))
 d10x.combined <- AddMetaData(d10x.combined, metadata = score_data)
@@ -191,28 +191,28 @@ samp_num<-10000
 pval<-0.05
 myeloid_pval_montecarlo<-do.call(rbind, lapply(1:samp_num, function(x){
   set.seed(x)
-  plt_myeloid_ped_random<-plt_myeloid_ped[sample(ped_cellcount, adult_cellcount),]
+  plt_myeloid_adult_random<-plt_myeloid_adult[sample(adult_cellcount,ped_cellcount),]
 
-  supressive<-t.test(plt_myeloid_ped_random$myeloid_immune_supressive_score1, plt_myeloid_adult$myeloid_immune_supressive_score1)$p.value
-  inflammatory<-t.test(plt_myeloid_ped_random$inflammatory_macs_score1, plt_myeloid_adult$inflammatory_macs_score1)$p.value
-  recruit<-t.test(plt_myeloid_ped_random$recently_recruited_myeloid1, plt_myeloid_adult$recently_recruited_myeloid1)$p.value
-  kuffer<-t.test(plt_myeloid_ped_random$kuffer_like_score1, plt_myeloid_adult$kuffer_like_score1)$p.value
+  supressive<-t.test(plt_myeloid_adult_random$myeloid_immune_supressive_score1, plt_myeloid_ped$myeloid_immune_supressive_score1)$p.value
+  inflammatory<-t.test(plt_myeloid_adult_random$inflammatory_macs_score1, plt_myeloid_ped$inflammatory_macs_score1)$p.value
+  recruit<-t.test(plt_myeloid_adult_random$recently_recruited_myeloid1, plt_myeloid_ped$recently_recruited_myeloid1)$p.value
+  kuffer<-t.test(plt_myeloid_adult_random$kuffer_like_score1, plt_myeloid_ped$kuffer_like_score1)$p.value
   
   data.frame(supressive=supressive, inflammatory=inflammatory, recruit=recruit ,kuffer=kuffer)
   }))
 
-print(paste("Comparing the myeloid immune supressive score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
-            ") in ", samp_num, " random samples at a p value of ",
-            round((length(myeloid_pval_montecarlo$supressive[which(myeloid_pval_montecarlo$supressive>pval)])+1)/(samp_num+1), 3), sep=""))
-print(paste("Comparing the inflammatory macs score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
-            ") in ", samp_num, " random samples at a p value of ",
-            round((length(myeloid_pval_montecarlo$inflammatory[which(myeloid_pval_montecarlo$inflammatory>pval)])+1)/(samp_num+1), 3), sep=""))
+# print(paste("Comparing the myeloid immune supressive score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+#             ") in ", samp_num, " random samples at a p value of ",
+#             round((length(myeloid_pval_montecarlo$supressive[which(myeloid_pval_montecarlo$supressive>pval)])+1)/(samp_num+1), 3), sep=""))
+# print(paste("Comparing the inflammatory macs score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+#             ") in ", samp_num, " random samples at a p value of ",
+#             round((length(myeloid_pval_montecarlo$inflammatory[which(myeloid_pval_montecarlo$inflammatory>pval)])+1)/(samp_num+1), 3), sep=""))
 print(paste("Comparing the recently recruited myeloid score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
             ") in ", samp_num, " random samples at a p value of ",
-            round((length(myeloid_pval_montecarlo$recruit[which(myeloid_pval_montecarlo$recruit>pval)])+1)/(samp_num+1), 3), sep=""))
+            round((length(myeloid_pval_montecarlo$recruit[which(myeloid_pval_montecarlo$recruit>pval)])+1)/(samp_num+1), 6), sep=""))
 print(paste("Comparing the kuffer-like score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
             ") in ", samp_num, " random samples at a p value of ",
-            round((length(myeloid_pval_montecarlo$kuffer[which(myeloid_pval_montecarlo$kuffer>pval)])+1)/(samp_num+1), 3), sep=""))
+            round((length(myeloid_pval_montecarlo$kuffer[which(myeloid_pval_montecarlo$kuffer>pval)])+1)/(samp_num+1), 6), sep=""))
 
 
 ########## 
@@ -664,7 +664,7 @@ ggplot(plt_KCRR, aes(Age,kuffer_like_score1))+geom_point()+
 ##############
 ## KC/RR ratio in each individual
 ##############
-load(here("data","adult_ped_integrated_refinedlabels.rds"))
+load(here("data","adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
 table(d10x.combined$CellType_refined)
 
@@ -674,9 +674,11 @@ myeloid_cells$CellType_refined<-as.character(myeloid_cells$CellType_refined)
 sum_df<-as.data.frame(tapply(myeloid_cells$cell, list(myeloid_cells$individual, myeloid_cells$CellType_refined), length))
 sum_df$individual<-rownames(sum_df)
 sum_df$KC_RR_ratio<-sum_df$`KC Like`/sum_df$`RR Myeloid`
+sum_df$RR_KC_ratio<-sum_df$`RR Myeloid`/sum_df$`KC Like`
+# sum_df<-sum_df[which(sum_df$`KC Like`>10),]
+# sum_df<-sum_df[which(sum_df$`RR Myeloid`>10),]
 
-#meta<-read.table(here("data/data_transfer_updated_jan16_2023.csv"), header=T, sep=",")
-meta<-read.table(here(dataset_loc,"data_transfer_updated_jan16_2023.csv"), header=T, sep=",")
+meta<-read.table(here("data","data_transfer_updated_jan16_2023.csv"), header=T, sep=",")
 
 sum_df<-merge(sum_df, meta,by.x="individual", by.y="Sample_ID")
 
@@ -688,5 +690,58 @@ ggplot(sum_df, aes(AgeGroup,KC_RR_ratio))+
   theme_bw()+th+fillscale_age+xlab("Age Group")+ylab("KC:RR Ratio")+
   geom_signif(comparisons = c("Adult","Ped"), color="grey50")
 
+ggplot(sum_df, aes(AgeGroup,RR_KC_ratio))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.2,aes(fill=AgeGroup))+geom_jitter(aes(fill=AgeGroup), shape=21, width=0.1)+
+  theme_bw()+th+fillscale_age+xlab("Age Group")+ylab("RR:KC Ratio")+
+  geom_signif(comparisons = c("Adult","Ped"), color="grey50")
 
 #save_plts(myeloid_kuffer_box, "kuffer_box_myeloid", w=4,h=4)
+
+###################
+## Just with KC of RR myeloid
+###################
+plt_KCRR<-plt_myeloid[which(plt_myeloid$CellType_refined %in% c("KC Like","RR Myeloid","Myeloid cells\n(Hepatocyte Like)")),]
+plt_KCRR$CellType_refined<-as.character(plt_KCRR$CellType_refined)
+
+cell_num_myeloid_type<-as.data.frame(table(as.factor(plt_KCRR$AgeGroup)))
+colnames(cell_num_myeloid_type)<-c("AgeGroup","CellCount")
+
+comp_simple<-list(c("Adult","Ped"))
+
+ggplot(plt_KCRR, aes(AgeGroup,recently_recruited_myeloid1))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=AgeGroup))+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  fillscale_age+
+  ylim(plt_min, plt_max+1)+
+  xlab("Age Group")+ylab("Recently Recruited Myeloid Signature Score")+
+  geom_text(aes(y=-1.5, x=AgeGroup,label=paste0("n = ",comma(CellCount))),cell_num_myeloid_type, hjust=-0.1, size=3)+
+  geom_signif(comparisons = comp_simple, step_increase = 0.03,tip_length = 0.01,
+              size = 0.5, vjust = 0.5,
+              textsize = 5,  map_signif_level = T, color="grey60")
+
+ggplot(plt_KCRR, aes(AgeGroup,kuffer_like_score1))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=AgeGroup))+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  fillscale_age+
+  ylim(plt_min, plt_max+1)+
+  xlab("Age Group")+ylab("Kuffer-like Signature Score")+
+  geom_text(aes(y=-1.5, x=AgeGroup,label=paste0("n = ",comma(CellCount))),cell_num_myeloid_type, hjust=-0.1, size=3)+
+  geom_signif(comparisons = comp_simple, step_increase = 0.03,tip_length = 0.01,
+              size = 0.5, vjust = 0.5,
+              textsize = 5,  map_signif_level = T, color="grey60")
+
+ggplot(plt_KCRR, aes(UMAP_1,UMAP_2))+
+  geom_point(aes(color=recently_recruited_myeloid1),size=1.5)+
+  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  facet_wrap(~AgeGroup)+
+  geom_text(aes(x = -6, y = -12, label=paste0("n = ",comma(CellCount))), cell_num_myeloid_type)+
+  scale_color_continuous_sequential(palette = "Mako") + 
+  guides(color=guide_legend(title="Recently\nRecruited\nMyeloid\nSignature Score"))
+
+ggplot(plt_KCRR, aes(UMAP_1,UMAP_2))+
+  geom_point(aes(color=kuffer_like_score1), size=1.5)+
+  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  facet_wrap(~AgeGroup)+
+  geom_text(aes(x = -6, y = -12, label=paste0("n = ",comma(CellCount))), cell_num_myeloid_type)+
+  scale_color_continuous_sequential(palette = "Mako") +
+  guides(color=guide_legend(title="Kuffer-like\nSignature Score"))
