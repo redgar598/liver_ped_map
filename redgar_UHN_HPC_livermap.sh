@@ -59,7 +59,7 @@ scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw t117652uhn@h4huh
 ##########
 # monte carlo cell type - age
 ##########
-for cellType_index in {1..14}
+for cellType_index in {1..12}
 do
 
 sbatch de_monte_carlo.sh $cellType_index
@@ -69,7 +69,7 @@ done
 ##########
 # monte carlo cell type - sex
 ##########
-for cellType_index in {1..13}
+for cellType_index in {1..12}
 do
 
 sbatch de_monte_carlo_sex.sh $cellType_index
@@ -90,6 +90,7 @@ scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_jan16_2023.c
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Diana__SingleCell_C92_10Feb22_3pr_V3_1 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sonya__C70_Caudate_5pr t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/McGilvray_Sonya__C64_Enriched_5pr t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+scp /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sai__C98_3pr_V3_1/outs/possorted_genome_bam.bam.bai t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/MacParland_Sai__C98_3pr_V3_1/outs
 
 
 ## general file moving moving files
@@ -108,7 +109,8 @@ scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_ma
 
 #grab data
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/QC_metrics.Rdata /home/redgar/Documents/liver_ped_map/data
-scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/adult_ped_integrated.rds /home/redgar/Documents/liver_ped_map/data
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/adult_ped_integrated_refinedlabels_withDropletQC.rds /home/redgar/Documents/liver_ped_map/data
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/adult_ped_cellRefined_withDropletQC.rds /home/redgar/Documents/liver_ped_map/data
 
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/adult_ped_cellRough.rds /home/redgar/Documents/liver_ped_map/data
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/d10x_adult_ped_raw.rds /home/redgar/Documents/liver_ped_map/data

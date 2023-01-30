@@ -34,7 +34,7 @@ d10x<-readRDS(file = here("data","d10x_adult_ped_raw.rds"))
 ######
 ## add cell type labels
 ######
-load(here("data","adult_ped_cellRefined.rds"))
+load(here("data","adult_ped_cellRefined_withDropletQC.rds"))
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
@@ -56,10 +56,10 @@ levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC")]<-"LS
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil")]<-"Neutrophil_notDEFA"
 
-d10x$cell_sex<-paste(as.character(d10x$CellType_refined), d10x$Sex, sep = "_")
-Idents(d10x) <- "cell_sex"
+d10x$cell_age<-paste(d10x$CellType_refined, d10x$AgeGroup, sep = "_")
+Idents(d10x) <- "cell_age"
 
-table(d10x$CellType_refined, d10x$Sex)
+table(d10x$CellType_refined, d10x$AgeGroup)
 
 
 #MAST (Finak et al., 2015), which fits a hurdle model to the expression of each gene,
@@ -68,26 +68,27 @@ table(d10x$CellType_refined, d10x$Sex)
 
 cell_types<-unique(as.character(d10x$CellType_refined))
 cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
-cell_types<-cell_types[-grep("Neutrophil_DEFA",cell_types)]# on 11 male defa neutrophils so not meaningful to compare
+#no neutrophils in peds
+cell_types<-cell_types[-grep("Neutrophil",cell_types)]
+cell_types<-cell_types[-grep("Low Quality",cell_types)]
 cell_types[grep("CD3",cell_types)]<-"CD3"
 
-contrasts_celltype_sex<-do.call(rbind,lapply(1:length(cell_types), function(x){
-  combinations(n = 2, r = 2, v = d10x$cell_sex[grep(cell_types[x],d10x$cell_sex)], repeats.allowed = FALSE)
-}))
+contrasts_celltype_age<-do.call(rbind,lapply(1:length(cell_types), function(x){
+  combinations(n = 2, r = 2, v = d10x$cell_age[grep(cell_types[x],d10x$cell_age)], repeats.allowed = FALSE)}))
 
-contrasts_celltype_sex
+contrasts_celltype_age
 
-nrow(contrasts_celltype_sex)
-
+nrow(contrasts_celltype_age)
 
 ###########
 ## Monte carlo the DE
 ###########
 
-d10x_F<-subset(d10x, subset = Sex == "F")
-ncol(d10x_F)
-d10x_M<-subset(d10x, subset = Sex == "M")
-ncol(d10x_M)
+
+d10x_adult<-subset(d10x, subset = AgeGroup == "Adult")
+ncol(d10x_adult)
+d10x_ped<-subset(d10x, subset = AgeGroup == "Ped")
+ncol(d10x_ped)
 
 
 ### paralize
@@ -99,41 +100,41 @@ samp_num=1000
 
 
 #DE_monte_carlo<-lapply(cell_types, function(cell_type){
-
-contrasts_celltype<-contrasts_celltype_sex[grep(cell_type, contrasts_celltype_sex)]
-cell_type<-as.character(unique(d10x$CellType_refined)[grep(cell_type,unique(d10x$CellType_refined))])
-
-d10x_F_celltype<-subset(d10x_F, subset = CellType_refined == cell_type)
-ncol(d10x_F_celltype)
-d10x_M_celltype<-subset(d10x_M, subset = CellType_refined == cell_type)
-ncol(d10x_M_celltype)
-
-
-de_lists<-sapply(1:samp_num, function(x){
-  set.seed(x)
   
-  ## make downsampled
-  if(ncol(d10x_F_celltype)<ncol(d10x_M_celltype)){
-    M_cells_random <- d10x_M_celltype[, sample(colnames(d10x_M_celltype), size = ncol(d10x_F_celltype), replace=F)]
-    d10_DE<-merge(d10x_F_celltype, M_cells_random)
-  }else{
-    F_cells_random <- d10x_F_celltype[, sample(colnames(d10x_F_celltype), size = ncol(d10x_M_celltype), replace=F)]
-    d10_DE<-merge(d10x_M_celltype, F_cells_random)}
+  contrasts_celltype<-contrasts_celltype_age[grep(cell_type, contrasts_celltype_age)]
+  cell_type<-as.character(unique(d10x$CellType_refined)[grep(cell_type,unique(d10x$CellType_refined))])
   
-  ## run DE 
-  de<-FindMarkers(d10_DE, ident.1 = contrasts_celltype[1], ident.2 = contrasts_celltype[2], test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
-  print(paste(contrasts_celltype[1],"vs", contrasts_celltype[2],":", nrow(de), sep=" "))
-  de$gene<-rownames(de)
-  rownames(de)<-NULL
-  de<-de[,c(6,1:5)]
-  de$cell.1<-contrasts_celltype[1]
-  de$cell.2<-contrasts_celltype[2]
-  
-  de[which(de$p_val_adj < 0.005 & abs(de$avg_log2FC) > 1),]$gene
-})
+  d10x_adult_celltype<-subset(d10x_adult, subset = CellType_refined == cell_type)
+  ncol(d10x_adult_celltype)
+  d10x_ped_celltype<-subset(d10x_ped, subset = CellType_refined == cell_type)
+  ncol(d10x_ped_celltype)
 
-sig_gene_count<-unlist(de_lists)
-if(length(sig_gene_count)==0){NA}else{
+  
+  de_lists<-sapply(1:samp_num, function(x){
+    set.seed(x)
+    
+    ## make downsampled
+    if(ncol(d10x_adult_celltype)<ncol(d10x_ped_celltype)){
+      ped_cells_random <- d10x_ped_celltype[, sample(colnames(d10x_ped_celltype), size = ncol(d10x_adult_celltype), replace=F)]
+      d10_DE<-merge(d10x_adult_celltype, ped_cells_random)
+    }else{
+      adult_cells_random <- d10x_adult_celltype[, sample(colnames(d10x_adult_celltype), size = ncol(d10x_ped_celltype), replace=F)]
+      d10_DE<-merge(d10x_ped_celltype, adult_cells_random)}
+    
+    ## run DE 
+    de<-FindMarkers(d10_DE, ident.1 = contrasts_celltype[1], ident.2 = contrasts_celltype[2], test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
+    print(paste(contrasts_celltype[1],"vs", contrasts_celltype[2],":", nrow(de), sep=" "))
+    de$gene<-rownames(de)
+    rownames(de)<-NULL
+    de<-de[,c(6,1:5)]
+    de$cell.1<-contrasts_celltype[1]
+    de$cell.2<-contrasts_celltype[2]
+    
+    de[which(de$p_val_adj < 0.005 & abs(de$avg_log2FC) > 1),]$gene
+    })
+  
+  sig_gene_count<-unlist(de_lists)
+  if(length(sig_gene_count)==0){NA}else{
   sig_gene_count<-as.data.frame(table(sig_gene_count))
   colnames(sig_gene_count)<-c("gene","sig_count")
   
@@ -146,8 +147,8 @@ if(length(sig_gene_count)==0){NA}else{
 
 #DE_monte_carlo<-do.call(rbind, DE_monte_carlo)
 DE_monte_carlo<-sig_gene_count
-head(DE_monte_carlo)
 DE_monte_carlo<-DE_monte_carlo[which(!(is.na(DE_monte_carlo$gene))),]
 
-save(DE_monte_carlo, file=here("data",paste(cell_type,"sex_diff_motecarlo_1000.RData",sep="_")))
+save(DE_monte_carlo, file=here("data",paste(cell_type,"adult_ped_diff_motecarlo_1000.RData",sep="_")))
+
 

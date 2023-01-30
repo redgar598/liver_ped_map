@@ -118,3 +118,65 @@ meta_cell_add<-meta_cell_add[match(colnames(d10x), meta_cell_add$cell),]
 print(identical(meta_cell_add$cell, colnames(d10x)))
 rownames(meta_cell_add)<-meta_cell_add$cell
 d10x<- AddMetaData(d10x, meta_cell_add)
+
+
+
+################
+## Checksaved rel change in all samples
+################
+load(here("data","adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+head(d10x.combined)
+
+umap_mat<-as.data.frame(Embeddings(object = d10x.combined, reduction = "umap"))#
+umap_mat$cell<-rownames(umap_mat)
+
+meta<-d10x.combined@meta.data
+meta$cell<-rownames(meta)
+
+plt<-merge(meta, umap_mat, by="cell")
+
+
+plt<-plt[order(plt$cell_status),]
+soup_change<-plot_grid(ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = CellType_refined), size=0.5)+theme_bw()+colscale_cellType+ guides(colour = guide_legend(override.aes = list(size=2))),
+                       ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = relALBChange), size=0.5)+theme_bw()+scale_colour_gradientn(colours=c('#fff5eb','#fee6ce','#fdd0a2','#fdae6b','#fd8d3c','#f16913','#d94801','#a63603','#7f2704'),limits=c(NA,NA), name="Relative\nALB\nChange"),
+                       ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = nuclear_fraction), size=0.5)+theme_bw(),
+                       ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = cell_status), size=0.5)+theme_bw()+ guides(colour = guide_legend(override.aes = list(size=2)))+scale_color_manual(values=c("grey","red","cornflowerblue"),name="Cell Status"),
+                       ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = percent.mt), size=0.5)+theme_bw(),
+                       ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = Phase), size=0.5)+theme_bw()+scale_color_manual(values=c("#e6ab02","#386cb0","#1b9e77"))+ guides(colour = guide_legend(override.aes = list(size=2))),
+                       ncol=2, align="v")
+soup_change
+save_plts(soup_change, "all_sample_soup_change", w=12,h=12)
+
+
+
+## grab legened from plot
+get_leg = function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  legend
+}
+
+align_plots_seperate<-function(plt_file_name,UMAP_plt){
+  leg_umap = get_leg(UMAP_plt)
+  plt_UMAP<- grid.arrange(UMAP_plt+theme(legend.position = "none"),leg_umap, ncol=2, widths=c(0.8,0.2))
+  save_plts(plt_UMAP, plt_file_name, w=7,h=5)
+}
+
+
+align_plots_seperate("cell_type_UMAP", ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = CellType_refined), size=0.5)+theme_bw()+colscale_cellType+ guides(colour = guide_legend(override.aes = list(size=2))))
+align_plots_seperate("soupX_UMAP", ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = relALBChange), size=0.5)+theme_bw()+scale_colour_gradientn(colours=c('#fff5eb','#fee6ce','#fdd0a2','#fdae6b','#fd8d3c','#f16913','#d94801','#a63603','#7f2704'),limits=c(NA,NA), name="Relative\nALB\nChange"))
+align_plots_seperate("nuclearfraction_UMAP",  ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = nuclear_fraction), size=0.5)+theme_bw())
+align_plots_seperate("cell_status_UMAP", ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = cell_status), size=0.5)+theme_bw()+ guides(colour = guide_legend(override.aes = list(size=2)))+scale_color_manual(values=c("grey","red","cornflowerblue"),name="Cell Status"))
+align_plots_seperate("percentMT_UMAP",  ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = percent.mt), size=0.5)+theme_bw())
+align_plots_seperate("phase_UMAP",ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = Phase), size=0.5)+theme_bw()+scale_color_manual(values=c("#e6ab02","#386cb0","#1b9e77"))+ guides(colour = guide_legend(override.aes = list(size=2))) )
+
+ 
+
+soup_dropletQC<-ggplot(plt, aes(cell_status, relALBChange))+geom_violin(fill="lightgrey",color="lightgrey")+geom_boxplot(aes(fill=cell_status), width=0.05)+
+  th+theme_bw()+scale_fill_manual(values=c("grey","red","cornflowerblue"),name="Cell Status", guide="none")+
+  xlab("Cell Status")+ylab("SoupX\n(relative ALB change)")
+save_plts(soup_dropletQC, "soupXdropletQCassociation", w=4,h=3)
+
+
+ 
