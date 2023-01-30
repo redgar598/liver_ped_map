@@ -14,7 +14,7 @@ module load R/4.2.1
 
 #Rscript R_functions/test.R
 
-Rscript R_functions/03_differential_expression_montecarlo.R $cellType_index
+Rscript scripts/03_differential_expression_montecarlo.R $cellType_index
 
 
 

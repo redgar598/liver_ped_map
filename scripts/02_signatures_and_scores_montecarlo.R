@@ -129,7 +129,6 @@ umap_mat$cell<-rownames(umap_mat)
 meta<-d10x.combined@meta.data
 meta$cell<-rownames(meta)
 
-
 plt<-merge(meta, umap_mat, by="cell")
 
 
@@ -218,7 +217,7 @@ print(paste("Comparing the kuffer-like score in myeloid cells, there is a sig di
 ########## 
 ## T cell Exhaustion
 ########## 
-lapply(c("NK_T"), function(cell_type){
+lapply(c("NK and T cells"), function(cell_type){
   plt_Tcell_celltype<-plt_Tcell[which(plt_Tcell$CellType_rough==cell_type),]
   
   plt_Tcell_adult<-plt_Tcell_celltype[which(plt_Tcell_celltype$AgeGroup=="Adult"),]
@@ -409,7 +408,7 @@ plt_min<-floor(min(plt_Tcell$exhausted_tcells_score1))
 SignificanceDF<-data.frame(x=c(1, 1, 2), xend=c(1, 2, 2),
            y=c(plt_max, plt_max+0.1, plt_max+0.1), yend=c(plt_max+0.1, plt_max+0.1, plt_max),
            annotation=c("*"),
-           CellType_rough="NK_T")
+           CellType_rough="NK and T cells")
 
 tcellexhaust_box_tcell<-ggplot(plt_Tcell, aes(AgeGroup,exhausted_tcells_score1))+
   geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=AgeGroup))+
@@ -675,8 +674,8 @@ sum_df<-as.data.frame(tapply(myeloid_cells$cell, list(myeloid_cells$individual, 
 sum_df$individual<-rownames(sum_df)
 sum_df$KC_RR_ratio<-sum_df$`KC Like`/sum_df$`RR Myeloid`
 sum_df$RR_KC_ratio<-sum_df$`RR Myeloid`/sum_df$`KC Like`
-# sum_df<-sum_df[which(sum_df$`KC Like`>10),]
-# sum_df<-sum_df[which(sum_df$`RR Myeloid`>10),]
+sum_df<-sum_df[which(sum_df$`KC Like`>10),]
+sum_df<-sum_df[which(sum_df$`RR Myeloid`>10),]
 
 meta<-read.table(here("data","data_transfer_updated_jan16_2023.csv"), header=T, sep=",")
 
@@ -745,3 +744,41 @@ ggplot(plt_KCRR, aes(UMAP_1,UMAP_2))+
   geom_text(aes(x = -6, y = -12, label=paste0("n = ",comma(CellCount))), cell_num_myeloid_type)+
   scale_color_continuous_sequential(palette = "Mako") +
   guides(color=guide_legend(title="Kuffer-like\nSignature Score"))
+
+
+
+plt_myeloid_adult<-plt_KCRR[which(plt_KCRR$AgeGroup=="Adult"),]
+adult_cellcount<-nrow(plt_myeloid_adult)
+print(paste(adult_cellcount, " adult myeloid cells",sep=""))
+
+plt_myeloid_ped<-plt_KCRR[which(plt_KCRR$AgeGroup=="Ped"),]
+ped_cellcount<-nrow(plt_myeloid_ped)
+print(paste(ped_cellcount, " ped myeloid cells",sep=""))
+
+
+samp_num<-10000
+pval<-0.05
+myeloid_pval_montecarlo<-do.call(rbind, lapply(1:samp_num, function(x){
+  set.seed(x)
+  plt_myeloid_adult_random<-plt_myeloid_adult[sample(adult_cellcount,ped_cellcount),]
+  
+  supressive<-t.test(plt_myeloid_adult_random$myeloid_immune_supressive_score1, plt_myeloid_ped$myeloid_immune_supressive_score1)$p.value
+  inflammatory<-t.test(plt_myeloid_adult_random$inflammatory_macs_score1, plt_myeloid_ped$inflammatory_macs_score1)$p.value
+  recruit<-t.test(plt_myeloid_adult_random$recently_recruited_myeloid1, plt_myeloid_ped$recently_recruited_myeloid1)$p.value
+  kuffer<-t.test(plt_myeloid_adult_random$kuffer_like_score1, plt_myeloid_ped$kuffer_like_score1)$p.value
+  
+  data.frame(supressive=supressive, inflammatory=inflammatory, recruit=recruit ,kuffer=kuffer)
+}))
+
+# print(paste("Comparing the myeloid immune supressive score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+#             ") in ", samp_num, " random samples at a p value of ",
+#             round((length(myeloid_pval_montecarlo$supressive[which(myeloid_pval_montecarlo$supressive>pval)])+1)/(samp_num+1), 3), sep=""))
+# print(paste("Comparing the inflammatory macs score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+#             ") in ", samp_num, " random samples at a p value of ",
+#             round((length(myeloid_pval_montecarlo$inflammatory[which(myeloid_pval_montecarlo$inflammatory>pval)])+1)/(samp_num+1), 3), sep=""))
+print(paste("Comparing the recently recruited myeloid score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+            ") in ", samp_num, " random samples at a p value of ",
+            round((length(myeloid_pval_montecarlo$recruit[which(myeloid_pval_montecarlo$recruit>pval)])+1)/(samp_num+1), 6), sep=""))
+print(paste("Comparing the kuffer-like score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+            ") in ", samp_num, " random samples at a p value of ",
+            round((length(myeloid_pval_montecarlo$kuffer[which(myeloid_pval_montecarlo$kuffer>pval)])+1)/(samp_num+1), 6), sep=""))
