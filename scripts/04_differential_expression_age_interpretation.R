@@ -34,7 +34,7 @@ d10x<-readRDS(file = here("data","d10x_adult_ped_raw.rds"))
 ######
 ## add cell type labels
 ######
-load(here("data","adult_ped_cellRefined.rds"))
+load(here("data","adult_ped_cellRefined_withDropletQC.rds"))
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
@@ -52,16 +52,22 @@ Idents(d10x) <- "cell_age"
 
 table(d10x$CellType_refined, d10x$AgeGroup)
 
+## testing factor
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC")]<-"LSEC_nothep"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil")]<-"Neutrophil_notDEFA"
+
+
 ##########
 ## Load DE Results
 ##########
 cell_types<-unique(as.character(d10x$CellType_refined))
-cell_types[which(cell_types=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
-cell_types[which(cell_types=="LSEC")]<-"LSEC_nothep"
-cell_types[which(cell_types=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
-cell_types[which(cell_types=="Neutrophil")]<-"Neutrophil_notDEFA"
 cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
-
+#no neutrophils in peds
+cell_types<-cell_types[-grep("Neutrophil",cell_types)]
+cell_types<-cell_types[-grep("Low Quality",cell_types)]
+cell_types
 
 DE_monte_carlo<-do.call(rbind, lapply(cell_types, function(celltype){
   print(celltype)
@@ -117,7 +123,7 @@ DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%IFNa),]
 DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%IFNg),]
 DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%type1_IFN),]
 
-
+summary_tbl[which(summary_tbl$gene%in%c(type1_IFN,IFNa,IFNg)),]
 
 ###########
 ## Plot violins
@@ -126,13 +132,18 @@ Idents(d10x) <- "AgeGroup"
 
 DE_monte_carlo_sig$cell<-as.factor(DE_monte_carlo_sig$cell)
 levels(DE_monte_carlo_sig$cell)<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","KC Like",
-                                   "LSEC\n(Hepatocyte Like)","LSEC","Mature B-cells","Neutrophil\n(DEFA+)","Neutrophil", "NK-like cells",
+                                  "Mature B-cells", "NK-like cells",
                                    "Plasma cells","RR Myeloid") 
 
 cell_types<-as.factor(cell_types)
 levels(cell_types)<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","KC Like",
-                      "LSEC\n(Hepatocyte Like)","LSEC","Mature B-cells","Neutrophil\n(DEFA+)","Neutrophil", "NK-like cells",
+                      "LSEC","Mature B-cells", "NK-like cells",
                       "Plasma cells","RR Myeloid") 
+
+d10x$CellType_refined<-as.factor(d10x$CellType_refined)
+levels(d10x$CellType_refined)<-c("Mature B-cells","Plasma cells", "CD3+ T-cells","gd T-cells","NK-like cells","Cholangiocytes",
+                      "LSEC","LSEC\n(Hepatocyte Like)", "Myeloid cells", "Myeloid cells\n(Hepatocyte Like)", "RR Myeloid", "KC Like",
+                      "Neutrophil","Neutrophil\n(DEFA+)","HSC","Hepatocytes", "Low Quality") 
 
 
 
@@ -168,7 +179,7 @@ plot_key_genes(IFNa_sig, "IFNa_sig")
 
 
 table(DE_monte_carlo_sig$gene)[order(table(DE_monte_carlo_sig$gene))]
-plot_key_genes(c("CRP","SAA2","ALB","APOE"), "DE_unique_to_celltypes")
+plot_key_genes(c("S100A9","S100A8","CCL4","CCL3"), "DE_unique_to_KClike")
 
 plot_key_genes(myeloid_immune_supressive, "myeloid_immune_supressive_montecarlo")
 plot_key_genes(inflammatory_macs, "inflammatory_macs_montecarlo")
@@ -181,6 +192,7 @@ plot_key_genes(exhausted_tcells, "exhausted_tcells_montecarlo")
 ########
 ## interpret DGE
 ########
+## testing factor
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC")]<-"LSEC_nothep"
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
@@ -191,12 +203,16 @@ Idents(d10x) <- "cell_age"
 
 cell_types<-unique(as.character(d10x$CellType_refined))
 cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
+#no neutrophils in peds
+cell_types<-cell_types[-grep("Neutrophil",cell_types)]
+cell_types<-cell_types[-grep("Low Quality",cell_types)]
 cell_types[grep("CD3",cell_types)]<-"CD3"
 
 contrasts_celltype_age<-do.call(rbind,lapply(1:length(cell_types), function(x){
   combinations(n = 2, r = 2, v = d10x$cell_age[grep(cell_types[x],d10x$cell_age)], repeats.allowed = FALSE)}))
 contrasts_celltype_age
 nrow(contrasts_celltype_age)
+
 
 ### get fold change in whole cohort for pathway analysis
 ## run DE 
@@ -214,6 +230,7 @@ diff_exp_all<-lapply(1:nrow(contrasts_celltype_age), function(x){
 
 diff_exp_all<-do.call(rbind, diff_exp_all)
 
+save(file=here("data","diff_exp_all_fullcohort.RData"),diff_exp_all)
 
 #########
 ## pathway adult versus ped in KC and RR
@@ -262,8 +279,9 @@ HSC_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="HSC_Adult"),])
 save_plts(HSC_GSEA, "GSEA_adult_ped_HSClike", w=20,h=10)
 
 
-
+##############
 ## Volcano
+##############
 vol_celltype<-function(cellType){
   diff_exp_all_celltype<-diff_exp_all[grep(cellType, diff_exp_all$cell.1),]
   volcano<-data.frame(gene=diff_exp_all_celltype$gene,Pvalue=diff_exp_all_celltype$p_val, Delta_Beta=diff_exp_all_celltype$avg_log2FC)

@@ -34,7 +34,7 @@ d10x<-readRDS(file = here("data","d10x_adult_ped_raw.rds"))
 ######
 ## add cell type labels
 ######
-load(here("data","adult_ped_cellRefined.rds"))
+load(here("data","adult_ped_cellRefined_withDropletQC.rds"))
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
@@ -52,16 +52,34 @@ Idents(d10x) <- "cell_sex"
 
 table(d10x$CellType_refined, d10x$Sex)
 
+
+########
+## Dimplot
+########
+load(here("data","adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+
+cell_num_all<-as.data.frame(table(d10x.combined@meta.data$Sex))
+colnames(cell_num_all)<-c("Sex","CellCount")
+sex_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_refined", split.by="Sex",pt.size=0.25)+colscale_cellType+ggtitle("")+
+  geom_text(aes(x=-11, y=-12, label=paste0("n = ",comma(CellCount))), cell_num_all)
+save_plts(sex_split, "sex_Cell_UMAP_refined", w=12,h=6)
+
+## testing factor
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC")]<-"LSEC_nothep"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil")]<-"Neutrophil_notDEFA"
+
+
 ##########
 ## Load DE Results
 ##########
 cell_types<-unique(as.character(d10x$CellType_refined))
-cell_types[which(cell_types=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
-cell_types[which(cell_types=="LSEC")]<-"LSEC_nothep"
-cell_types[which(cell_types=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
-cell_types[which(cell_types=="Neutrophil")]<-"Neutrophil_notDEFA"
 cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
-
+#no neutrophils in peds
+cell_types<-cell_types[-grep("Neutrophil",cell_types)]
+cell_types<-cell_types[-grep("Low Quality",cell_types)]
+cell_types
 
 DE_monte_carlo<-do.call(rbind, lapply(cell_types, function(celltype){
   print(celltype)
@@ -135,8 +153,15 @@ levels(DE_monte_carlo_sig$cell)<-c("CD3+ T-cells","Cholangiocytes","gd T-cells",
 
 cell_types<-as.factor(cell_types)
 levels(cell_types)<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","KC Like",
-                      "LSEC\n(Hepatocyte Like)","LSEC","Mature B-cells","Neutrophil\n(DEFA+)","Neutrophil", "NK-like cells",
+                      "LSEC\n(Hepatocyte Like)","LSEC","Mature B-cells", "NK-like cells",
                       "Plasma cells","RR Myeloid") 
+
+d10x$CellType_refined<-as.factor(d10x$CellType_refined)
+levels(d10x$CellType_refined)<-c("Mature B-cells","Plasma cells", "CD3+ T-cells","gd T-cells","NK-like cells","Cholangiocytes",
+                                 "LSEC","LSEC\n(Hepatocyte Like)", "Myeloid cells", "Myeloid cells\n(Hepatocyte Like)", "RR Myeloid", "KC Like",
+                                 "Neutrophil","Neutrophil\n(DEFA+)","HSC","Hepatocytes", "Low Quality") 
+
+
 
 
 
@@ -145,8 +170,9 @@ plot_key_genes<-function(keygenes, label){
     plots<-lapply(1:length(cell_types),function(x){
       p<-VlnPlot(subset(d10x, subset = CellType_refined == as.character(cell_types[x])) , features = keygenes[y], pt.size = 0, log=T)
       p<-if( (as.character(cell_types[x]) %in% as.character(DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene==keygenes[y]),]$cell))  ){
-        p+theme(plot.background = element_rect(color = "black",size = 2)) +xlab("") + ylab("")+ theme(legend.position="none")}else{
-          p+fillscale_age +xlab("") + ylab("")+ theme(legend.position="none")
+        p+theme(plot.background = element_rect(color = "black",size = 2)) +xlab("") + ylab("")+ 
+          theme(legend.position="none")+scale_fill_manual(values=c("#a6dba0","#9970ab"))}else{
+          p+scale_fill_manual(values=c("#a6dba0","#9970ab")) +xlab("") + ylab("")+ theme(legend.position="none")
         }
       p})
     plot_grid(plotlist = plots, ncol=1)})
@@ -162,9 +188,8 @@ plot_key_genes<-function(keygenes, label){
   ggsave2(paste0(here("figures/jpeg/"),label, "_sex.jpeg"), w=wid,h=30,bg="white")}
 
 
-#### All sig IFN (a,g 1)
-IFN_sig<-unique(as.character(DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%c(IFNg,IFNa, type1_IFN)),]$gene))
-plot_key_genes(IFN_sig, "IFNg_sig")
+
+plot_key_genes(c("XIST","CCL4","CCL3","AREG"), "top_differential")
 
 
 
@@ -173,6 +198,8 @@ plot_key_genes(IFN_sig, "IFNg_sig")
 ########
 ## interpret DGE
 ########
+
+## testing factor
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC")]<-"LSEC_nothep"
 levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
@@ -181,26 +208,38 @@ levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil")
 d10x$cell_sex<-paste(as.character(d10x$CellType_refined), d10x$Sex, sep = "_")
 Idents(d10x) <- "cell_sex"
 
+table(d10x$CellType_refined, d10x$Sex)
+
+
+#MAST (Finak et al., 2015), which fits a hurdle model to the expression of each gene,
+#consisting of logistic regression for the zero process (i.e., whether the gene is expressed) #
+#and linear regression for the continuous process (i.e., the expression level). 
+
 cell_types<-unique(as.character(d10x$CellType_refined))
 cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
+#no neutrophils in peds
+cell_types<-cell_types[-grep("Neutrophil",cell_types)]
+cell_types<-cell_types[-grep("Low Quality",cell_types)]
 cell_types[grep("CD3",cell_types)]<-"CD3"
 
-contrasts_celltype_age<-do.call(rbind,lapply(1:length(cell_types), function(x){
-  combinations(n = 2, r = 2, v = d10x$cell_sex[grep(cell_types[x],d10x$cell_sex)], repeats.allowed = FALSE)}))
-contrasts_celltype_age
-nrow(contrasts_celltype_age)
+contrasts_celltype_sex<-do.call(rbind,lapply(1:length(cell_types), function(x){
+  combinations(n = 2, r = 2, v = d10x$cell_sex[grep(cell_types[x],d10x$cell_sex)], repeats.allowed = FALSE)
+}))
+
+contrasts_celltype_sex
+nrow(contrasts_celltype_sex)
+
 
 ### get fold change in whole cohort for pathway analysis
 ## run DE 
-
-diff_exp_all<-lapply(1:nrow(contrasts_celltype_age), function(x){
-  de<-FindMarkers(d10x, ident.1 = contrasts_celltype_age[x,1], ident.2 = contrasts_celltype_age[x,2], test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
-  print(paste(contrasts_celltype_age[x,1],"vs", contrasts_celltype_age[x,2],":", nrow(de), sep=" "))
+diff_exp_all<-lapply(1:nrow(contrasts_celltype_sex), function(x){
+  de<-FindMarkers(d10x, ident.1 = contrasts_celltype_sex[x,1], ident.2 = contrasts_celltype_sex[x,2], test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
+  print(paste(contrasts_celltype_sex[x,1],"vs", contrasts_celltype_sex[x,2],":", nrow(de), sep=" "))
   de$gene<-rownames(de)
   rownames(de)<-NULL
   de<-de[,c(6,1:5)]
-  de$cell.1<-contrasts_celltype_age[x,1]
-  de$cell.2<-contrasts_celltype_age[x,2]
+  de$cell.1<-contrasts_celltype_sex[x,1]
+  de$cell.2<-contrasts_celltype_sex[x,2]
   de})
 
 
@@ -399,7 +438,7 @@ diff_exp_all_celltype_label<-diff_exp_all_celltype[which(diff_exp_all_celltype$g
 
 ggplot(diff_exp_all_celltype, aes(avg_log2FC_NK, avg_log2FC_RR, color=sig))+geom_point()+th_present+theme_bw()+
   ylab("RR Differential Expression\n(Fold change)")+xlab("NK Differential Expression\n(log2 Fold change)")+
-  scale_color_manual(values = c("red","grey"))+
+  scale_color_manual(values = c("red","#f7057d","grey","grey"))+
   geom_text(aes(label=gene),diff_exp_all_celltype_label,color="black",vjust=-0.75, hjust=1,size=3)+
   geom_vline(xintercept = c(-1,1), color="grey")+  geom_hline(yintercept = c(-1,1), color="grey")+
   ylim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+

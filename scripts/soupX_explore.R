@@ -180,3 +180,39 @@ save_plts(soup_dropletQC, "soupXdropletQCassociation", w=4,h=3)
 
 
  
+
+
+################
+## Checksaved rel change in all samples
+################
+d10x<-readRDS(file = here("data","d10x_adult_ped_raw.rds"))
+alb_exp<-FetchData(object = d10x, vars = c("ALB"))
+alb_exp$cell<-rownames(alb_exp)
+rm(d10x)
+
+load(here("data","adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+head(d10x.combined)
+
+umap_mat<-as.data.frame(Embeddings(object = d10x.combined, reduction = "umap"))#
+umap_mat$cell<-rownames(umap_mat)
+
+meta<-d10x.combined@meta.data
+meta$cell<-rownames(meta)
+
+plt<-merge(meta, umap_mat, by="cell")
+plt<-merge(plt, alb_exp, by="cell")
+
+
+plt<-plt[order(plt$ALB),]
+my_breaks = c(0, 10, 100, 1000, 8000)
+ALB_count_after_soup<-ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = ALB), size=0.5)+
+  facet_wrap(~AgeGroup)+
+  theme_bw()+scale_color_gradient2(name = "ALB\ncount", trans = "log",
+                                  breaks = my_breaks, labels = my_breaks, 
+                                  low = "white",
+                                  high = "blue",
+                                  midpoint = 0,
+                                  na.value = "grey80")
+
+save_plts(ALB_count_after_soup, "ALB_soup_change", w=10,h=4.5)
+

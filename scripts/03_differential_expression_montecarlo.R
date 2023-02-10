@@ -43,6 +43,15 @@ identical(colnames(d10x), cell_label$index)
 d10x <- AddMetaData(d10x, metadata = cell_label)
 
 
+##############
+### Difference in proportion with age
+##############
+cell_count<-tapply(d10x$orig.ident, list(d10x$CellType_refined, d10x$AgeGroup), length)
+cell_count[is.na(cell_count)]<-0
+cell_count_plt<-melt(cell_count)
+
+cell_counts<-ggplot(d10x@meta.data, aes(CellType_refined, fill=AgeGroup))+geom_bar( position = position_dodge(), color="black")+theme_bw()+xlab("")
+save_plts(cell_counts, "cell_counts_by_age", w=15,h=5)
 
 
 ##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.

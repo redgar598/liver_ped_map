@@ -13,7 +13,7 @@ library(colorspace)
 source("scripts/00_pretty_plots.R")
 
 
-load(here("data","adult_ped_integrated_refinedlabels.rds"))
+load(here("data","adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
 d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_rough %in% c("Myeloid cells"))
 rm(d10x.combined)
@@ -33,6 +33,50 @@ myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size
   annotate("text",x=-14, y=-12, label=paste0("n = ",comma(ncol(d10x.combined_myeloid))))
 myeloid_cluster_umap
 save_plts(myeloid_cluster_umap, "myeloid_cluster_umap_nolab_refined", w=7,h=5)
+
+myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  annotate("text",x=-14, y=-12, label=paste0("n = ",comma(ncol(d10x.combined_myeloid))))
+myeloid_cluster_umap
+
+
+###################
+## Some silly plots
+###################
+umap_mat<-as.data.frame(Embeddings(object = d10x.combined_myeloid, reduction = "umap"))#
+umap_mat$cell<-rownames(umap_mat)
+
+meta<-d10x.combined_myeloid@meta.data
+meta$cell<-rownames(meta)
+
+plt<-merge(meta, umap_mat, by="cell")
+
+myeloid_density<-ggplot(plt, aes(x=UMAP_1, y=UMAP_2)) +
+  geom_point(aes(color=CellType_refined),alpha=0.1, shape=16, size=2) + 
+  geom_density_2d(bins=6, color="grey30")+
+  theme_bw()+colscale_cellType
+save_plts(myeloid_density, "myeloid_density", w=6,h=4)
+
+##### DO this on raw data
+d10x<-readRDS(file = here("data","d10x_adult_ped_raw.rds"))
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
+myeloid_markers<-FetchData(object = d10x, vars = c("MARCO", "VSIG4","LYZ"))
+myeloid_markers$cell<-rownames(myeloid_markers)
+plt<-merge(plt, myeloid_markers, by="cell")
+
+plt_nonzero<-plt[which(plt$MARCO>0 & plt$LYZ>0),]
+
+myeloid_density_markers<-ggplot()+geom_point(aes(MARCO, LYZ, fill=CellType_refined),plt,  shape=21, colour = "transparent", size=1)+  theme_bw()+fillscale_cellType+
+  geom_density_2d(aes(MARCO, LYZ, color=CellType_refined),plt_nonzero, bins=6, color="grey30")+
+  guides(fill = guide_legend(override.aes = list(size=2)))
+save_plts(myeloid_density_markers, "myeloid_density_markers", w=6,h=4)
+
+
+
+##############
+## fibrotic or regenerative macrophages
+##############
+FeaturePlot(d10x.combined_myeloid, features = c("CD86","MRC1"), min.cutoff = "q9", pt.size=1)
 
 
             # myeliod_clusters<-d10x.combined_myeloid@meta.data
