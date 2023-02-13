@@ -24,6 +24,6 @@ d10x.combined_adult <- RunPCA(d10x.combined_adult, npcs = 30, verbose = FALSE)
 d10x.combined_adult <- RunUMAP(d10x.combined_adult, reduction = "pca", dims = 1:30)
 
 all_refined_cluster_umap_nolab<-DimPlot(d10x.combined_adult, reduction = "umap", pt.size=0.25, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
-  annotate("text",x=-11, y=-12, label=paste0("n = ",comma(ncol(d10x.combined_adult))))
+  annotate("text",x=-13, y=-14, label=paste0("n = ",comma(ncol(d10x.combined_adult))), color="grey30")
 all_refined_cluster_umap_nolab
 save_plts(all_refined_cluster_umap_nolab, "refined_cellType_map_nolabel_adultsOnly", w=7,h=5)
