@@ -217,10 +217,74 @@ de_sex<-FindMarkers(d10x_raw_RR, ident.1 = "M", ident.2 = "F", test.use = "MAST"
 de_sex_negbinom<-FindMarkers(d10x_raw_RR, ident.1 = "M", ident.2 = "F", test.use = "negbinom",latent.vars="nFeature_RNA", verbose=F)
 
 
-
 save(de_cell,de_cell_negbinom, de_age, de_age_negbinom, de_sex,de_sex_negbinom, file=here("data/DGE_compare.Rdata"))
+
+
+
+load(here("data/DGE_compare.Rdata"))
+
+## grab legened from plot
+get_leg = function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  legend
+}
 
 # sig_de<-de_sex[which(de$p_val_adj < 0.005 & abs(de$avg_log2FC) > 1),]
 # sig_de_negbinom<-de_sex_negbinom[which(de_negbinom$p_val_adj < 0.005 & abs(de_negbinom$avg_log2FC) > 1),]
+
+
+
+plto_DGE<-function(MAST, negbinom){
+  colnames(MAST)<-paste(colnames(MAST),"MAST", sep="_")
+  MAST$gene<-rownames(MAST)
+  colnames(negbinom)<-paste(colnames(negbinom),"negbinom", sep="_")
+  negbinom$gene<-rownames(negbinom)
+  
+  plt<-merge(MAST, negbinom, by="gene")
+  cor.test(plt$avg_log2FC_MAST, plt$avg_log2FC_negbinom, method="spearman")
+  cor.test(plt$p_val_MAST, plt$p_val_negbinom, method="spearman")
+  
+  lim<-ceiling(range(c(-log10(plt$p_val_MAST),-log10(plt$p_val_negbinom )), finite=TRUE)[2])
+  
+  sig_de<-MAST[which(MAST$p_val_adj < 0.005 & abs(MAST$avg_log2FC) > 1),]
+  sig_de_negbiom<-negbinom[which(negbinom$p_val_adj < 0.005 & abs(negbinom$avg_log2FC) > 1),]
+  
+  both<-paste("Sig. Both (",length(intersect(sig_de$gene, sig_de_negbiom$gene)), ")", sep="")
+  sigmast<-paste("Sig. MAST (",length(which(!(sig_de$gene%in%sig_de_negbiom$gene) & sig_de$gene%in%plt$gene)), ")", sep="")
+  signeg<-paste("Sig. Negbinom (",length(which(!(sig_de_negbiom$gene%in%sig_de$gene))), ")", sep="")
+  ns<-paste("NS (",length(which(!(plt$gene%in%c(sig_de$gene, sig_de_negbiom$gene)))), ")", sep="")
+  
+  
+  plt$color<-sapply(1:nrow(plt), function(x){
+    if(plt$gene[x]%in%sig_de$gene & plt$gene[x]%in%sig_de_negbiom$gene){both}else{
+      if(plt$gene[x]%in%sig_de$gene){sigmast}else{
+        if(plt$gene[x]%in%sig_de_negbiom$gene){signeg}else{ns}}
+    }
+  })
+  
+  plt<-plt[order(plt$color),]
+  MAST_negbinom<-ggplot(plt, aes(-log10(p_val_MAST),-log10(p_val_negbinom), color=color))+geom_point(shape=19)+ylim(0,lim)+xlim(0,lim)+geom_abline()+
+    geom_vline(xintercept=-log10(max(sig_de$p_val_MAST)), color="grey")+geom_hline(yintercept=-log10(max(sig_de_negbiom$p_val_negbinom)), color="grey")+
+    scale_color_manual(values = c("lightgrey","#1b7837","#6f99ff","#ffc026"), name="Significant\n(FDR <0.005\n|FC| > 1)")+theme_bw()+
+    annotate("text", x=250, y=1, label = paste0("Rs = ",signif(cor.test(plt$p_val_MAST, plt$p_val_negbinom, method="spearman")$estimate, 2)))+
+    xlab("MAST\nP Value (-log10)")+ylab("Negative Binomial\nP Value (-log10)")
+  
+  plot_grid(ggplot(plt, aes(-log10(p_val_MAST)))+geom_density(fill="grey")+theme_bw()+xlab(""),get_leg(MAST_negbinom),
+              MAST_negbinom +theme(legend.position = "none") ,
+            ggplot(plt, aes(-log10(p_val_negbinom)))+geom_density(fill="grey")+theme_bw()+xlab("")+coord_flip(),
+              align="v", axis = "l",rel_widths = c(1,0.25), rel_heights = c(0.25,1))}
+
+
+plto_DGE(de_cell, de_cell_negbinom)
+save_plts(plto_DGE(de_cell, de_cell_negbinom), "MAST_negbinom_celltype", w=8,h=8)
+
+plto_DGE(de_sex, de_sex_negbinom)
+save_plts(plto_DGE(de_sex, de_sex_negbinom), "MAST_negbinom_sex", w=8,h=8)
+
+plto_DGE(de_age, de_age_negbinom)
+save_plts(plto_DGE(de_age, de_age_negbinom), "MAST_negbinom_age", w=8,h=8)
+
 
 
