@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --mem=100G
-#SBATCH -J soup_X
+#SBATCH -J DGE_Compare
 #SBATCH -p veryhimem
 #SBATCH -c 32 
 #SBATCH -N 1 
@@ -9,5 +9,5 @@
 
 module load R/4.2.1
 
-Rscript scripts/soupX_explore.R
+Rscript scripts/compare_DGE_methods.R
 
