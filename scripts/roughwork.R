@@ -98,11 +98,11 @@ mcell_mc_from_coclust_balanced(
 ## Removing outlier cells
 #We now have a preliminary metacell object. It is a good practice to make sure all metacells within it are homogeneous. This is done by the outlier scan procedure, which splits metacells whose underlying similarity structure supports the existence of multiple sub-clusters, and removes outlier cells that strongly deviate from their metacell's expression profile.
 
-mcell_plot_outlier_heatmap(mc_id="test_mc", mat_id = "test", T_lfc=3)
-mcell_mc_split_filt(new_mc_id="test_mc_f", 
-            mc_id="test_mc",
-            mat_id="test",
-            T_lfc=3, plot_mats=F)
+                    mcell_plot_outlier_heatmap(mc_id="test_mc", mat_id = "test", T_lfc=3)
+                    mcell_mc_split_filt(new_mc_id="test_mc_f", 
+                                mc_id="test_mc",
+                                mat_id="test",
+                                T_lfc=3, plot_mats=F)
 
 
 ## Selecting markers and coloring metacells
@@ -128,6 +128,11 @@ mcell_mc2d_force_knn(mc2d_id="test_2dproj",mc_id="test_mc_f", graph_id="test_gra
 tgconfig::set_param("mcell_mc2d_height",1000, "metacell")
 tgconfig::set_param("mcell_mc2d_width",1000, "metacell")
 mcell_mc2d_plot(mc2d_id="test_2dproj")
+
+
+
+
+
 
 
 ## Visualizing the MC confusion matrix
@@ -160,3 +165,57 @@ plt(gene1 = 'ALB', gene2 = 'PTPRC', lfp = lfp, colors = mc@colors)
 # It is also useful to browse the lfp table itself. *mcell_mc_export_tab* exports the lfp table to a tab-delimited file. It filters genes with maximal lfp value above the *T_fold* parameter. The function reports the metacell size (n_cells) and mean UMIs per metacell (mean_umis), which is a proxy for the cell size. The group field contains the annotation of the metacell (this will be informative after the metacell coloring functions we'll present below). The metadata field names (columns in the mat object @cell_metadata table) can be supplied to the *metadata_fields* parameter. The function would then breakdown cells in each metacell on the values of the metadata field. Very useful to characterize the metacells if our data has informative metadata features.
 mcell_mc_export_tab(mc_id = "test_sample", gstat_id = mat_id, mat_id = mat_id, T_fold=2, metadata_fields=c('Patient', 'CD8_gate', 'Sex', 'Stage', 'Histology'))
 lfp_tab = read.table(scfigs_fn(mc_id, "log2_mc_fp", ext = "txt"), header=F, sep="\t", stringsAsFactors = F)
+
+
+
+
+######################
+## Compare to louvain
+######################
+metacells<-as.data.frame(mc@mc)
+colnames(metacells)<-"metacell"
+metacells$cell<-rownames(metacells)
+
+
+d10x <- Read10X(data.dir="/home/redgar/Documents/liver_ped_map/data/testmetacell/MacParland_Diana__C93_Frozen_Liver_220919_3pr_V3_1/filtered_feature_bc_matrix")
+d10x<-CreateSeuratObject(counts = d10x, project = "ped_adult_map", min.cells = 0, min.features = 0)
+
+d10x    <- SCTransform(d10x, verbose = F)
+d10x    <- RunPCA(d10x, verbose = F)
+d10x    <- RunUMAP(d10x, dims = 1:30, verbose = F)
+d10x    <- FindNeighbors(d10x, dims = 1:30, verbose = F)
+d10x    <- FindClusters(d10x, verbose = T, resolution = 0.8)
+
+umap_mat<-as.data.frame(Embeddings(object = d10x, reduction = "umap"))#
+umap_mat$cell<-rownames(umap_mat)
+
+meta<-d10x@meta.data
+meta$cell<-rownames(meta)
+
+plt<-merge(meta, umap_mat, by="cell")
+plt<-merge(plt, metacells, by="cell")
+
+plot_grid(
+  ggplot(plt, aes(x=UMAP_1, y=UMAP_2)) +
+  geom_point(aes(color=seurat_clusters)) + 
+  theme_bw(),
+  ggplot(plt, aes(x=UMAP_1, y=UMAP_2)) +
+    geom_point(aes(color=as.factor(metacell))) + 
+    theme_bw(),
+  ncol=1, align="v")
+
+remotes::install_github("davidsjoberg/ggsankey")
+library(ggsankey)
+
+plt$metacell<-as.factor(plt$metacell)
+df <- plt %>%
+  make_long(seurat_clusters, metacell)
+df
+
+ggplot(df, aes(x = x, 
+               next_x = next_x, 
+               node = node, 
+               next_node = next_node,
+               fill = factor(node))) +
+  geom_sankey() +
+  theme_sankey(base_size = 16)

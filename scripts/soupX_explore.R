@@ -18,6 +18,7 @@ library(DropletQC)
 source("scripts/00_pretty_plots.R")
 source("scripts/00_entropy_d10x.R")
 
+#dataset_loc <- here("/media/redgar/Seagate Portable Drive/ped_liver_map_raw")
 dataset_loc <- here("../../../projects/macparland/RE/PediatricAdult/ped_liver_map_raw")
 
 samples<-list.files(dataset_loc)

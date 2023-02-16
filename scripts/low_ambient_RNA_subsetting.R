@@ -131,7 +131,7 @@ tapply(d10x_adultlow_ped$cell, list(d10x_adultlow_ped$CellType_refined,d10x_adul
 ## run DE 
 
 diff_exp_all<-lapply(1:nrow(contrasts_celltype_age), function(x){
-  de<-FindMarkers(d10x_adultlow_ped, ident.1 = contrasts_celltype_age[x,1], ident.2 = contrasts_celltype_age[x,2], test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
+  de<-FindMarkers(d10x_adultlow_ped, ident.1 = contrasts_celltype_age[x,1], ident.2 = contrasts_celltype_age[x,2], test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
   print(paste(contrasts_celltype_age[x,1],"vs", contrasts_celltype_age[x,2],":", nrow(de), sep=" "))
   de$gene<-rownames(de)
   rownames(de)<-NULL
