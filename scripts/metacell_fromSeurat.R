@@ -1,7 +1,17 @@
-
-
-library(Seurat)
+### Load libraries
 library(here)
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(gridExtra)
+library(reshape2)
+library(gtools)
+library(SoupX)
+library(colorspace)
+library(cowplot)
+library(DropletQC)
+
 #library("metacell")
 
 
