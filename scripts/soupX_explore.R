@@ -299,6 +299,16 @@ GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.g
   res = GSEA(gene_list, GO_file, pval = 0.05)
   ## Nothing significant
   
+#########
+## Sample Contamination
+#########
+contamination<-read.csv(here("data/contamination.csv"))
+contamination$caud<-sapply(1:nrow(contamination), function(x) strsplit(contamination$Sample_ID[x],"_")[[1]][1])
+cont_box<-ggplot(contamination, aes(Age.Group, Contamination.estimate, fill=Age.Group))+geom_boxplot()+
+  geom_point(shape=21, size=2)+geom_text(aes(label=caud),hjust = 0, nudge_x = 0.05)+
+  fillscale_age+th_present+ theme(legend.position = "none")
+save_plts(cont_box, "SoupX_contamination", w=3,h=5)
+  
   
 #   
 #   plt_path<-res$Results
