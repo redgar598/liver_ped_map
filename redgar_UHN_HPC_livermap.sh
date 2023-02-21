@@ -43,7 +43,6 @@ sbatch de_monte_carlo_notparallel.sh
 sbatch metacell.sh
 
 
-
 sbatch test_run.sh
 
 
@@ -153,3 +152,6 @@ wget 'ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE166nnn/GSE166504/suppl/GSE166504_
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/spatial_scRNAseq/data/reference_datasets/mouse_liver_GSE166504/GSE166504_cell_raw_counts_Hepatocyte_Chow_Animal2.csv /home/redgar/Documents/spatial_scRNAseq/data/reference_datasets/mouse_liver_GSE166504
 
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/DGE_compare.Rdata /home/redgar/Documents/liver_ped_map/data
+
+
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/d10x_adult_ped_raw_noSoupX.rds /media/redgar/Seagate\ Portable\ Drive/processed_data
