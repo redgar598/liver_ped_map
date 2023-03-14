@@ -55,8 +55,6 @@ sbatch test_run.sh
 ######
 ssh t117652uhn@h4huhndata1.uhnresearch.ca
 
-scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw t117652uhn@h4huhndata1.uhnresearch.ca://cluster/projects/macparland/RE/PediatricAdult/
-
 
 ##########
 # monte carlo cell type - age
@@ -85,24 +83,18 @@ done
 
 ### big raw data move
 #ssh t117652uhn@h4huhndata1.uhnresearch.ca
-
-scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/
 scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_jan16_2023.csv t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw
 
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/C39_NPC_june6_2017 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/C39_TLH_june6_2017 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
-scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/X210026__SingleCell_C88_14Oct21_3pr_V3_1 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
-scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParlnd_Sai__C97_3pr_V3_1 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/C54_3prV2_12Apr18 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/X210026__SingleCell_C88_14Oct21_3pr_V3_1 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Jawairia__C104_Bx_5pr_V2 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sonya__C68_Total_liver t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
-scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Jawairia__C104_Bx_5pr_V2 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 
-
-
-
-
-scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Jawairia__C104_Bx_5pr_V2 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParlnd_Sai__C97_3pr_V3_1 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+
+
 
 
 

@@ -26,7 +26,7 @@ samples<-samples[-grep("data_transfer",samples)]
 print(samples)
 
 #meta<-read.table(here("data/data_transfer_updated_mar14_2023.csv"), header=T, sep=",")
-meta<-read.table(here(dataset_loc,"data_transfer_updated_mar14_2023.csv"), header=T, sep=",")
+meta<-read.table(here(dataset_loc,"data_transfer_updated_mar14_2023_no39.csv"), header=T, sep=",")
 
 d10x.list <- sapply(1:length(samples), function(y){
   caud<-meta$Sample_ID[which(meta$file == samples[y])]
