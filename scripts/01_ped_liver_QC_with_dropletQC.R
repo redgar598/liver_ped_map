@@ -97,7 +97,7 @@ d10x.list <- sapply(1:length(samples), function(y){
   ######
   ## dropletQC
   ######
-  if(file.exists(file.path(dataset_loc,paste(samples[y],"/outs", sep=""),"possorted_genome_bam.bam.bai"))){
+  if(file.exists(file.path(dataset_loc,paste(samples[y],"/outs", sep=""),"possorted_genome_bam.bam"))){
     nf1 <- nuclear_fraction_tags(
       outs = file.path(dataset_loc,paste(samples[y],"/outs", sep="")),
       tiles = 1, cores = 1, verbose = FALSE)
