@@ -1,3 +1,8 @@
+if (!requireNamespace("remotes", quietly = TRUE)) {
+  install.packages("remotes")
+}
+remotes::install_github("mojaveazure/seurat-disk")
+
 library(SeuratDisk)
 library(Seurat)
 library(here)
