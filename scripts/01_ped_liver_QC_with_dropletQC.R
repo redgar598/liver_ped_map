@@ -25,8 +25,8 @@ samples<-list.files(dataset_loc)
 samples<-samples[-grep("data_transfer",samples)]
 print(samples)
 
-#meta<-read.table(here("data/data_transfer_updated_mar14_2023.csv"), header=T, sep=",")
-meta<-read.table(here(dataset_loc,"data_transfer_updated_mar14_2023.csv"), header=T, sep=",")
+#meta<-read.table(here("data/data_transfer_updated_mar20_2023.csv"), header=T, sep=",")
+meta<-read.table(here(dataset_loc,"data_transfer_updated_mar20_2023.csv"), header=T, sep=",")
 
 d10x.list <- sapply(1:length(samples), function(y){
   caud<-meta$Sample_ID[which(meta$file == samples[y])]
@@ -652,14 +652,25 @@ DotPlot(object = d10x.combined, features = HSCs_genes[15:27])+xlab("HSC Marker")
 DotPlot(object = d10x.combined, features = Macrophage_genes)+xlab("Macrophage Marker")
 dev.off()
 
+
+## 35 weird
+ggplot(d10x.combined@meta.data, aes(seurat_clusters, percent.mt))+geom_violin()
+ggplot(d10x.combined@meta.data, aes(seurat_clusters, nuclear_fraction))+geom_violin()
+table(d10x.combined@meta.data$seurat_clusters, d10x.combined@meta.data$cell_status)
+plt_entropy_individual<-entropy_d10(d10x.combined, "individual")
+entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined)
+entropy_individual
+plt_entropy_individual<-entropy_d10(d10x.combined, "cell_status")
+entropy_individual<-entropy_plt(plt_entropy_individual, "cell_status", d10x.combined)
+entropy_individual
+FeaturePlot(d10x.combined, reduction = "umap", split.by = "individual", features="ALB",ncol=3, pt.size=1)
+
 #relabel some clusters
 DefaultAssay(d10x.combined) <- "integrated"
 d10x.combined@meta.data$CellType_rough<-as.character(d10x.combined@meta.data$CellType_rough)
-d10x.combined@meta.data$CellType_rough[which(d10x.combined@meta.data$seurat_clusters=="2")]<-"LSEC\n(Hepatocyte Like)"
-d10x.combined@meta.data$CellType_rough[which(d10x.combined@meta.data$seurat_clusters=="25")]<-"LSEC\n(Hepatocyte Like)"
-d10x.combined@meta.data$CellType_rough[which(d10x.combined@meta.data$seurat_clusters=="23")]<-"Low Quality"
-d10x.combined@meta.data$CellType_rough[which(d10x.combined@meta.data$seurat_clusters=="17")]<-"Low Quality"
-d10x.combined@meta.data$CellType_rough[which(d10x.combined@meta.data$seurat_clusters=="22")]<-"Low Quality"
+d10x.combined@meta.data$CellType_rough[which(d10x.combined@meta.data$seurat_clusters=="30")]<-"Low Quality"
+d10x.combined@meta.data$CellType_rough[which(d10x.combined@meta.data$seurat_clusters=="3")]<-"Low Quality"
+d10x.combined@meta.data$CellType_rough[which(d10x.combined@meta.data$seurat_clusters=="11")]<-"Low Quality"
 
 
 

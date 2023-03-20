@@ -195,7 +195,7 @@ alb_exp<-FetchData(object = d10x, vars = c("ALB"))
 alb_exp$cell<-rownames(alb_exp)
 rm(d10x)
 
-load(here("data","adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+load(here("data","adult_ped_integrated.rds"))
 head(d10x.combined)
 
 umap_mat<-as.data.frame(Embeddings(object = d10x.combined, reduction = "umap"))#
@@ -205,6 +205,8 @@ meta<-d10x.combined@meta.data
 meta$cell<-rownames(meta)
 
 plt<-merge(meta, umap_mat, by="cell")
+alb_exp$cell<-sapply(1:nrow(alb_exp), function(x){strsplit(alb_exp$cell[x],"-")[[1]][1]})
+plt$cell<-sapply(1:nrow(plt), function(x){strsplit(plt$cell[x],"-")[[1]][1]})
 plt<-merge(plt, alb_exp, by="cell")
 
 
@@ -220,6 +222,18 @@ ALB_count_after_soup<-ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour =
                                   na.value = "grey80")
 
 save_plts(ALB_count_after_soup, "ALB_soup_change", w=10,h=4.5)
+
+ALB_count_after_soup<-ggplot(plt, aes(UMAP_1, UMAP_2)) + geom_point(aes(colour = ALB), size=0.5)+
+  facet_wrap(~individual)+
+  theme_bw()+scale_color_gradient2(name = "ALB\ncount", trans = "log",
+                                   breaks = my_breaks, labels = my_breaks,
+                                   low = "white",
+                                   high = "blue",
+                                   midpoint = 0,
+                                   na.value = "grey80")
+
+save_plts(ALB_count_after_soup, "ALB_soup_change_individual", w=14,h=10)
+
 
 
 #############################################
