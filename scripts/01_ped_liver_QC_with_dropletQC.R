@@ -28,6 +28,9 @@ print(samples)
 #meta<-read.table(here("data/data_transfer_updated_mar20_2023.csv"), header=T, sep=",")
 meta<-read.table(here(dataset_loc,"data_transfer_updated_mar20_2023.csv"), header=T, sep=",")
 
+samples<-samples[which(samples%in%meta$file)]
+
+
 d10x.list <- sapply(1:length(samples), function(y){
   caud<-meta$Sample_ID[which(meta$file == samples[y])]
   print(caud)
