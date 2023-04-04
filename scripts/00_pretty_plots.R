@@ -4,12 +4,13 @@ save_plts<-function(plt, name, w,h){
   ggsave(plt, file=paste(here("figures/jpeg/"),name,".jpeg", sep=""), w=w, h=h)}
 
 
-myColors_celltype <- c("#660cc7","#8642d1","#5612a3","#4b911d","#b83b3b","#006d2c","#6bbce8","#3469ad","#d17906","#b01e87","#60ba5d","#207537",
+myColors_celltype <- c("#660cc7","#8642d1","#5612a3","#4b911d","#7a4202","#006d2c","#6bbce8","#3469ad","#d17906","#b01e87","#60ba5d","#207537",
                        "#a0c487","#d9a5a5","#87a4c9","#e8c392","#dea4ce","#79639a",
-                       "#207537","#f7057d","#b80783","#811453","#431039")
+                       "#207537","#fa61ad","#b80783","#994676","#431039","#cb181d","maroon1","#67000d","grey","#ce1256","#a6d96a")
 color_possibilities_celltype<-c("B-cells","Mature B-cells","Plasma cells","CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","LSEC","Myeloid cells","NK-like cells", "NK and T cells",
                                 "NKT cells\n(Hepatocyte Like)","Cholangiocytes\n(Hepatocyte Like)","HSC\n(Hepatocyte Like)","LSEC\n(Hepatocyte Like)","Myeloid cells\n(Hepatocyte Like)","B-cells\n(Hepatocyte Like)",
-                                "NKT cells","RR Myeloid","KC Like","Neutrophil","Neutrophil\n(DEFA+)")
+                                "NKT cells","RR Myeloid","KC Like","Neutrophil","Neutrophil\n(DEFA+)","Erythrocytes","Mast cell","Myeloid Erythrocytes\n(phagocytosis)",
+                                "Doublet","Macrophage\n(MHCII high)","Cycling T-cells")
 names(myColors_celltype) <- color_possibilities_celltype
 fillscale_cellType <- scale_fill_manual(name="Cell Type",
                                         values = myColors_celltype, drop = T, limits=force)
