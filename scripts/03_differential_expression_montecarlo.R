@@ -223,10 +223,8 @@ d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNorm
 
 
 ## testing factor
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC")]<-"LSEC_nothep"
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil")]<-"Neutrophil_notDEFA"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Macrophage\n(MHCII high)")]<-"Marcophage_MHCII"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Myeloid Erythrocytes\n(phagocytosis)")]<-"Myeloid_Erythrocytes_phagocytosis"
 
 d10x$cell_age<-paste(d10x$CellType_refined, d10x$AgeGroup, sep = "_")
 Idents(d10x) <- "cell_age"
@@ -239,9 +237,13 @@ table(d10x$CellType_refined, d10x$AgeGroup)
 #and linear regression for the continuous process (i.e., the expression level). 
 
 cell_types<-unique(as.character(d10x$CellType_refined))
-cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
+
+# too few mast cells and too few phagocytosis
+cell_types<-cell_types[-grep("Mast cell",cell_types)]
+cell_types<-cell_types[-grep("Myeloid_Erythrocytes_phagocytosis",cell_types)]
 #no neutrophils in peds
 cell_types<-cell_types[-grep("Neutrophil",cell_types)]
+cell_types<-cell_types[-grep("Doublet",cell_types)]
 cell_types<-cell_types[-grep("Low Quality",cell_types)]
 cell_types[grep("CD3",cell_types)]<-"CD3"
 

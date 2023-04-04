@@ -665,7 +665,7 @@ ggplot(plt_KCRR, aes(Age,kuffer_like_score1))+geom_point()+
 ##############
 load(here("data","adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
-table(d10x.combined$CellType_refined)
+table(d10x.combined$CellType_refined, d10x.combined$individual)
 
 myeloid_cells<-d10x.combined@meta.data[which(d10x.combined@meta.data$CellType_refined%in%c("KC Like","RR Myeloid")),]
 myeloid_cells$CellType_refined<-as.character(myeloid_cells$CellType_refined)
@@ -677,7 +677,7 @@ sum_df$RR_KC_ratio<-sum_df$`RR Myeloid`/sum_df$`KC Like`
 sum_df<-sum_df[which(sum_df$`KC Like`>10),]
 sum_df<-sum_df[which(sum_df$`RR Myeloid`>10),]
 
-meta<-read.table(here("data","data_transfer_updated_jan16_2023.csv"), header=T, sep=",")
+meta<-read.table(here("data","data_transfer_updated_mar20_2023.csv"), header=T, sep=",")
 
 sum_df<-merge(sum_df, meta,by.x="individual", by.y="Sample_ID")
 
@@ -699,7 +699,7 @@ ggplot(sum_df, aes(AgeGroup,RR_KC_ratio))+
 ###################
 ## Just with KC of RR myeloid
 ###################
-plt_KCRR<-plt_myeloid[which(plt_myeloid$CellType_refined %in% c("KC Like","RR Myeloid","Myeloid cells\n(Hepatocyte Like)")),]
+plt_KCRR<-plt_myeloid[which(plt_myeloid$CellType_refined %in% c("KC Like","RR Myeloid","Macrophage\n(MHCII high)")),]
 plt_KCRR$CellType_refined<-as.character(plt_KCRR$CellType_refined)
 
 cell_num_myeloid_type<-as.data.frame(table(as.factor(plt_KCRR$AgeGroup)))

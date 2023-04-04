@@ -153,7 +153,7 @@ meta$cell<-rownames(meta)
 plt<-merge(meta, umap_mat, by="cell")
 
 
-d10x.combined_NK_T_B<-subset(d10x.combined, subset = CellType_rough %in% c("CD3_Tcell","nkTcell","gdTcell"))
+d10x.combined_NK_T_B<-subset(d10x.combined, subset = CellType_rough %in% c("NK and T cells"))
 d10x.combined_NK_T_B <- RunPCA(d10x.combined_NK_T_B, npcs = 30, verbose = FALSE)
 d10x.combined_NK_T_B <- RunUMAP(d10x.combined_NK_T_B, reduction = "pca", dims = 1:30)
 umap_mat_Tcell<-as.data.frame(Embeddings(object = d10x.combined_NK_T_B, reduction = "umap"))#
@@ -164,7 +164,7 @@ plt_Tcell<-merge(meta_Tcell, umap_mat_Tcell, by="cell")
 cell_num_tcell<-as.data.frame(table(plt_Tcell$AgeGroup))
 colnames(cell_num_tcell)<-c("AgeGroup","CellCount")
 
-d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_rough %in% c("Myeloid"))
+d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_rough %in% c("Myeloid cells"))
 d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
 d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
 umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_myeloid, reduction = "umap"))#
