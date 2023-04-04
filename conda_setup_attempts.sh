@@ -10,10 +10,14 @@ conda install jupyter
 conda install python=3.6.6
 
 conda activate fetal_liver
+pip install notebook
 jupyter notebook
 
-cd /Documents/liver_ped_map/scripts
-python fetal_liver.py
+ 
+
+
+#cd /Documents/liver_ped_map/scripts
+#python fetal_liver.py
 
 import anndata
 adata = anndata.read("/cluster/projects/macparland/RE/PediatricAdult/fetal_liver/download.h5ad")

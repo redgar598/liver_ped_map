@@ -3,7 +3,7 @@ library(Seurat)
 library(here)
 
 #https://developmental.cellatlas.io/fetal-liver
-#fetal_liver_h5ad <- Convert(here("/media/redgar/Seagate Portable Drive/fetal_liver/download.h5ad"), ".h5seurat", overwrite= TRUE)
+fetal_liver_h5ad <- Convert(here("/media/redgar/Seagate Portable Drive/fetal_liver/download.h5ad"), ".h5seurat", overwrite= TRUE)
 fetal_liver_h5ad <- Convert(here("../../../projects/macparland/RE/PediatricAdult/fetal_liver/download.h5ad"), ".h5seurat", overwrite= TRUE)
 fetal_liver_h5ad <- Convert(here("../../Downloads/fetal_liver_alladata.h5ad"), ".h5seurat", overwrite= TRUE)
 
