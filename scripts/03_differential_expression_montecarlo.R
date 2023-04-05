@@ -205,6 +205,8 @@ identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
 
+################## remove line once updated main script meta data ########################
+d10x@meta.data$Sex[which(d10x@meta.data$individual=="C104_bx5pr")]<-"M"
 
 ##############
 ### Difference in proportion with age
