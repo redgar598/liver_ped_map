@@ -3,6 +3,12 @@ save_plts<-function(plt, name, w,h){
   ggsave(plt, file=paste(here("figures/"),name,".pdf", sep=""), w=w, h=h)
   ggsave(plt, file=paste(here("figures/jpeg/"),name,".jpeg", sep=""), w=w, h=h)}
 
+save_fetal_plts<-function(plt, name, w,h){
+  ggsave(plt, file=paste(here("figures/fetal/"),name,".pdf", sep=""), w=w, h=h)
+  ggsave(plt, file=paste(here("figures/fetal/jpeg/"),name,".jpeg", sep=""), w=w, h=h)}
+
+
+
 
 myColors_celltype <- c("#660cc7","#8642d1","#5612a3","#4b911d","#7a4202","#006d2c","#6bbce8","#3469ad","#d17906","#b01e87","#60ba5d","#207537",
                        "#a0c487","#d9a5a5","#87a4c9","#e8c392","#dea4ce","#79639a",

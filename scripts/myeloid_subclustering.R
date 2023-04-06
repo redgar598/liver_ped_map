@@ -74,9 +74,10 @@ save_plts(myeloid_density_markers, "myeloid_density_markers", w=6,h=4)
 
 
 ##############
-## fibrotic or regenerative macrophages
+## fibrotic or regenerative macrophages and other markers
 ##############
 FeaturePlot(d10x.combined_myeloid, features = c("CD86","MRC1"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_myeloid, features = c("TREM2"), min.cutoff = "q9", pt.size=1)
 
 
             # myeliod_clusters<-d10x.combined_myeloid@meta.data

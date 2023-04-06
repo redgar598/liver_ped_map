@@ -6,6 +6,8 @@ conda activate fetal_liver
 conda install -c bioconda anndata
 conda install -c conda-forge jupyter_core
 conda install jupyter
+conda install -c bioconda scanpy
+
 
 conda install python=3.6.6
 
