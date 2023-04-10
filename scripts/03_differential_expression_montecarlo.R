@@ -310,7 +310,9 @@ de_lists<-sapply(1:samp_num, function(x){
   de$cell.1<-contrasts_celltype[1]
   de$cell.2<-contrasts_celltype[2]
   
-  de[which(de$p_val_adj < 0.005 & abs(de$avg_log2FC) > 1),]$gene
+  # more relaxed FDR and no FC 
+  #de[which(de$p_val_adj < 0.005 & abs(de$avg_log2FC) > 1),]$gene
+  de[which(de$p_val_adj < 0.05),]$gene
 })
 
 sig_gene_count<-unlist(de_lists)

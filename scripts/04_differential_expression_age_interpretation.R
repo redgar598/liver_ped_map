@@ -492,20 +492,24 @@ Idents(d10x) <- "cell_age"
 table(d10x$CellType_refined, d10x$AgeGroup)
 
 ## testing factor
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC")]<-"LSEC_nothep"
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil")]<-"Neutrophil_notDEFA"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Macrophage\n(MHCII high)")]<-"Marcophage_MHCII"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Myeloid Erythrocytes\n(phagocytosis)")]<-"Myeloid_Erythrocytes_phagocytosis"
 
 
 ##########
 ## Load DE Results
 ##########
 cell_types<-unique(as.character(d10x$CellType_refined))
-cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
+
+# too few mast cells and too few phagocytosis
+cell_types<-cell_types[-grep("Mast cell",cell_types)]
+cell_types<-cell_types[-grep("Myeloid_Erythrocytes_phagocytosis",cell_types)]
 #no neutrophils in peds
 cell_types<-cell_types[-grep("Neutrophil",cell_types)]
+cell_types<-cell_types[-grep("Doublet",cell_types)]
 cell_types<-cell_types[-grep("Low Quality",cell_types)]
+##Erythrocytes didn't run?
+cell_types<-cell_types[-grep("Erythrocytes",cell_types)]
 cell_types
 
 DE_monte_carlo<-do.call(rbind, lapply(cell_types, function(celltype){
@@ -570,19 +574,19 @@ summary_tbl[which(summary_tbl$gene%in%c(type1_IFN,IFNa,IFNg)),]
 Idents(d10x) <- "AgeGroup"
 
 DE_monte_carlo_sig$cell<-as.factor(DE_monte_carlo_sig$cell)
-levels(DE_monte_carlo_sig$cell)<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","KC Like",
-                                   "Mature B-cells", "NK-like cells",
-                                   "Plasma cells","RR Myeloid") 
+# levels(DE_monte_carlo_sig$cell)<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","KC Like",
+#                                    "Mature B-cells", "NK-like cells",
+#                                    "Plasma cells","RR Myeloid") 
 
 cell_types<-as.factor(cell_types)
-levels(cell_types)<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","KC Like",
-                      "LSEC","Mature B-cells", "NK-like cells",
-                      "Plasma cells","RR Myeloid") 
+# levels(cell_types)<-c("CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","KC Like",
+#                       "LSEC","Mature B-cells", "NK-like cells",
+#                       "Plasma cells","RR Myeloid") 
 
 d10x$CellType_refined<-as.factor(d10x$CellType_refined)
-levels(d10x$CellType_refined)<-c("Mature B-cells","Plasma cells", "CD3+ T-cells","gd T-cells","NK-like cells","Cholangiocytes",
-                                 "LSEC","LSEC\n(Hepatocyte Like)", "Myeloid cells", "Myeloid cells\n(Hepatocyte Like)", "RR Myeloid", "KC Like",
-                                 "Neutrophil","Neutrophil\n(DEFA+)","HSC","Hepatocytes", "Low Quality") 
+# levels(d10x$CellType_refined)<-c("Mature B-cells","Plasma cells", "CD3+ T-cells","gd T-cells","NK-like cells","Cholangiocytes",
+#                                  "LSEC","LSEC\n(Hepatocyte Like)", "Myeloid cells", "Myeloid cells\n(Hepatocyte Like)", "RR Myeloid", "KC Like",
+#                                  "Neutrophil","Neutrophil\n(DEFA+)","HSC","Hepatocytes", "Low Quality") 
 
 
 
@@ -631,19 +635,25 @@ plot_key_genes(exhausted_tcells, "exhausted_tcells_montecarlo")
 ########
 ## interpret DGE
 ########
+################## remove line once updated main script meta data ########################
+d10x@meta.data$Sex[which(d10x@meta.data$individual=="C104_bx5pr")]<-"M"
+
+
 ## testing factor
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC\n(Hepatocyte Like)")]<-"LSEC_hep"
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="LSEC")]<-"LSEC_nothep"
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil\n(DEFA+)")]<-"Neutrophil_DEFA"
-levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Neutrophil")]<-"Neutrophil_notDEFA"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Macrophage\n(MHCII high)")]<-"Marcophage_MHCII"
+levels(d10x$CellType_refined)[which(levels(d10x$CellType_refined)=="Myeloid Erythrocytes\n(phagocytosis)")]<-"Myeloid_Erythrocytes_phagocytosis"
 
 d10x$cell_age<-paste(d10x$CellType_refined, d10x$AgeGroup, sep = "_")
 Idents(d10x) <- "cell_age"
 
 cell_types<-unique(as.character(d10x$CellType_refined))
-cell_types<-cell_types[-grep("Hepatocyte Like",cell_types)]
+
+# too few mast cells and too few phagocytosis
+cell_types<-cell_types[-grep("Mast cell",cell_types)]
+cell_types<-cell_types[-grep("Myeloid_Erythrocytes_phagocytosis",cell_types)]
 #no neutrophils in peds
 cell_types<-cell_types[-grep("Neutrophil",cell_types)]
+cell_types<-cell_types[-grep("Doublet",cell_types)]
 cell_types<-cell_types[-grep("Low Quality",cell_types)]
 cell_types[grep("CD3",cell_types)]<-"CD3"
 
@@ -780,6 +790,8 @@ vol_celltype("RR")
 vol_celltype("KC")
 vol_celltype("NK")
 vol_celltype("HSC")
+vol_celltype("Marcophage_MHCII_Adult")
+
 
 ######
 ## FC correlation plot RR-KC
