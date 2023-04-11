@@ -83,6 +83,8 @@ cat ./E-MTAB-7407-unix-ftp_liver.txt | sh
 
 cat /media/redgar/Seagate\ Portable\ Drive/fetal_liver/scp_liver_only.txt| xargs -i scp {} t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/fetal_liver
 
+scp /media/redgar/Seagate\ Portable\ Drive/fetal_liver/E-MTAB-7407.sdrf.txt  t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/fetal_liver
+
 
 #################
 ### Moving files
