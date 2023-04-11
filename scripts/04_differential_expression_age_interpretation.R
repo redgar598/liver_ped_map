@@ -519,6 +519,10 @@ DE_monte_carlo<-do.call(rbind, lapply(cell_types, function(celltype){
 
 DE_monte_carlo_sig<-DE_monte_carlo[which(DE_monte_carlo$monte_carlo_sig<0.001),]
 
+## check a gene
+DE_monte_carlo_sig[grep("ARG", DE_monte_carlo_sig$gene),]
+
+
 table(DE_monte_carlo_sig$cell)
 table(DE_monte_carlo_sig$gene)[which(table(DE_monte_carlo_sig$gene)>0)]
 length(unique(DE_monte_carlo_sig$gene))
@@ -810,7 +814,7 @@ diff_exp_all_celltype$sig<-sapply(1:nrow(diff_exp_all_celltype), function(x){
 })
 
 diff_exp_all_celltype_label<-diff_exp_all_celltype[which(diff_exp_all_celltype$gene%in%c(sig_MC_KC$gene,sig_MC_RR$gene)),]
-
+diff_exp_all_celltype_label<-diff_exp_all_celltype_label[which(abs(diff_exp_all_celltype_label$avg_log2FC_RR)>2 | abs(diff_exp_all_celltype_label$avg_log2FC_KC)>2),]
 
 ggplot(diff_exp_all_celltype, aes(avg_log2FC_RR, avg_log2FC_KC, color=sig))+geom_point()+th_present+theme_bw()+
   ylab("KC Differential Expression\n(Fold change)")+xlab("RR Differential Expression\n(log2 Fold change)")+
@@ -819,10 +823,42 @@ ggplot(diff_exp_all_celltype, aes(avg_log2FC_RR, avg_log2FC_KC, color=sig))+geom
   geom_vline(xintercept = c(-1,1), color="grey")+  geom_hline(yintercept = c(-1,1), color="grey")+
   ylim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
   xlim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
-  annotate("text", x=2, y=3.6, label="Higher Expression in Adults")+
-  annotate("text", x=-3.5, y=-3.8, label="Higher Expression in Peds")
+  annotate("text", x=2, y=4.2, label="Higher Expression in Adults")+
+  annotate("text", x=-3, y=-3.8, label="Higher Expression in Peds")
 ggsave(file=here("figures/FC_correlation_KC_RR_differential_Ped_adult.pdf"), h=7, w=8)
 ggsave(file=here("figures/jpeg/FC_correlation_KC_RR_differential_Ped_adult.jpeg"), h=7, w=8)
+
+
+######
+## FC correlation plot MHC-KC
+######
+diff_exp_all_celltype<-merge(diff_exp_all[grep("MHC", diff_exp_all$cell.1),], diff_exp_all[grep("KC", diff_exp_all$cell.1),], by="gene",  suffixes = c("_MHC","_KC"))
+
+sig_MC_MHC<-DE_monte_carlo_sig[grep("MHC",DE_monte_carlo_sig$cell),]
+sig_MC_KC<-DE_monte_carlo_sig[grep("KC",DE_monte_carlo_sig$cell),]
+
+diff_exp_all_celltype$sig<-sapply(1:nrow(diff_exp_all_celltype), function(x){
+  if(diff_exp_all_celltype$gene[x]%in%sig_MC_RR$gene & diff_exp_all_celltype$gene[x]%in%sig_MC_KC$gene){"both"}else{
+    if(diff_exp_all_celltype$gene[x]%in%sig_MC_MHC$gene){"MHCII only"}else{
+      if(diff_exp_all_celltype$gene[x]%in%sig_MC_KC$gene){"KC only"}else{"NS"}
+    }
+  }
+})
+
+diff_exp_all_celltype_label<-diff_exp_all_celltype[which(diff_exp_all_celltype$gene%in%c(sig_MC_KC$gene,sig_MC_MHC$gene)),]
+diff_exp_all_celltype_label<-diff_exp_all_celltype_label[which(abs(diff_exp_all_celltype_label$avg_log2FC_MHC)>2 | abs(diff_exp_all_celltype_label$avg_log2FC_KC)>2),]
+
+ggplot(diff_exp_all_celltype, aes(avg_log2FC_MHC, avg_log2FC_KC, color=sig))+geom_point()+th_present+theme_bw()+
+  ylab("KC Differential Expression\n(Fold change)")+xlab("MHCII Differential Expression\n(log2 Fold change)")+
+  scale_color_manual(values = c("red","#f7057d","#b80783","grey"))+
+  geom_text(aes(label=gene),diff_exp_all_celltype_label,color="black",vjust=-0.75, hjust=1,size=3)+
+  geom_vline(xintercept = c(-1,1), color="grey")+  geom_hline(yintercept = c(-1,1), color="grey")+
+  ylim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
+  xlim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
+  annotate("text", x=2, y=4.2, label="Higher Expression in Adults")+
+  annotate("text", x=-3, y=-3.8, label="Higher Expression in Peds")
+ggsave(file=here("figures/FC_correlation_KC_MHCII_differential_Ped_adult.pdf"), h=7, w=8)
+ggsave(file=here("figures/jpeg/FC_correlation_KC_MHCII_differential_Ped_adult.jpeg"), h=7, w=8)
 
 
 
@@ -844,6 +880,7 @@ diff_exp_all_celltype$sig<-sapply(1:nrow(diff_exp_all_celltype), function(x){
 })
 
 diff_exp_all_celltype_label<-diff_exp_all_celltype[which(diff_exp_all_celltype$gene%in%c(sig_MC_KC$gene,sig_MC_NK$gene)),]
+diff_exp_all_celltype_label<-diff_exp_all_celltype_label[which(abs(diff_exp_all_celltype_label$avg_log2FC_NK)>2 | abs(diff_exp_all_celltype_label$avg_log2FC_KC)>2),]
 
 ggplot(diff_exp_all_celltype, aes(avg_log2FC_NK, avg_log2FC_KC, color=sig))+geom_point()+th_present+theme_bw()+
   ylab("KC Differential Expression\n(Fold change)")+xlab("NK Differential Expression\n(log2 Fold change)")+
@@ -856,6 +893,47 @@ ggplot(diff_exp_all_celltype, aes(avg_log2FC_NK, avg_log2FC_KC, color=sig))+geom
   annotate("text", x=-3.5, y=-3.8, label="Higher Expression in Peds")
 ggsave(file=here("figures/FC_correlation_KC_NK_differential_Ped_adult.pdf"), h=7, w=8)
 ggsave(file=here("figures/jpeg/FC_correlation_KC_NK_differential_Ped_adult.jpeg"), h=7, w=8)
+
+
+
+
+
+
+
+######
+## FC correlation plot RR-MHCII
+######
+diff_exp_all_celltype<-merge(diff_exp_all[grep("MHC", diff_exp_all$cell.1),], diff_exp_all[grep("RR", diff_exp_all$cell.1),], by="gene",  suffixes = c("_MHC","_RR"))
+
+sig_MC_MHC<-DE_monte_carlo_sig[grep("MHC",DE_monte_carlo_sig$cell),]
+sig_MC_RR<-DE_monte_carlo_sig[grep("RR",DE_monte_carlo_sig$cell),]
+
+diff_exp_all_celltype$sig<-sapply(1:nrow(diff_exp_all_celltype), function(x){
+  if(diff_exp_all_celltype$gene[x]%in%sig_MC_MHC$gene & diff_exp_all_celltype$gene[x]%in%sig_MC_RR$gene){"both"}else{
+    if(diff_exp_all_celltype$gene[x]%in%sig_MC_MHC$gene){"NK only"}else{
+      if(diff_exp_all_celltype$gene[x]%in%sig_MC_RR$gene){"RR only"}else{"NS"}
+    }
+  }
+})
+
+diff_exp_all_celltype_label<-diff_exp_all_celltype[which(diff_exp_all_celltype$gene%in%c(sig_MC_RR$gene,sig_MC_MHC$gene)),]
+diff_exp_all_celltype_label<-diff_exp_all_celltype_label[which(abs(diff_exp_all_celltype_label$avg_log2FC_MHC)>2 | abs(diff_exp_all_celltype_label$avg_log2FC_RR)>2),]
+
+ggplot(diff_exp_all_celltype, aes(avg_log2FC_MHC, avg_log2FC_RR, color=sig))+geom_point()+th_present+theme_bw()+
+  ylab("RR Differential Expression\n(Fold change)")+xlab("MHCII Differential Expression\n(log2 Fold change)")+
+  scale_color_manual(values = c("red","#f7057d","#b80783","grey"))+
+  geom_text(aes(label=gene),diff_exp_all_celltype_label,color="black",vjust=-0.75, hjust=1,size=3)+
+  geom_vline(xintercept = c(-1,1), color="grey")+  geom_hline(yintercept = c(-1,1), color="grey")+
+  ylim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
+  xlim(c(min(diff_exp_all$avg_log2FC),max(diff_exp_all$avg_log2FC)))+
+  annotate("text", x=2, y=3.6, label="Higher Expression in Adults")+
+  annotate("text", x=-3.5, y=-3.8, label="Higher Expression in Peds")
+ggsave(file=here("figures/FC_correlation_RR_MHCII_differential_Ped_adult.pdf"), h=7, w=8)
+ggsave(file=here("figures/jpeg/FC_correlation_RR_MHCII_differential_Ped_adult.jpeg"), h=7, w=8)
+
+
+
+
 
 ######
 ## FC correlation plot RR-NK
@@ -888,3 +966,65 @@ ggsave(file=here("figures/FC_correlation_RR_NK_differential_Ped_adult.pdf"), h=7
 ggsave(file=here("figures/jpeg/FC_correlation_RR_NK_differential_Ped_adult.jpeg"), h=7, w=8)
 
 
+
+
+
+
+
+
+
+
+
+
+
+############
+## myeloid hits
+############
+
+load(here("data","adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+
+d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_rough %in% c("Myeloid cells"))
+rm(d10x.combined)
+gc()
+d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.1)
+
+DimPlot(d10x.combined_myeloid, label=T, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  annotate("text",x=-11, y=-12, label=paste0("n = ",comma(ncol(d10x.combined_myeloid))))
+
+## KC
+KC_gene_stat<-DE_monte_carlo_sig[grep("KC", DE_monte_carlo_sig$cell),]
+KC_gene_FC<-diff_exp_all[grep("KC", diff_exp_all$cell.1),]
+KC_gene_FC_sig<-KC_gene_FC[which(KC_gene_FC$gene%in%KC_gene_stat$gene),]
+KC_gene_FC_sig[which(KC_gene_FC_sig$avg_log2FC<0),]
+FeaturePlot(d10x.combined_myeloid, features = c("CCL4","CCL3","IL1B","C1QC"),split.by = "AgeGroup", min.cutoff = "q9", pt.size=0.1)
+
+## RR
+RR_gene_stat<-DE_monte_carlo_sig[grep("RR", DE_monte_carlo_sig$cell),]
+RR_gene_FC<-diff_exp_all[grep("RR", diff_exp_all$cell.1),]
+RR_gene_FC_sig<-RR_gene_FC[which(RR_gene_FC$gene%in%RR_gene_stat$gene),]
+RR_gene_FC_sig[which(RR_gene_FC_sig$avg_log2FC<0),]
+FeaturePlot(d10x.combined_myeloid, features = c("HMOX1","HSPA1A","AREG","TREM2"),split.by = "AgeGroup", min.cutoff = "q9", pt.size=0.1)
+
+## MHCII
+MHC_gene_stat<-DE_monte_carlo_sig[grep("MHC", DE_monte_carlo_sig$cell),]
+MHC_gene_FC<-diff_exp_all[grep("MHC", diff_exp_all$cell.1),]
+MHC_gene_FC_sig<-MHC_gene_FC[which(MHC_gene_FC$gene%in%MHC_gene_stat$gene),]
+MHC_gene_FC_sig[which(MHC_gene_FC_sig$avg_log2FC<0),]
+FeaturePlot(d10x.combined_myeloid, features = c("HMOX1","CCL3","G0S2","FOS"),split.by = "AgeGroup", min.cutoff = "q9", pt.size=0.1)
+
+
+FeaturePlot(d10x.combined_myeloid, features = c("CCL4","AREG","IL1B","HMOX1"),split.by = "AgeGroup", min.cutoff = "q9", pt.size=0.1)
+
+FeaturePlot(d10x.combined_myeloid, features = c("IL1B"),split.by = "AgeGroup", min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_myeloid, features = c("AREG"),split.by = "AgeGroup", min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_myeloid, features = c("MRC1"),split.by = "AgeGroup", min.cutoff = "q9", pt.size=1)
+
+FeaturePlot(d10x.combined_myeloid, features = c("TREM2"),split.by = "AgeGroup", min.cutoff = "q9", pt.size=1)
+
+# IL1B is anitinflammatory
+# IL1B activates AREG 
+# MRC1 (CD206) cells are involved in all this
+# These might have cool interactions with T cells.

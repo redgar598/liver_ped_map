@@ -158,10 +158,15 @@ colnames(cell_num_myeloid)<-c("AgeGroup","CellCount")
 cell_num_all<-as.data.frame(table(plt$AgeGroup))
 colnames(cell_num_all)<-c("AgeGroup","CellCount")
 
+
 rm(d10x.combined)
-rm(d10x.combined_KCRR)
 rm(d10x.combined_NK_T_B)
 gc()
+
+myeloid_cluster_umap<-DimPlot(d10x.combined_KCRR, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  annotate("text",x=-5, y=-6, label=paste0("n = ",comma(ncol(d10x.combined_KCRR))))
+myeloid_cluster_umap
+save_plts(myeloid_cluster_umap, "KC_MHC_RR_cluster_umap_labelled_refined", w=7,h=5)
 
 
 
