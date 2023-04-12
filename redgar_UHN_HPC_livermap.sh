@@ -105,6 +105,8 @@ scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParlnd_Sai__C
 
 scp /media/redgar/Seagate\ Portable\ Drive/fetal_liver/download.h5ad t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/fetal_liver
 scp /media/redgar/Seagate\ Portable\ Drive/fetal_liver/fetal_liver.h5ad t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/fetal_liver
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/fetal_integrated.rds /media/redgar/Seagate\ Portable\ Drive/fetal_liver 
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/fetal_celllabels.rds /media/redgar/Seagate\ Portable\ Drive/fetal_liver 
 
 
 

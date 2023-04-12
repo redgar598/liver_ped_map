@@ -60,7 +60,7 @@ cell_types<-unique(d10x$CellType_rough)
 ## Signature Genes
 #########
 myeloid_immune_supressive<-c("CTSB","CD163","MS4A7","FOLR2","GPNMB","VSIG4","HMOX1","MSR1")
-inflammatory_macs<-c("CD74","HLA-DRA","TYROBP","C1QC","HLA-DPA1","HLA-DPB1","LYZ","S100A6")
+inflammatory_macs<-c("CD74","HLA-DRA","C1QC","HLA-DPA1","HLA-DPB1","LYZ","S100A6")
 exhausted_tcells<-c("TOX","PDCD1","LAG3","TNFRSF9","CXCL13","ENTPD1","HAVCR2","CD38")
 
 recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
@@ -168,7 +168,18 @@ myeloid_cluster_umap<-DimPlot(d10x.combined_KCRR, reduction = "umap", pt.size=0.
 myeloid_cluster_umap
 save_plts(myeloid_cluster_umap, "KC_MHC_RR_cluster_umap_labelled_refined", w=7,h=5)
 
-
+######
+## Indivudal score gene plots
+######
+myeloid_cluster_umap<-FeaturePlot(d10x.combined_KCRR, reduction = "umap", pt.size=0.25, min.cutoff = "q9",features=kuffer_signature)
+myeloid_cluster_umap
+save_plts(myeloid_cluster_umap, "KC_MHC_RR_KCmarkers_umap_labelled_refined", w=6,h=5)
+myeloid_cluster_umap<-FeaturePlot(d10x.combined_KCRR, reduction = "umap", pt.size=0.25,min.cutoff = "q9", features=recent_recruit_myeloid)
+myeloid_cluster_umap
+save_plts(myeloid_cluster_umap, "KC_MHC_RR_RRmarkers_umap_labelled_refined", w=6,h=5)
+myeloid_cluster_umap<-FeaturePlot(d10x.combined_KCRR, reduction = "umap", pt.size=0.25, min.cutoff = "q9",features=inflammatory_macs, ncol=2)
+myeloid_cluster_umap
+save_plts(myeloid_cluster_umap, "KC_MHC_RR_MHCIImarkers_umap_labelled_refined", w=6,h=10)
 
 #########
 ## Signatures Monte Carlo
@@ -632,3 +643,82 @@ tcellexhaust_box_tcell<-ggplot(plt_Tcell, aes(AgeGroup,exhausted_tcells_score1))
   xlab("Age Group")+ylab("Exhausted T Cell Signature Score")
 save_plts(tcellexhaust_box_tcell, "tcell_exhaust_box_tcell", w=8,h=4)
 
+
+
+################
+## Heat map like fetal paper
+################
+
+d10x<-readRDS(file = here("data","d10x_adult_ped_raw.rds"))
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
+
+load(here("data","adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+d10x.combined_KCRR<-subset(d10x.combined, subset = CellType_refined %in% c("KC Like","RR Myeloid","Macrophage\n(MHCII high)"))
+d10x.combined_KCRR <- RunPCA(d10x.combined_KCRR, npcs = 30, verbose = FALSE)
+d10x.combined_KCRR <- RunUMAP(d10x.combined_KCRR, reduction = "pca", dims = 1:30)
+umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_KCRR, reduction = "umap"))#
+umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
+meta_myeloid<-d10x.combined_KCRR@meta.data
+meta_myeloid$cell<-rownames(meta_myeloid)
+plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
+
+cell_num_all<-as.data.frame(table(plt_myeloid$AgeGroup))
+colnames(cell_num_all)<-c("AgeGroup","CellCount")
+
+## Proinflammatory
+proinflam<-c("IL1A","CCL4L2","CCL3L1","TNF","CCL3","CCL4","CXCL8","NFKBIA","IL1B")
+
+plot_gene_UMAP<-function(gene){
+  gene_exp<-FetchData(d10x, vars=gene)
+  gene_exp$cell<-rownames(gene_exp)
+  gene_exp<-melt(gene_exp)
+  plt_myeloid<-merge(plt_myeloid, gene_exp, by='cell')
+  
+  
+  scale_this <- function(x){
+    (x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)
+  }
+  
+  plt_myeloid_mean<-plt_myeloid %>% group_by(individual,Age, CellType_refined, variable) %>% summarise(mm=mean(value))
+  plt_myeloid_mean <- plt_myeloid_mean %>% group_by(variable) %>%
+    dplyr::mutate(scaled = scale_this(mm))
+  plt_myeloid_mean<-as.data.frame(plt_myeloid_mean)
+  
+  plt_myeloid_mean$label<-sapply(1:nrow(plt_myeloid_mean), function(x){
+    paste(plt_myeloid_mean$Age[x], " (", strsplit(plt_myeloid_mean$individual[x], "_")[[1]][1], ")", sep="")
+  })
+  
+  plt_myeloid_mean$label<-as.factor(plt_myeloid_mean$label)
+  plt_myeloid_mean$label<-factor(plt_myeloid_mean$label, levels=c("2 (C104)", "11 (C85)", "12 (C93)", "17 (C64)", "17 (C96)",
+                                                                  "26 (C82)", "48 (C70)", "57 (C97)", "61 (C68)","65 (C39)", "67 (C54)","69 (C88)"))
+  
+  ggplot(plt_myeloid_mean, aes(label, variable, fill=scaled))+
+    geom_tile()+facet_wrap(~CellType_refined)+theme_classic()+
+    scale_fill_continuous_divergingx(palette = 'RdBu',rev = T, name ="Scaled\nMean\nExpression",
+                                     p3 = .1, p4 = .6, p1 = .2, p2 = .6)+
+    theme(axis.text.x = element_text(angle = 45, hjust=1))
+  
+  ggplot(plt_myeloid_mean[which(plt_myeloid_mean$label!="17 (C96)"),], aes(label, variable, fill=scaled))+
+    geom_tile()+facet_wrap(~CellType_refined)+theme_classic()+
+    scale_fill_continuous_divergingx(palette = 'RdBu',rev = T, name ="Scaled\nMean\nExpression",
+                                     p3 = .1, p4 = .6, p1 = .2, p2 = .6)+
+    theme(axis.text.x = element_text(angle = 45, hjust=1))
+  
+  ggplot(plt_myeloid_mean, aes(label, variable, fill=scaled))+
+    geom_tile()+facet_wrap(~CellType_refined)+theme_classic()+
+    scale_fill_continuous_sequential(palette = "Viridis", rev=F, name="Scaled\nMean\nExpression")+
+    theme(axis.text.x = element_text(angle = 45, hjust=1))
+  
+  ggplot(plt_myeloid_mean[which(plt_myeloid_mean$label!="17 (C96)"),], aes(label, variable, fill=scaled))+
+    geom_tile()+facet_wrap(~CellType_refined)+theme_classic()+
+    scale_fill_continuous_sequential(palette = "Viridis", rev=F, name="Scaled\nMean\nExpression")+
+    theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+  plot_grid(umap,violin, rel_heights =  c(1,1), ncol=1)}
+
+
+ggplot(plt_myeloid, aes(as.character(Age),log(value)))+
+  geom_violin(fill="lightgrey", color="lightgrey")+geom_boxplot(aes(fill=AgeGroup), width=0.1, outlier.shape = NA)+
+  theme_bw()+th+theme(legend.position = "none")+
+  facet_grid(variable~CellType_refined, scale="free_y")+fillscale_age

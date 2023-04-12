@@ -80,6 +80,7 @@ FeaturePlot(d10x.combined_myeloid, features = c("CD86","MRC1"), min.cutoff = "q9
 FeaturePlot(d10x.combined_myeloid, features = c("TREM2"), min.cutoff = "q9", pt.size=1)
 
 
+
 ######
 ## Neutrophils have few genes expressed?
 ######
