@@ -560,7 +560,7 @@ rm(d10x)
 gc()
 
 ### load integrate for UMAP etc
-load(here("/media/redgar/Seagate Portable Drive/fetal_liver/fetal_integrated.rds"))
+load(here("data","fetal_integrated.rds"))
 score_data<-score_data[match(rownames(d10x.combined@meta.data),rownames(score_data)),]
 identical(rownames(d10x.combined@meta.data),rownames(score_data))
 d10x.combined <- AddMetaData(d10x.combined, metadata = score_data)
@@ -578,4 +578,4 @@ meta$cell<-rownames(meta)
 
 plt<-merge(meta, umap_mat, by="cell")
 
-save(plt, file=paste(here("data/"),"fetal_scores.rds", sep=""))
+save(plt, file=here("data","fetal_scores.RData"))

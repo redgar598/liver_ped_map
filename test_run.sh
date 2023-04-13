@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --mem=200G
+#SBATCH --mem=50G
 #SBATCH -J fetal_liver
 #SBATCH -p veryhimem
 #SBATCH -c 32 
