@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --mem=50G
 #SBATCH -J fetal_liver
-#SBATCH -p veryhimem
+#SBATCH -p himem
 #SBATCH -c 32 
 #SBATCH -N 1 
 #SBATCH --output=%x.out
