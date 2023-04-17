@@ -579,3 +579,67 @@ meta$cell<-rownames(meta)
 plt<-merge(meta, umap_mat, by="cell")
 
 save(plt, file=here("data","fetal_scores.RData"))
+
+
+
+######
+load(here("data","fetal_scores.RData"))
+
+plt$Age<-as.factor(plt$Characteristics.age.)
+levels(plt$Age)<-c(11,12,13,14,16,17,7,8,9)
+plt$Age<-factor(plt$Age, levels=c(7,8,9,11,12,13,14,16,17))
+
+fetal_all_cells<-ggplot(plt, aes(UMAP_1,UMAP_2))+
+  geom_point(aes(color=Cell.Labels), size=0.5)+
+  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(nrow(plt))))+colscale_cellType_fetal+
+  guides(colour = guide_legend(override.aes = list(size=2)))
+fetal_all_cells
+save_fetal_plts(fetal_all_cells, "cell_type_umap_fetal_all_cells", w=12,h=6)
+
+
+fetal_all_cells<-ggplot(plt, aes(UMAP_1,UMAP_2))+
+  geom_point(aes(color=recently_recruited_myeloid1), size=0.5)+
+  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(nrow(plt))))+
+  scale_color_continuous_sequential(palette = "Viridis", rev=F, name="Recently\nRecruited\nMyeloid\nSignature Score")
+fetal_all_cells
+save_fetal_plts(fetal_all_cells, "recruit_umap_fetal_all_cells", w=12,h=7)
+
+
+plt_myeloid<-plt[which(plt$Cell.Labels%in%c("Monocyte-DC precursor", "Mono-Mac","Kupffer Cell",
+                                            "Neutrophil-myeloid progenitor","Mono-NK",
+                                            "MEMP","VCAM1+ Erythroblastic Island Macrophage","Monocyte",
+                                            "pDC precursor","Erythroblastic Island Macrophage","DC1")),]
+
+
+cell_num_myeloid<-as.data.frame(table(plt_myeloid$Cell.Labels, plt_myeloid$Characteristics.age.))
+colnames(cell_num_myeloid)<-c("Cell.Labels","Characteristics.age.","CellCount")
+
+fetal_all_cells_age<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
+  geom_point(aes(color=recently_recruited_myeloid1), size=0.5)+
+  theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  facet_grid(Cell.Labels~Characteristics.age.)+  
+  geom_text(aes(x = -5, y = -6, label=paste0("n = ",comma(CellCount))), cell_num_myeloid)+
+  scale_color_continuous_sequential(palette = "Viridis", rev=F, name="Recently\nRecruited\nMyeloid\nSignature Score")
+fetal_all_cells_age
+save_fetal_plts(fetal_all_cells, "recruit_umap_fetal_all_cells", w=12,h=7)
+
+
+# BOX PLOT
+plt_max<-ceiling(max(plt_myeloid$recently_recruited_myeloid1))
+plt_min<-floor(min(plt_myeloid$recently_recruited_myeloid1))+0.5
+
+myeloid_recruit_box<-
+  ggplot(plt_myeloid, aes(Age,recently_recruited_myeloid1))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1)+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  facet_wrap(~Cell.Labels)+
+  xlab("Age")+ylab("Recently Recruited Myeloid Signature Score")
+myeloid_recruit_box
+save_fetal_plts(myeloid_recruit_box, "recruit_box_myeloid", w=4,h=4)
+
+ggplot(plt_myeloid, aes(Age,kuffer_like_score1))+
+  geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1)+
+  theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+  facet_wrap(~Cell.Labels)

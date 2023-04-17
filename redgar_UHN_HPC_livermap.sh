@@ -43,6 +43,9 @@ sbatch de_monte_carlo_notparallel.sh
 sbatch metacell.sh
 
 
+sbatch IFALD_exploratory_run.sh
+
+
 sbatch test_run.sh
 
 
@@ -94,6 +97,8 @@ scp /media/redgar/Seagate\ Portable\ Drive/fetal_liver/E-MTAB-7407.sdrf.txt  t11
 #ssh t117652uhn@h4huhndata1.uhnresearch.ca
 scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_jan16_2023.csv t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw
 scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_mar20_2023.csv t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw
+scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_mar20_2023_IFALD.csv t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw
+
 
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/C39_NPC_june6_2017 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/C39_TLH_june6_2017 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
@@ -102,6 +107,12 @@ scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/X210026__SingleC
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Jawairia__C104_Bx_5pr_V2 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sonya__C68_Total_liver t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParlnd_Sai__C97_3pr_V3_1 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+
+scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sonya__SingleCell_iFALD073_Biopsy_25Jan21_3pr_v3 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Catia__HSC_IF030_3pr_v3 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sonya__HSC-FI_006 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+
+
 
 scp /media/redgar/Seagate\ Portable\ Drive/fetal_liver/download.h5ad t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/fetal_liver
 scp /media/redgar/Seagate\ Portable\ Drive/fetal_liver/fetal_liver.h5ad t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/fetal_liver
@@ -169,7 +180,11 @@ wget 'ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE166nnn/GSE166504/suppl/GSE166504_
 
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/spatial_scRNAseq/data/reference_datasets/mouse_liver_GSE166504/GSE166504_cell_raw_counts_Hepatocyte_Chow_Animal2.csv /home/redgar/Documents/spatial_scRNAseq/data/reference_datasets/mouse_liver_GSE166504
 
-scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/DGE_compare.Rdata /home/redgar/Documents/liver_ped_map/data
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/fetal_scores.RData /home/redgar/Documents/liver_ped_map/data
 
 
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/d10x_adult_ped_raw_noSoupX.rds /media/redgar/Seagate\ Portable\ Drive/processed_data
+
+
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/fetal/*pdf /home/redgar/Documents/liver_ped_map/figures/fetal
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/fetal/jpeg/*jpeg /home/redgar/Documents/liver_ped_map/figures/fetal/jpeg
