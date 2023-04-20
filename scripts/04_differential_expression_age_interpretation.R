@@ -124,6 +124,9 @@ myeloid_immune_supressive<-c("CTSB","CD163","MS4A7","FOLR2","GPNMB","VSIG4","HMO
 inflammatory_macs<-c("CD74","HLA-DRA","TYROBP","C1QC","HLA-DPA1","HLA-DPB1","LYZ","S100A6")
 exhausted_tcells<-c("TOX","PDCD1","LAG3","TNFRSF9","CXCL13","ENTPD1","HAVCR2","CD38")
 
+DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%myeloid_immune_supressive),]
+DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%inflammatory_macs),]
+
 
 DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%c("KLRG1", "B3GAT1", "CD69","ITGAE")),]
 DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%c("LYZ", "MARCO", "MRC1","PTPRC")),]
@@ -189,8 +192,8 @@ plot_key_genes<-function(keygenes, label){
   
   plot_grid(label_blank, plot_grid(plotlist=all_plots, ncol=length(keygenes)), rel_widths=c(0.1,1))
   wid<-length(keygenes)*3
-  ggsave2(paste0(here("figures/"), label, "_adult_ped.pdf"), w=wid,h=30)
-  ggsave2(paste0(here("figures/jpeg/"),label, "_adult_ped.jpeg"), w=wid,h=30,bg="white")}
+  ggsave2(paste0(here("figures/"), label, "_adult_ped.pdf"), w=wid,h=40)
+  ggsave2(paste0(here("figures/jpeg/"),label, "_adult_ped.jpeg"), w=wid,h=40,bg="white")}
 
 
 #### IFNg
@@ -201,9 +204,9 @@ plot_key_genes(IFNg_sig, "IFNg_sig")
 IFNa_sig<-unique(as.character(DE_monte_carlo_sig[which(DE_monte_carlo_sig$gene%in%IFNa),]$gene))
 plot_key_genes(IFNa_sig, "IFNa_sig")
 
-
+DE_monte_carlo_sig$gene<-as.character(DE_monte_carlo_sig$gene)
 table(DE_monte_carlo_sig$gene)[order(table(DE_monte_carlo_sig$gene))]
-plot_key_genes(c("S100A9","S100A8","CCL4","CCL3"), "DE_unique_to_KClike")
+plot_key_genes(c("S100A9","S100A8","CCL4","CCL3","HMOX1","IL1B"), "DE_unique_to_KClike")
 
 plot_key_genes(myeloid_immune_supressive, "myeloid_immune_supressive_montecarlo")
 plot_key_genes(inflammatory_macs, "inflammatory_macs_montecarlo")
@@ -695,6 +698,9 @@ save_plts(plot_gene_UMAP("HLA-DRB1"), "diff_exp_HLA-DRB1", w=10,h=10)
 
 plot_gene_UMAP("HLA-DQB1")
 save_plts(plot_gene_UMAP("HLA-DQB1"), "diff_exp_HLA-DQB1", w=10,h=10)
+
+plot_gene_UMAP("CCL3")
+save_plts(plot_gene_UMAP("CCL3"), "diff_exp_CCL3", w=10,h=10)
 
 
 plot_gene_UMAP("IL1A")

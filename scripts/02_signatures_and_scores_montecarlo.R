@@ -168,6 +168,12 @@ myeloid_cluster_umap<-DimPlot(d10x.combined_KCRR, reduction = "umap", pt.size=0.
 myeloid_cluster_umap
 save_plts(myeloid_cluster_umap, "KC_MHC_RR_cluster_umap_labelled_refined", w=7,h=5)
 
+myeloid_cluster_umap_age<-DimPlot(d10x.combined_KCRR, reduction = "umap", pt.size=0.25, label=F, split.by="AgeGroup",group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  annotate("text",x=-5, y=-6, label=paste0("n = ",comma(ncol(d10x.combined_KCRR))))
+myeloid_cluster_umap_age
+save_plts(myeloid_cluster_umap_age, "KC_MHC_RR_cluster_umap_labelled_refined_age", w=12,h=5)
+
+
 ######
 ## Indivudal score gene plots
 ######
