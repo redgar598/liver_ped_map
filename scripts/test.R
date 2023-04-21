@@ -12,7 +12,8 @@ library(colorspace)
 library(cowplot)
 library(DropletQC)
 
-load(here("data","d10x_SCI_merged.rds"))
+#d10x<-readRDS(here("/media/redgar/Seagate Portable Drive/spinalcord_tutorial_data/d10x_SCI_merged.rds"))
+d10x<-readRDS(here("data/d10x_SCI_merged.rds"))
 
 d10x.list.sample <- SplitObject(d10x, split.by = "sample_ID")
 
