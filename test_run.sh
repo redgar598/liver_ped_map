@@ -9,5 +9,5 @@
 
 module load R/4.2.1
 
-Rscript scripts/fetal_liver.R
+Rscript scripts/test.R
 
