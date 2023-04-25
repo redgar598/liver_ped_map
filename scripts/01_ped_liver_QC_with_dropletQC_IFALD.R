@@ -749,7 +749,7 @@ DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.1
 
 
 # some are TPSAB1+, AREG+ resident Mast cells
-MAST_markers<-FeaturePlot(d10x.combined_RBC, features = c("TPSAB1", "AREG"))
+MAST_markers<-FeaturePlot(d10x.combined, features = c("TPSAB1", "AREG"))
 save_plts(MAST_markers, "IFALD_MAST_markers_rPCA_UMAP", w=8,h=4)
 
 MAST_markers<-FeaturePlot(d10x.combined, features = c("TPSAB1", "AREG"))

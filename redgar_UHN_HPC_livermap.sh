@@ -160,6 +160,7 @@ scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_ma
 
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_integrated.rds /home/redgar/Documents/liver_ped_map/data
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_d10x_adult_ped_raw.rds /home/redgar/Documents/liver_ped_map/data
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_cellRefined_withDropletQC.rds /home/redgar/Documents/liver_ped_map/data
 
 
 scp /home/redgar/Documents/tissue_MHCI/R_functions/pretty_plots.R t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn
