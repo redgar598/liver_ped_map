@@ -42,19 +42,32 @@ d10x_fetal@meta.data$Tissue<-"TLH"
 d10x_fetal@meta.data$chemistry<-"3pr"
 colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Characteristics.sex.")]<-"Sex"
 colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Characteristics.age.")]<-"Age"
-d10x_fetal@meta.data$AgeGroup<-"fetal"
+d10x_fetal@meta.data$AgeGroup<-"Fetal"
 d10x_fetal@meta.data$FreshorFrozen<-"fresh"
 d10x_fetal@meta.data$BMI<-NA
 d10x_fetal@meta.data$relALBChange<-NA
 d10x_fetal@meta.data$nuclear_fraction<-NA
 d10x_fetal@meta.data$cell_status<-NA
 colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Cell.Labels")]<-"CellType_refined"
+d10x_fetal@meta.data$age_condition<-paste(d10x_fetal$AgeGroup, d10x.combined$Treatment, sep=" ")
+
 
 d10x_ped_IFALD@meta.data$file<-NULL        
 d10x_ped_IFALD@meta.data$Approx_bam_GB<-NULL   
 d10x_ped_IFALD@meta.data$Characteristics.facs.sorting.<-NA
 d10x_ped_IFALD@meta.data$Sample<-d10x_ped_IFALD@meta.data$individual
 d10x_ped_IFALD@meta.data$individual<-sapply(1:nrow(d10x_ped_IFALD@meta.data), function(x) strsplit(d10x_ped_IFALD@meta.data$individual[x],"_")[[1]][1])
+d10x_ped_IFALD@meta.data$CellType_rough <-NULL    
+d10x_ped_IFALD@meta.data$second_best_cell  <-NULL    
+d10x_ped_IFALD@meta.data$S.Score   <-NULL 
+d10x_ped_IFALD@meta.data$G2M.Score <-NULL 
+d10x_ped_IFALD@meta.data$Phase     <-NULL 
+d10x_ped_IFALD@meta.data$old.ident<-NULL 
+d10x_ped_IFALD@meta.data$integrated_snn_res.0.5 <-NULL 
+d10x_ped_IFALD@meta.data$seurat_clusters<-NULL 
+d10x_ped_IFALD@meta.data$age_id<-NULL 
+d10x_ped_IFALD@meta.data$index<-NULL 
+
 
 head(d10x_ped_IFALD@meta.data)
 head(d10x_fetal@meta.data)
