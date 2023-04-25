@@ -60,4 +60,7 @@ ggplot(tile_plt, aes(Var1, Var2, fill=value))+geom_tile()+geom_text(aes(label=va
 
 
 DimPlot(d10x.combined, group.by = "CellType_original")+colscale_cellType+ggtitle("")
+ggsave(file="../../Downloads/test.png", width = 6, h=3 )
+ggsave(file="../../Downloads/test.jpeg", width = 6, h=3 )
+
 DimPlot(d10x.combined, group.by = "CellType_refined")+colscale_cellType+ggtitle("")

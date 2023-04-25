@@ -1197,6 +1197,15 @@ age_condition_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "Cell
   geom_text(aes(x=-13, y=-13, label=paste0("n = ",comma(CellCount))), cell_num_all)+xlab("UMAP 1")+ylab("UMAP 2")
 save_plts(age_condition_split, "IFALD_age_condition_roughCell_facet_rPCA_UMAP_refined", w=15,h=10)
 
+# 
+# d10x.combined_health<-subset(d10x.combined, subset = age_condition %in% c("Ped Healthy","Adult Healthy"))
+# d10x.combined_health$age_condition<-as.character(d10x.combined_health$age_condition)
+# cell_num_all_health<-cell_num_all[which(cell_num_all$age_condition%in% c("Ped Healthy","Adult Healthy")),]
+# age_condition_split<-DimPlot(d10x.combined_health, reduction = "umap", group.by = "CellType_refined", split.by="age_condition", pt.size=0.05, ncol=2)+colscale_cellType+ggtitle("")+
+#   geom_text(aes(x=-13, y=-13, label=paste0("n = ",comma(CellCount))), cell_num_all_health)+xlab("UMAP 1")+ylab("UMAP 2")
+# save_plts(age_condition_split, "IFALD_age_condition_roughCell_facet_rPCA_UMAP_refined_healthyonly", w=15,h=5.5)
+
+
 
 
 ##############

@@ -300,7 +300,7 @@ kuffer_all<-ggplot(plt, aes(UMAP_1,UMAP_2, color=kuffer_like_score1))+
   geom_point(size=0.5)+
   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
   annotate("text", x = -11, y = -12, label = paste0("n = ",comma(nrow(plt))))+
-  scale_color_continuous_sequential(palette = "Viridis", rev=F, name="Kuffer-like\nSignature Score")
+  scale_color_continuous_sequential(palette = "Viridis", rev=F, name="Kupffer-like\nSignature Score")
 save_plts(kuffer_all, "kuffer_umap_all", w=7,h=5)
 
 kuffer_all_agesplit<-ggplot(plt, aes(UMAP_1,UMAP_2))+
@@ -308,14 +308,14 @@ kuffer_all_agesplit<-ggplot(plt, aes(UMAP_1,UMAP_2))+
   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
   facet_wrap(~AgeGroup)+
   geom_text(aes(x = -11, y = -12, label=paste0("n = ",comma(CellCount))), cell_num_all)+
-  scale_color_continuous_sequential(palette = "Viridis", rev=F, name="Kuffer-like\nSignature Score")
+  scale_color_continuous_sequential(palette = "Viridis", rev=F, name="Kupffer-like\nSignature Score")
 save_plts(kuffer_all_agesplit, "kuffer_umap_all_agesplit", w=12,h=5)
 
 kuffer_all_myeloid<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2, color=kuffer_like_score1))+
   geom_point(size=0.5)+
   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
   annotate("text", x = -5, y = -6, label = paste0("n = ",comma(nrow(plt_myeloid))))+
-  scale_color_continuous_sequential(palette = "Viridis", rev=F, name="Kuffer-like\nSignature Score")
+  scale_color_continuous_sequential(palette = "Viridis", rev=F, name="Kupffer-like\nSignature Score")
 save_plts(kuffer_all_myeloid, "kuffer_umap_myeloid", w=7,h=5)
 
 kuffer_all_myeloid_agesplit<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
@@ -323,7 +323,7 @@ kuffer_all_myeloid_agesplit<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
   facet_wrap(~AgeGroup)+
   geom_text(aes(x = -5, y = -6, label=paste0("n = ",comma(CellCount))), cell_num_myeloid)+
-  scale_color_continuous_sequential(palette = "Viridis", rev=F, name="Kuffer-like\nSignature Score")
+  scale_color_continuous_sequential(palette = "Viridis", rev=F, name="Kupffer-like\nSignature Score")
 save_plts(kuffer_all_myeloid_agesplit, "kuffer_umap_myeloid_agesplit", w=12,h=5)
 
 # BOX PLOT
@@ -340,7 +340,7 @@ myeloid_kuffer_box<-
                               y=c(plt_max, plt_max+0.25, plt_max+0.25), yend=c(plt_max+0.25, plt_max+0.25, plt_max),
                               annotation=c("*")),
               aes(x=x,xend=xend, y=y, yend=yend, annotation=annotation), color="grey50")+ylim(plt_min, plt_max+1)+
-  xlab("Age Group")+ylab("Kuffer-like Signature Score")+
+  xlab("Age Group")+ylab("Kupffer-like Signature Score")+
   geom_text(aes(y=-1.5, x=AgeGroup,label=paste0("n = ",comma(CellCount))),cell_num_myeloid, hjust=-0.1, size=3)
 save_plts(myeloid_kuffer_box, "kuffer_box_myeloid", w=4,h=4)
 

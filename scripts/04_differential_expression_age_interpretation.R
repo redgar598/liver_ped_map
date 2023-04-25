@@ -300,19 +300,19 @@ pathway_plt<-function(de){
     guides(fill = guide_legend(override.aes = list(size=5)))}
 
 RR_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="RR Myeloid_Adult"),])
-save_plts(RR_GSEA, "GSEA_adult_ped_recently_recruited", w=20,h=10)
+save_plts(RR_GSEA, "GSEA_adult_ped_recently_recruited", w=15,h=7)
 
 KC_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="KC Like_Adult"),])
-save_plts(KC_GSEA, "GSEA_adult_ped_KClike", w=20,h=10)
+save_plts(KC_GSEA, "GSEA_adult_ped_KClike", w=15,h=7)
 
 NK_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="NK-like cells_Adult"),])
-save_plts(NK_GSEA, "GSEA_adult_ped_NKlike", w=20,h=10)
+save_plts(NK_GSEA, "GSEA_adult_ped_NKlike", w=15,h=7)
 
 HSC_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="HSC_Adult"),])
-save_plts(HSC_GSEA, "GSEA_adult_ped_HSClike", w=20,h=10)
+save_plts(HSC_GSEA, "GSEA_adult_ped_HSClike", w=15,h=7)
 
 MHC_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="Marcophage_MHCII_Adult"),])
-save_plts(MHC_GSEA, "GSEA_adult_ped_MHCII", w=20,h=10)
+save_plts(MHC_GSEA, "GSEA_adult_ped_MHCII", w=15,h=7)
 
 ##############
 ## Volcano
