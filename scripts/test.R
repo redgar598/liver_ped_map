@@ -14,6 +14,10 @@ library(DropletQC)
 
 #d10x<-readRDS(here("/media/redgar/Seagate Portable Drive/spinalcord_tutorial_data/d10x_SCI_merged.rds"))
 d10x<-readRDS(here("data/d10x_SCI_merged.rds"))
+d10x78<-readRDS(here("data/d10x_78_SCI_merged.rds"))
+
+d10x<- merge(d10x, y= d10x78, merge.data=TRUE, project = "SCI")
+d10x
 
 d10x.list.sample <- SplitObject(d10x, split.by = "sample_ID")
 

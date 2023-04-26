@@ -1035,7 +1035,7 @@ d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data
 d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("1","2","5"))]<-"Plasma cells"
 d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("6","4"))]<-"Cycling T-cells"
 d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("3"))]<-"Cycling Myeloid"
-d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("10"))]<-"Doublets"
+d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("10"))]<-"Doublet"
 d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("9"))]<-"Platelets"
 
 bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_rough")+colscale_cellType
@@ -1153,7 +1153,7 @@ levels(d10x.combined@meta.data$CellType_refined)<-c("CD3+ T-cells","Cholangiocyt
                                                     "Doublet","Erythrocytes","gd T-cells",
                                                     "Hepatocytes","HSC","KC Like",
                                                     "Low Quality","LSEC","Macrophage\n(CLEC9A high)",
-                                                    "Macrophage\n(MHCII high)","Mast cell", "Mature B-cells",
+                                                    "Macrophage\n(MHCII high)", "Mature B-cells",#"Mast cell",
                                                     "Myeloid Erythrocytes\n(phagocytosis)", "Neutrophil","NK-like cells",
                                                     "Plasma cells","Platelets","RR Myeloid")
 
@@ -1161,7 +1161,7 @@ d10x.combined@meta.data$CellType_refined<-factor(d10x.combined@meta.data$CellTyp
                                                                                                       "CD3+ T-cells","gd T-cells","NK-like cells","CLNK T-cells","Cycling T-cells",
                                                                                                       "Cholangiocytes","LSEC",
                                                                                                       "RR Myeloid","Macrophage\n(MHCII high)","KC Like","Macrophage\n(CLEC9A high)","Cycling Myeloid",
-                                                                                                      "Neutrophil","Mast cell",
+                                                                                                      "Neutrophil",#"Mast cell",
                                                                                                       "Myeloid Erythrocytes\n(phagocytosis)","Erythrocytes","Platelets",
                                                                                                       "HSC","Hepatocytes","Doublet","Low Quality"))
 
