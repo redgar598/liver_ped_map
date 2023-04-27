@@ -94,7 +94,7 @@ d10x <- merge(d10x_ped_IFALD,d10x_fetal, merge.data=TRUE, project = "IFALD_fetal
 print("RUNNING INTEGRATION")
 
 ## run integration across donor and hopefully that will also smooth out differences with chemistry and batch?
-d10x.list<- SplitObject(d10x, split.by = "sample")
+d10x.list<- SplitObject(d10x, split.by = "Sample")
 
 # normalize, identify variable features and score cell cycle for each dataset independently
 s.genes <- cc.genes$s.genes

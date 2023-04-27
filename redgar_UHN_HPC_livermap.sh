@@ -89,8 +89,14 @@ cat /media/redgar/Seagate\ Portable\ Drive/fetal_liver/scp_liver_only.txt| xargs
 scp /media/redgar/Seagate\ Portable\ Drive/fetal_liver/E-MTAB-7407.sdrf.txt  t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/fetal_liver
 
 
-
+######
+##SCI
+######
 scp /media/redgar/Seagate\ Portable\ Drive/spinalcord_tutorial_data/d10x_SCI_merged.rds t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data
+scp /media/redgar/Seagate\ Portable\ Drive/spinalcord_tutorial_data/d10x_78_SCI_merged.rds t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data
+
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/d10x_SCI_fullintegrated.rds /media/redgar/Seagate\ Portable\ Drive/spinalcord_tutorial_data 
+
 
 #################
 ### Moving files
@@ -126,7 +132,6 @@ scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map
 
 
 
-scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/d10x_SCI_fullintegrated.rds /media/redgar/Seagate\ Portable\ Drive/spinalcord_tutorial_data 
 
 
 
