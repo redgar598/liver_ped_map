@@ -49,7 +49,7 @@ d10x_fetal@meta.data$relALBChange<-NA
 d10x_fetal@meta.data$nuclear_fraction<-NA
 d10x_fetal@meta.data$cell_status<-NA
 colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Cell.Labels")]<-"CellType_refined"
-d10x_fetal@meta.data$age_condition<-paste(d10x_fetal$AgeGroup, d10x.combined$Treatment, sep=" ")
+d10x_fetal@meta.data$age_condition<-paste(d10x_fetal$AgeGroup, d10x_fetal$Treatment, sep=" ")
 
 
 d10x_ped_IFALD@meta.data$file<-NULL        
