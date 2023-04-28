@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --mem=150G
+#SBATCH --mem=200G
 #SBATCH -J QC_Fetal_adult_ped_IFALD
 #SBATCH -p veryhimem
 #SBATCH -c 32 
