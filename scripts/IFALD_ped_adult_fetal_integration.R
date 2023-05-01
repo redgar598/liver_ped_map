@@ -149,9 +149,9 @@ source("scripts/00_entropy_d10x.R")
 
 
 ###################
-### 
+### save for local plotting
 ###################
-fetal_ped_IFALD<-readRDS(here("data","Fetal_IFALD_adult_ped_integrated.rds"))
+load(here("data","Fetal_IFALD_adult_ped_integrated.rds"))
 
 Macrophage_genes<-c( "PTPRC", "MARCO","CD74")
 LEC_genes<-c("CALCRL","RAMP2")
@@ -170,18 +170,18 @@ MHCII<-c("HLA-DRA","HLA-DPB1")
 b_genes_noIG<-c("MS4A1", "CD79B")
 immunoglobins<-c("IGKC","IGHG1")
 
-head(fetal_ped_IFALD)
+head(d10x.fetal_ped_IFALD)
 
-umap_mat<-as.data.frame(Embeddings(object = fetal_ped_IFALD, reduction = "umap"))#
+umap_mat<-as.data.frame(Embeddings(object = d10x.fetal_ped_IFALD, reduction = "umap"))#
 umap_mat$cell<-rownames(umap_mat)
 
-meta<-fetal_ped_IFALD@meta.data
+meta<-d10x.fetal_ped_IFALD@meta.data
 meta$cell<-rownames(meta)
 
 plt<-merge(meta, umap_mat, by="cell")
 
 
-gene_exp<-FetchData(fetal_ped_IFALD, vars=c(Macrophage_genes,LEC_genes,Hepatocyte_genes,Cholangiocytes_genes,HSCs_genes,T_genes,NK_genes,gd_genes,RBC,
+gene_exp<-FetchData(d10x.fetal_ped_IFALD, vars=c(Macrophage_genes,LEC_genes,Hepatocyte_genes,Cholangiocytes_genes,HSCs_genes,T_genes,NK_genes,gd_genes,RBC,
                                  MAST, recent_recruit_myeloid, kuffer_signature, neutro_gene, MHCII, b_genes_noIG, immunoglobins))
 gene_exp$cell<-rownames(gene_exp)
 gene_exp<-melt(gene_exp)
