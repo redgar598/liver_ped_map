@@ -130,7 +130,7 @@ scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/d10x_fetal_raw.rds /media/redgar/Seagate\ Portable\ Drive/fetal_liver 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/fetal_celllabels.rds /media/redgar/Seagate\ Portable\ Drive/fetal_liver 
 
-
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/QC_Fetal_adult_ped_IFALD.out /home/redgar/Documents/liver_ped_map 
 
 
 
