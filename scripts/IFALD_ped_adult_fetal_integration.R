@@ -236,8 +236,8 @@ meta$cell<-rownames(meta)
 
 plt<-merge(meta, umap_mat, by="cell")
 
-
-gene_exp<-FetchData(d10x.fetal_ped_IFALD, vars=c(Macrophage_genes,LEC_genes,Hepatocyte_genes,Cholangiocytes_genes,HSCs_genes,T_genes,NK_genes,gd_genes,RBC,
+## raw expression values
+gene_exp<-FetchData(d10x, vars=c(Macrophage_genes,LEC_genes,Hepatocyte_genes,Cholangiocytes_genes,HSCs_genes,T_genes,NK_genes,gd_genes,RBC,
                                  MAST, recent_recruit_myeloid, kuffer_signature, neutro_gene, MHCII, b_genes_noIG, immunoglobins))
 gene_exp$cell<-rownames(gene_exp)
 gene_exp<-melt(gene_exp)
@@ -253,7 +253,7 @@ head(plt)
 
 save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 
-
+# 
 # 
 # #############
 # ### Plots
@@ -271,7 +271,7 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 #   geom_point(size=0.5)+
 #   theme_classic()+th+theme(legend.text=element_text(size=10),
 #                            legend.title=element_text(size=12),
-#                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+ 
+#                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
 #   guides(colour = guide_legend(override.aes = list(size=5)))+
 #   annotate("text", x = -10, y = -15, label = paste0("n = ",comma(nrow(plt_not_gene))))+
 #   scale_color_manual(name="Cell Type",values = combo_colors, drop = T, limits=force)
@@ -288,7 +288,7 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 #   geom_point(aes( color=CellType_refined),size=0.5)+
 #   theme_classic()+th+theme(legend.text=element_text(size=10),
 #                            legend.title=element_text(size=12),
-#                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+ 
+#                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
 #   guides(colour = guide_legend(override.aes = list(size=5)))+
 #   geom_text(aes(x = -10, y = -15, label=paste0("n = ",comma(Count))), countcells)+
 #   scale_color_manual(name="Cell Type",values = combo_colors, drop = T, limits=force)+
@@ -300,7 +300,7 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 #   geom_point(size=0.5)+
 #   theme_classic()+th+theme(legend.text=element_text(size=10),
 #                            legend.title=element_text(size=12),
-#                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+ 
+#                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
 #   guides(colour = guide_legend(override.aes = list(size=5)))+
 #   annotate("text", x = -10, y = -15, label = paste0("n = ",comma(nrow(plt_not_gene))))
 # save_plts(all_UMAP, "UMAP_Fetal_ped_adult_IFALD_seuratclusters", w=16,h=12)
@@ -317,40 +317,40 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 #   entrophy_cluster_df<-do.call(rbind, lapply(as.character(unique(d10x$seurat_clusters)), function(cluster){
 #     data.frame(seurat_clusters=cluster, entropy=entropy(d10x[,covariate][which(d10x$seurat_clusters==cluster)]))
 #   }))
-#   
+# 
 #   cell_cluster_count<-plt_not_gene %>%  group_by(seurat_clusters,rlang::parse_expr(covariate) %>% eval) %>%
 #     summarise(n = n()) %>%
 #     mutate(freq = n / sum(n))
-#   
+# 
 #   cell_cluster_count<-as.data.frame(cell_cluster_count)
 #   cell_cluster_count<-merge(cell_cluster_count, entrophy_cluster_df, by="seurat_clusters")
 #   colnames(cell_cluster_count)[2]<-covariate
 #   plt_entropy<-cell_cluster_count
-#   
-#   max_count<-as.data.frame(plt_entropy %>% 
-#                              group_by(seurat_clusters) %>% 
+# 
+#   max_count<-as.data.frame(plt_entropy %>%
+#                              group_by(seurat_clusters) %>%
 #                              summarise(total = sum(n)))
-#   
+# 
 #   entrophy_label<-plt_entropy[!duplicated(plt_entropy[,c("seurat_clusters",  "entropy")]), c("seurat_clusters",  "entropy")]
 #   entrophy_label<-merge(entrophy_label, max_count, by="seurat_clusters")
-#   
-#   bar_individual<-ggplot() + 
+# 
+#   bar_individual<-ggplot() +
 #     geom_bar(aes(fill=rlang::parse_expr(covariate) %>% eval, y=n, x=seurat_clusters),plt_entropy, position="stack", stat="identity", color="black")+
 #     theme_bw()+th+ylab("Cell Count")+xlab("Seurat Cluster")+
 #     geom_text(aes(label=round(entropy,2), y=(total+(0.1*max(total))), x=seurat_clusters), entrophy_label)+
 #     scale_fill_manual(values=sequential_hcl(length(unique(d10x[,covariate])), "Batlow"), name=covariate)
-#   
+# 
 #   individual_UMAP<-ggplot(d10x, aes(UMAP_1,UMAP_2, color=get(covariate)))+geom_point(size=0.5)+theme_void()+
 #     scale_color_manual(values=sequential_hcl(length(unique(d10x[,covariate])), "Batlow"))+
-#     theme(legend.position = "none") 
-#     
-#   label.df_2 <- d10x %>% 
-#     group_by(seurat_clusters) %>% 
-#     summarize(x = mean(UMAP_1), y = mean(UMAP_2)) 
-#   
+#     theme(legend.position = "none")
+# 
+#   label.df_2 <- d10x %>%
+#     group_by(seurat_clusters) %>%
+#     summarize(x = mean(UMAP_1), y = mean(UMAP_2))
+# 
 #   cluster_UMAP<-ggplot(d10x, aes(UMAP_1,UMAP_2, color=seurat_clusters))+geom_point(size=0.5)+theme_void()+ theme(legend.position = "none") +
 #     geom_text(aes(x,y,label=seurat_clusters),label.df_2, color="black")
-#   
+# 
 #   plot_grid(plot_grid(cluster_UMAP, individual_UMAP), bar_individual, ncol=1, rel_heights = c(1.5,1))}
 # 
 # 
@@ -375,14 +375,14 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 # colnames(cell_cluster_count)[2]<-covariate
 # plt_entropy<-cell_cluster_count
 # 
-# max_count<-as.data.frame(plt_entropy %>% 
-#                            group_by(seurat_clusters) %>% 
+# max_count<-as.data.frame(plt_entropy %>%
+#                            group_by(seurat_clusters) %>%
 #                            summarise(total = sum(n)))
 # 
 # entrophy_label<-plt_entropy[!duplicated(plt_entropy[,c("seurat_clusters",  "entropy")]), c("seurat_clusters",  "entropy")]
 # entrophy_label<-merge(entrophy_label, max_count, by="seurat_clusters")
 # 
-# bar_individual<-ggplot() + 
+# bar_individual<-ggplot() +
 #   geom_bar(aes(fill=rlang::parse_expr(covariate) %>% eval, y=n, x=seurat_clusters),plt_entropy, position="stack", stat="identity", color="black")+
 #   theme_bw()+th+ylab("Cell Count")+xlab("Seurat Cluster")+
 #   geom_text(aes(label=round(entropy,2), y=(total+(0.1*max(total))), x=seurat_clusters), entrophy_label)+
@@ -390,11 +390,11 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 # 
 # individual_UMAP<-ggplot(d10x, aes(UMAP_1,UMAP_2, color=get(covariate)))+geom_point(size=0.5)+theme_void()+
 #   scale_color_manual(values=combo_colors)+
-#   theme(legend.position = "none") 
+#   theme(legend.position = "none")
 # 
-# label.df_2 <- d10x %>% 
-#   group_by(seurat_clusters) %>% 
-#   summarize(x = mean(UMAP_1), y = mean(UMAP_2)) 
+# label.df_2 <- d10x %>%
+#   group_by(seurat_clusters) %>%
+#   summarize(x = mean(UMAP_1), y = mean(UMAP_2))
 # 
 # cluster_UMAP<-ggplot(d10x, aes(UMAP_1,UMAP_2, color=seurat_clusters))+geom_point(size=0.5)+theme_void()+ theme(legend.position = "none") +
 #   geom_text(aes(x,y,label=seurat_clusters),label.df_2, color="black")
@@ -412,7 +412,7 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 # ###############
 # scale_this <- function(x){(x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)}
 # 
-# plt_summary<-plt %>% group_by(CellType_refined, variable) %>% 
+# plt_summary<-plt %>% group_by(CellType_refined, variable) %>%
 #   summarise(mn=mean(value), count=length(which(value>0)), percent_exp=(length(which(value>0))/length(value))*100)
 # plt_summary <- plt_summary %>% group_by(variable) %>%
 #   dplyr::mutate(scaled = scale_this(mn))
@@ -423,7 +423,7 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 # 
 # plt_summary$variable<-gsub("rna_","",plt_summary$variable)
 # plt_summary$variable<-factor(plt_summary$variable, levels=rev(c(b_genes_noIG, immunoglobins, T_genes,gd_genes,NK_genes, Cholangiocytes_genes,LEC_genes,
-#                                                                 Macrophage_genes,recent_recruit_myeloid,MHCII, kuffer_signature,RBC, neutro_gene, MAST, 
+#                                                                 Macrophage_genes,recent_recruit_myeloid,MHCII, kuffer_signature,RBC, neutro_gene, MAST,
 #                                                                 HSCs_genes,Hepatocyte_genes)))
 # 
 # plt_summary$CellType_refined<-factor(plt_summary$CellType_refined, levels=c("B-cells","Mature B-cells","Plasma cells","pre B cell","pro B cell","B cell","pre pro B cell ","Platelets",
@@ -448,7 +448,7 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 #     scale_size(name="Percent\nCells\nExpressing")+
 #     theme(axis.text.x = element_blank(),axis.title = element_blank(),axis.ticks.x = element_blank(),
 #           plot.margin = margin(0.25,0.25,0,0.25,"cm"))+
-#     geom_hline(yintercept = 32.5)+ geom_hline(yintercept = 27.5)+ geom_hline(yintercept = 23.5)+ 
+#     geom_hline(yintercept = 32.5)+ geom_hline(yintercept = 27.5)+ geom_hline(yintercept = 23.5)+
 #     geom_hline(yintercept = 12.5)+ geom_hline(yintercept = 8.5)+ geom_hline(yintercept = 6.5)+
 #     geom_hline(yintercept = 4.5)+ geom_hline(yintercept = 2.5),
 #   ggplot(plt_summary, aes(CellType_refined, y=1, fill=CellType_refined))+geom_tile(color="black")+
@@ -461,4 +461,35 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 #   ncol=1, rel_heights = c(6,2), align = "v", axis="lr")
 # fancy_dotplot
 # save_plts(fancy_dotplot, "dot_plot_celltype_Fetal_ped_adult_IFALD", w=12,h=12)
+# 
+# 
+# 
+# 
+# #################
+# ## individual gene expression
+# #################
+# 
+# 
+# gene_UMAP<-function(gene,percentile) {
+#   plt_not_gene<-plt[which(plt$variable==gene),]
+# 
+#   exp_limit<-quantile(plt_not_gene$value, percentile)
+#   plt_not_gene$gene_exp_limited<-NA
+#   plt_not_gene$gene_exp_limited[which(plt_not_gene$value>exp_limit)]<-plt_not_gene$value[which(plt_not_gene$value>exp_limit)]
+#   plt_not_gene<-plt_not_gene[rev(order(plt_not_gene$gene_exp_limited)),]
+#   
+#   ggplot(plt_not_gene, aes(UMAP_1,UMAP_2, color=log(gene_exp_limited)))+
+#     geom_point(size=0.15)+
+#     theme_classic()+th+theme(legend.text=element_text(size=10),
+#                              legend.title=element_text(size=12),
+#                              plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#     annotate("text", x = -10, y = -15, label = paste0("n = ",comma(nrow(plt_not_gene))))+
+#     scale_color_continuous_sequential(palette = "Viridis", rev=F, nam=paste(gene, "\nExpression\n(log)"),na.value = "grey80")
+#   }
+# 
+# gene_UMAP("ALB", 0)
+# gene_UMAP("ALB", 0.1)
+# gene_UMAP("ALB", 0.9)
+# 
+# save_plts(all_UMAP, "UMAP_Fetal_ped_adult_IFALD", w=20,h=12)
 # 
