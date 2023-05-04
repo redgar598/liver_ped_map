@@ -86,63 +86,64 @@ head(d10x_ped_IFALD@meta.data)
 ## Merge
 #################
 d10x <- merge(d10x_ped_IFALD,d10x_fetal, merge.data=TRUE, project = "IFALD_fetal_adult_ped_map")
-
-#########
-## Signature Scores on unintegrated data
-#########
-
-##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
-# This is log(TP10K+1)
-d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
-
-myeloid_immune_supressive<-c("CTSB","CD163","MS4A7","FOLR2","GPNMB","VSIG4","HMOX1","MSR1")
-inflammatory_macs<-c("CD74","HLA-DRA","C1QC","HLA-DPA1","HLA-DPB1","LYZ","S100A6")
-exhausted_tcells<-c("TOX","PDCD1","LAG3","TNFRSF9","CXCL13","ENTPD1","HAVCR2","CD38")
-
-recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
-kuffer_signature<-c("VSIG4","MARCO","CD5L","HMOX1")
-
-######
-## Score Signatures
-######
-d10x <- AddModuleScore(
-  object = d10x,
-  features = list(myeloid_immune_supressive),
-  ctrl = 5,
-  name = 'myeloid_immune_supressive_score'
-)
-
-d10x <- AddModuleScore(
-  object = d10x,
-  features = list(inflammatory_macs),
-  ctrl = 5,
-  name = 'inflammatory_macs_score'
-)
-
-d10x <- AddModuleScore(
-  object = d10x,
-  features = list(exhausted_tcells),
-  ctrl = 5,
-  name = 'exhausted_tcells_score'
-)
-
-d10x <- AddModuleScore(
-  object = d10x,
-  features = list(recent_recruit_myeloid),
-  ctrl = 5,
-  name = 'recently_recruited_myeloid'
-)
-
-d10x <- AddModuleScore(
-  object = d10x,
-  features = list(kuffer_signature),
-  ctrl = 5,
-  name = 'kuffer_like_score'
-)
-
-score_data<-d10x@meta.data[,c("myeloid_immune_supressive_score1","inflammatory_macs_score1","exhausted_tcells_score1","recently_recruited_myeloid1","kuffer_like_score1")]
-score_data$cell<-rownames(score_data)
-
+saveRDS(d10x, file = here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
+# 
+# #########
+# ## Signature Scores on unintegrated data
+# #########
+# 
+# ##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
+# # This is log(TP10K+1)
+# d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+# 
+# myeloid_immune_supressive<-c("CTSB","CD163","MS4A7","FOLR2","GPNMB","VSIG4","HMOX1","MSR1")
+# inflammatory_macs<-c("CD74","HLA-DRA","C1QC","HLA-DPA1","HLA-DPB1","LYZ","S100A6")
+# exhausted_tcells<-c("TOX","PDCD1","LAG3","TNFRSF9","CXCL13","ENTPD1","HAVCR2","CD38")
+# 
+# recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
+# kuffer_signature<-c("VSIG4","MARCO","CD5L","HMOX1")
+# 
+# ######
+# ## Score Signatures
+# ######
+# d10x <- AddModuleScore(
+#   object = d10x,
+#   features = list(myeloid_immune_supressive),
+#   ctrl = 5,
+#   name = 'myeloid_immune_supressive_score'
+# )
+# 
+# d10x <- AddModuleScore(
+#   object = d10x,
+#   features = list(inflammatory_macs),
+#   ctrl = 5,
+#   name = 'inflammatory_macs_score'
+# )
+# 
+# d10x <- AddModuleScore(
+#   object = d10x,
+#   features = list(exhausted_tcells),
+#   ctrl = 5,
+#   name = 'exhausted_tcells_score'
+# )
+# 
+# d10x <- AddModuleScore(
+#   object = d10x,
+#   features = list(recent_recruit_myeloid),
+#   ctrl = 5,
+#   name = 'recently_recruited_myeloid'
+# )
+# 
+# d10x <- AddModuleScore(
+#   object = d10x,
+#   features = list(kuffer_signature),
+#   ctrl = 5,
+#   name = 'kuffer_like_score'
+# )
+# 
+# score_data<-d10x@meta.data[,c("myeloid_immune_supressive_score1","inflammatory_macs_score1","exhausted_tcells_score1","recently_recruited_myeloid1","kuffer_like_score1")]
+# score_data$cell<-rownames(score_data)
+# 
 # ###############
 # ## Integrate by donor
 # ###############
@@ -201,58 +202,58 @@ score_data$cell<-rownames(score_data)
 # 
 # 
 # 
-
-
-
-###################
-### save for local plotting
-###################
-load(here("data","Fetal_IFALD_adult_ped_integrated.rds"))
-
-Macrophage_genes<-c( "PTPRC", "MARCO","CD74")
-LEC_genes<-c("CALCRL","RAMP2")
-Hepatocyte_genes<-c("ALB", "CYP3A4")
-Cholangiocytes_genes<-c( "EPCAM", "KRT7")
-HSCs_genes<-c( "IGFBP7",  "SPARC")
-T_genes<-c("CD3D","CD8A")
-NK_genes<-c("NKG7","CD7")
-gd_genes<-c("GNLY")
-RBC<-c("HBB","HBA2","HBA1","FCGR3A")
-MAST<-c("TPSAB1", "AREG")
-recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
-kuffer_signature<-c("VSIG4","CD5L")
-neutro_gene<-c("CSF3R","FCGR3B")
-MHCII<-c("HLA-DRA","HLA-DPB1")
-b_genes_noIG<-c("MS4A1", "CD79B")
-immunoglobins<-c("IGKC","IGHG1")
-
-head(d10x.fetal_ped_IFALD)
-
-umap_mat<-as.data.frame(Embeddings(object = d10x.fetal_ped_IFALD, reduction = "umap"))#
-umap_mat$cell<-rownames(umap_mat)
-
-meta<-d10x.fetal_ped_IFALD@meta.data
-meta$cell<-rownames(meta)
-
-plt<-merge(meta, umap_mat, by="cell")
-
-## raw expression values
-gene_exp<-FetchData(d10x, vars=c(Macrophage_genes,LEC_genes,Hepatocyte_genes,Cholangiocytes_genes,HSCs_genes,T_genes,NK_genes,gd_genes,RBC,
-                                 MAST, recent_recruit_myeloid, kuffer_signature, neutro_gene, MHCII, b_genes_noIG, immunoglobins))
-gene_exp$cell<-rownames(gene_exp)
-gene_exp<-melt(gene_exp)
-
-plt<-merge(gene_exp,plt, by="cell")
-
-plt<-merge(score_data,plt, by="cell")
-
-head(plt)
-
-
-
-
-save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
-
+# 
+# 
+# 
+# ###################
+# ### save for local plotting
+# ###################
+# load(here("data","Fetal_IFALD_adult_ped_integrated.rds"))
+# 
+# Macrophage_genes<-c( "PTPRC", "MARCO","CD74")
+# LEC_genes<-c("CALCRL","RAMP2")
+# Hepatocyte_genes<-c("ALB", "CYP3A4")
+# Cholangiocytes_genes<-c( "EPCAM", "KRT7")
+# HSCs_genes<-c( "IGFBP7",  "SPARC")
+# T_genes<-c("CD3D","CD8A")
+# NK_genes<-c("NKG7","CD7")
+# gd_genes<-c("GNLY")
+# RBC<-c("HBB","HBA2","HBA1","FCGR3A")
+# MAST<-c("TPSAB1", "AREG")
+# recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
+# kuffer_signature<-c("VSIG4","CD5L")
+# neutro_gene<-c("CSF3R","FCGR3B")
+# MHCII<-c("HLA-DRA","HLA-DPB1")
+# b_genes_noIG<-c("MS4A1", "CD79B")
+# immunoglobins<-c("IGKC","IGHG1")
+# 
+# head(d10x.fetal_ped_IFALD)
+# 
+# umap_mat<-as.data.frame(Embeddings(object = d10x.fetal_ped_IFALD, reduction = "umap"))#
+# umap_mat$cell<-rownames(umap_mat)
+# 
+# meta<-d10x.fetal_ped_IFALD@meta.data
+# meta$cell<-rownames(meta)
+# 
+# plt<-merge(meta, umap_mat, by="cell")
+# 
+# ## raw expression values
+# gene_exp<-FetchData(d10x, vars=c(Macrophage_genes,LEC_genes,Hepatocyte_genes,Cholangiocytes_genes,HSCs_genes,T_genes,NK_genes,gd_genes,RBC,
+#                                  MAST, recent_recruit_myeloid, kuffer_signature, neutro_gene, MHCII, b_genes_noIG, immunoglobins))
+# gene_exp$cell<-rownames(gene_exp)
+# gene_exp<-melt(gene_exp)
+# 
+# plt<-merge(gene_exp,plt, by="cell")
+# 
+# plt<-merge(score_data,plt, by="cell")
+# 
+# head(plt)
+# 
+# 
+# 
+# 
+# save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
+# 
 # 
 # 
 # #############
@@ -262,10 +263,10 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 # load(here("/media/redgar/Seagate Portable Drive/fetal_liver/","Fetal_IFALD_adult_ped_pltData.RData"))
 # 
 # plt_not_gene<-plt[which(plt$variable=="MARCO"),]
-# 
 # plt_not_gene[which(is.na(plt_not_gene$CellType_refined)),]
 # plt[which(is.na(plt$variable)),]
 # plt_not_gene$CellType_refined<-factor(plt_not_gene$CellType_refined, levels=names(combo_colors))
+# 
 # 
 # all_UMAP<-ggplot(plt_not_gene, aes(UMAP_1,UMAP_2, color=CellType_refined))+
 #   geom_point(size=0.5)+
@@ -276,7 +277,6 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 #   annotate("text", x = -10, y = -15, label = paste0("n = ",comma(nrow(plt_not_gene))))+
 #   scale_color_manual(name="Cell Type",values = combo_colors, drop = T, limits=force)
 # save_plts(all_UMAP, "UMAP_Fetal_ped_adult_IFALD", w=20,h=12)
-# 
 # 
 # 
 # countcells<-data.frame(tapply(plt_not_gene$cell, plt_not_gene$age_condition, function(x) length(unique(x))))
@@ -438,7 +438,7 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 #                                                                             "Mast cell",
 #                                                                             "HSC","HSC/MPP",
 #                                                                             "Hepatocytes","Hepatocyte",
-#                                                                             "Doublet"))
+#                                                                             "Doublet","Low Quality"))
 # 
 # 
 # fancy_dotplot<-plot_grid(
@@ -468,28 +468,282 @@ save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 # #################
 # ## individual gene expression
 # #################
+# countcells<-data.frame(tapply(plt_not_gene_myeloid$cell, plt_not_gene_myeloid$age_condition, function(x) length(unique(x))))
+# colnames(countcells)<-c("Count")
+# countcells$age_condition<-rownames(countcells)
 # 
 # 
-# gene_UMAP<-function(gene,percentile) {
+# gene_UMAP<-function(gene,percentile, splt=F) {
 #   plt_not_gene<-plt[which(plt$variable==gene),]
 # 
 #   exp_limit<-quantile(plt_not_gene$value, percentile)
 #   plt_not_gene$gene_exp_limited<-NA
 #   plt_not_gene$gene_exp_limited[which(plt_not_gene$value>exp_limit)]<-plt_not_gene$value[which(plt_not_gene$value>exp_limit)]
-#   plt_not_gene<-plt_not_gene[rev(order(plt_not_gene$gene_exp_limited)),]
+#   #plt_not_gene<-plt_not_gene[rev(order(plt_not_gene$gene_exp_limited)),]
+# 
+#   plt_not_gene<-rbind(plt_not_gene[which(is.na(plt_not_gene$gene_exp_limited)),],
+#                       plt_not_gene[which(!(is.na(plt_not_gene$gene_exp_limited))),][(order(plt_not_gene[which(!(is.na(plt_not_gene$gene_exp_limited))),]$gene_exp_limited)),])
 #   
-#   ggplot(plt_not_gene, aes(UMAP_1,UMAP_2, color=log(gene_exp_limited)))+
-#     geom_point(size=0.15)+
-#     theme_classic()+th+theme(legend.text=element_text(size=10),
-#                              legend.title=element_text(size=12),
-#                              plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
-#     annotate("text", x = -10, y = -15, label = paste0("n = ",comma(nrow(plt_not_gene))))+
-#     scale_color_continuous_sequential(palette = "Viridis", rev=F, nam=paste(gene, "\nExpression\n(log)"),na.value = "grey80")
+#   
+#   if(splt==F){
+#     umap_plt<-ggplot(plt_not_gene, aes(UMAP_1,UMAP_2, color=log(gene_exp_limited)))+
+#       geom_point(size=0.15)+
+#       theme_classic()+th+theme(legend.text=element_text(size=10),
+#                                legend.title=element_text(size=12),
+#                                plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#       annotate("text", x = -10, y = -15, label = paste0("n = ",comma(nrow(plt_not_gene))))+
+#       scale_color_continuous_sequential(palette = "Viridis", rev=F, nam=paste(gene, "\nExpression\n(log)"),na.value = "grey80")
+#     }
+#   if(splt==T){
+#     umap_plt<-ggplot(plt_not_gene, aes(UMAP_1,UMAP_2))+
+#       geom_point(size=0.15, aes(color=log(gene_exp_limited)))+  facet_wrap(~age_condition)+
+#       theme_classic()+th+theme(legend.text=element_text(size=10),
+#                                legend.title=element_text(size=12),
+#                                plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#       geom_text(aes(x = -10, y = -15, label=paste0("n = ",comma(Count))), countcells)+
+#       scale_color_continuous_sequential(palette = "Viridis", rev=F, nam=paste(gene, "\nExpression\n(log)"),na.value = "grey80")
+#   }
+#   umap_plt
 #   }
 # 
 # gene_UMAP("ALB", 0)
 # gene_UMAP("ALB", 0.1)
 # gene_UMAP("ALB", 0.9)
 # 
+# gene_UMAP("VSIG4", 0.9)
+# gene_UMAP("CD5L", 0.9)
+# gene_UMAP("VSIG4", 0.9,T)
+# gene_UMAP("CD5L", 0.9,T)
+# 
+# gene_UMAP("S100A8", 0.9,T)
+# gene_UMAP("S100A9", 0.9,T)
+# gene_UMAP("CD68", 0.9,T)
+# gene_UMAP("LYZ", 0.9,T)
+# 
 # save_plts(all_UMAP, "UMAP_Fetal_ped_adult_IFALD", w=20,h=12)
+# 
+# 
+# 
+# #############
+# ## Myeloid Score plots
+# #############
+# plt_not_gene_myeloid<-plt_not_gene[which(plt_not_gene$CellType_refined%in%c("Myeloid cells","RR Myeloid","Mono-Mac","Kupffer Cell","KC Like","Macrophage\n(MHCII high)","Macrophage\n(CLEC9A high)",
+#                         "Monocyte","pDC precursor")),]
+# 
+# myeloid_UMAP<-ggplot(plt_not_gene_myeloid, aes(UMAP_1,UMAP_2, color=CellType_refined))+
+#   geom_point(size=0.5)+
+#   theme_classic()+th+theme(legend.text=element_text(size=10),
+#                            legend.title=element_text(size=12),
+#                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#   guides(colour = guide_legend(override.aes = list(size=5)))+
+#   annotate("text", x = -10, y = -15, label = paste0("n = ",comma(nrow(plt_not_gene_myeloid))))+
+#   scale_color_manual(name="Cell Type",values = combo_colors, drop = T, limits=force)
+# myeloid_UMAP
+# save_plts(myeloid_UMAP, "UMAP_Fetal_ped_adult_IFALD_myeloid", w=20,h=12)
+# 
+# recruit_all_myeloid<-ggplot(plt_not_gene_myeloid, aes(UMAP_1,UMAP_2, color=recently_recruited_myeloid1))+
+#   geom_point(size=0.5)+
+#   theme_classic()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#   annotate("text", x = -5, y = -6, label = paste0("n = ",comma(nrow(plt_not_gene_myeloid))))+
+#   scale_color_continuous_sequential(palette = "Viridis", rev=F, name="Recently\nRecruited\nMyeloid\nSignature Score")
+# recruit_all_myeloid
+# save_plts(recruit_all_myeloid, "Fetal_adult_ped_IFALD_recruit_myeloid", w=7,h=5)
+# 
+# 
+# countcells<-data.frame(tapply(plt_not_gene_myeloid$cell, plt_not_gene_myeloid$age_condition, function(x) length(unique(x))))
+# colnames(countcells)<-c("Count")
+# countcells$age_condition<-rownames(countcells)
+# 
+# condition_split_UMAP_myeloid<-ggplot(plt_not_gene_myeloid, aes(UMAP_1,UMAP_2))+
+#   geom_point(aes( color=CellType_refined),size=0.5)+
+#   theme_classic()+th+theme(legend.text=element_text(size=10),
+#                            legend.title=element_text(size=12),
+#                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#   guides(colour = guide_legend(override.aes = list(size=5)))+
+#   geom_text(aes(x = -10, y = -15, label=paste0("n = ",comma(Count))), countcells)+
+#   scale_color_manual(name="Cell Type",values = combo_colors, drop = T, limits=force)+
+#   facet_wrap(~age_condition)
+# condition_split_UMAP_myeloid
+# save_plts(condition_split_UMAP_myeloid, "condition_split_UMAP_Fetal_ped_adult_IFALD_myeloid", w=20,h=12)
+# 
+# 
+# condition_split_UMAP<-ggplot(plt_not_gene_myeloid, aes(UMAP_1,UMAP_2))+
+#   geom_point(aes( color=recently_recruited_myeloid1),size=0.5)+
+#   theme_classic()+th+theme(legend.text=element_text(size=10),
+#                            legend.title=element_text(size=12),
+#                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#   scale_color_continuous_sequential(palette = "Viridis", rev=F, name="Recently\nRecruited\nMyeloid\nSignature Score")+
+#   facet_wrap(~age_condition)+
+#   geom_text(aes(x = -10, y = -15, label=paste0("n = ",comma(Count))), countcells)
+# condition_split_UMAP
+# save_plts(condition_split_UMAP, "Fetal_adult_ped_IFALD_recruit_myeloid_condition_split", w=20,h=12)
+# 
+# condition_split_UMAP<-ggplot(plt_not_gene_myeloid, aes(UMAP_1,UMAP_2))+
+#   geom_point(aes( color=kuffer_like_score1),size=0.5)+
+#   theme_classic()+th+theme(legend.text=element_text(size=10),
+#                            legend.title=element_text(size=12),
+#                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#   scale_color_continuous_sequential(palette = "Viridis", rev=F, name="Kupffer-like\nSignature Score")+
+#   facet_wrap(~age_condition)+
+#   geom_text(aes(x = -10, y = -15, label=paste0("n = ",comma(Count))), countcells)
+# condition_split_UMAP
+# save_plts(condition_split_UMAP, "Fetal_adult_ped_IFALD_KC_myeloid_condition_split", w=20,h=12)
+# 
+# condition_split_UMAP<-ggplot(plt_not_gene_myeloid, aes(UMAP_1,UMAP_2))+
+#   geom_point(aes( color=inflammatory_macs_score1),size=0.5)+
+#   theme_classic()+th+theme(legend.text=element_text(size=10),
+#                            legend.title=element_text(size=12),
+#                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#   scale_color_continuous_sequential(palette = "Viridis", rev=F, name="MHCII\nMyeloid\nSignature Score")+
+#   facet_wrap(~age_condition)+
+#   geom_text(aes(x = -10, y = -15, label=paste0("n = ",comma(Count))), countcells)
+# condition_split_UMAP
+# save_plts(condition_split_UMAP, "Fetal_adult_ped_IFALD_MHCII_myeloid_condition_split", w=20,h=12)
+# 
+# 
+# ################
+# ## Statistics
+# ################
+# plt_myeloid_adult<-plt_not_gene_myeloid[which(plt_not_gene_myeloid$age_condition=="Adult Healthy"),]
+# adult_cellcount<-nrow(plt_myeloid_adult)
+# print(paste(adult_cellcount, " adult myeloid cells",sep=""))
+# 
+# plt_myeloid_ped<-plt_not_gene_myeloid[which(plt_not_gene_myeloid$age_condition=="Ped Healthy"),]
+# ped_cellcount<-nrow(plt_myeloid_ped)
+# print(paste(ped_cellcount, " ped myeloid cells",sep=""))
+# 
+# plt_myeloid_fetal<-plt_not_gene_myeloid[which(plt_not_gene_myeloid$age_condition=="Fetal Healthy"),]
+# fetal_cellcount<-nrow(plt_myeloid_fetal)
+# print(paste(fetal_cellcount, " fetal myeloid cells",sep=""))
+# 
+# 
+# samp_num<-10000
+# pval<-0.05
+# myeloid_pval_montecarlo<-do.call(rbind, lapply(1:samp_num, function(x){
+#   set.seed(x)
+#   plt_myeloid_adult_random<-plt_myeloid_adult[sample(adult_cellcount,ped_cellcount),]
+#   
+#   supressive<-t.test(plt_myeloid_adult_random$myeloid_immune_supressive_score1, plt_myeloid_ped$myeloid_immune_supressive_score1)$p.value
+#   inflammatory<-t.test(plt_myeloid_adult_random$inflammatory_macs_score1, plt_myeloid_ped$inflammatory_macs_score1)$p.value
+#   recruit<-t.test(plt_myeloid_adult_random$recently_recruited_myeloid1, plt_myeloid_ped$recently_recruited_myeloid1)$p.value
+#   kuffer<-t.test(plt_myeloid_adult_random$kuffer_like_score1, plt_myeloid_ped$kuffer_like_score1)$p.value
+#   
+#   data.frame(supressive=supressive, inflammatory=inflammatory, recruit=recruit ,kuffer=kuffer)
+# }))
+# 
+# print(paste("Comparing the myeloid immune supressive score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+#             ") in ", samp_num, " random samples at a p value of ",
+#             round((length(myeloid_pval_montecarlo$supressive[which(myeloid_pval_montecarlo$supressive>pval)])+1)/(samp_num+1), 3), sep=""))
+# print(paste("Comparing the inflammatory macs score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+#             ") in ", samp_num, " random samples at a p value of ",
+#             round((length(myeloid_pval_montecarlo$inflammatory[which(myeloid_pval_montecarlo$inflammatory>pval)])+1)/(samp_num+1), 3), sep=""))
+# print(paste("Comparing the recently recruited myeloid score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+#             ") in ", samp_num, " random samples at a p value of ",
+#             round((length(myeloid_pval_montecarlo$recruit[which(myeloid_pval_montecarlo$recruit>pval)])+1)/(samp_num+1), 6), sep=""))
+# print(paste("Comparing the kuffer-like score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+#             ") in ", samp_num, " random samples at a p value of ",
+#             round((length(myeloid_pval_montecarlo$kuffer[which(myeloid_pval_montecarlo$kuffer>pval)])+1)/(samp_num+1), 6), sep=""))
+# 
+# 
+# samp_num<-10000
+# pval<-0.05
+# myeloid_pval_montecarlo<-do.call(rbind, lapply(1:samp_num, function(x){
+#   set.seed(x)
+#   plt_myeloid_fetal_random<-plt_myeloid_fetal[sample(fetal_cellcount,ped_cellcount),]
+#   
+#   supressive<-t.test(plt_myeloid_fetal_random$myeloid_immune_supressive_score1, plt_myeloid_ped$myeloid_immune_supressive_score1)$p.value
+#   inflammatory<-t.test(plt_myeloid_fetal_random$inflammatory_macs_score1, plt_myeloid_ped$inflammatory_macs_score1)$p.value
+#   recruit<-t.test(plt_myeloid_fetal_random$recently_recruited_myeloid1, plt_myeloid_ped$recently_recruited_myeloid1)$p.value
+#   kuffer<-t.test(plt_myeloid_fetal_random$kuffer_like_score1, plt_myeloid_ped$kuffer_like_score1)$p.value
+#   
+#   data.frame(supressive=supressive, inflammatory=inflammatory, recruit=recruit ,kuffer=kuffer)
+# }))
+# 
+# print(paste("Comparing the myeloid immune supressive score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+#             ") in ", samp_num, " random samples at a p value of ",
+#             round((length(myeloid_pval_montecarlo$supressive[which(myeloid_pval_montecarlo$supressive>pval)])+1)/(samp_num+1), 3), sep=""))
+# print(paste("Comparing the inflammatory macs score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+#             ") in ", samp_num, " random samples at a p value of ",
+#             round((length(myeloid_pval_montecarlo$inflammatory[which(myeloid_pval_montecarlo$inflammatory>pval)])+1)/(samp_num+1), 3), sep=""))
+# print(paste("Comparing the recently recruited myeloid score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+#             ") in ", samp_num, " random samples at a p value of ",
+#             round((length(myeloid_pval_montecarlo$recruit[which(myeloid_pval_montecarlo$recruit>pval)])+1)/(samp_num+1), 6), sep=""))
+# print(paste("Comparing the kuffer-like score in myeloid cells, there is a sig difference between ped and adult (p <", pval,
+#             ") in ", samp_num, " random samples at a p value of ",
+#             round((length(myeloid_pval_montecarlo$kuffer[which(myeloid_pval_montecarlo$kuffer>pval)])+1)/(samp_num+1), 6), sep=""))
+# 
+# 
+# 
+# # BOX PLOT
+# plt_not_gene_myeloid$age_condition<-factor(plt_not_gene_myeloid$age_condition, levels=c("Fetal Healthy","Ped Healthy","Ped IFALD","Adult Healthy" ))
+# 
+# cell_num_myeloid<-as.data.frame(table(plt_not_gene_myeloid$age_condition))
+# colnames(cell_num_myeloid)<-c("age_condition","CellCount")
+# 
+# plt_max<-ceiling(max(plt_not_gene_myeloid$recently_recruited_myeloid1))
+# plt_min<-floor(min(plt_not_gene_myeloid$recently_recruited_myeloid1))+0.5
+# 
+# myeloid_recruit_box<-
+#   ggplot(plt_not_gene_myeloid, aes(age_condition,recently_recruited_myeloid1))+
+#   geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=age_condition))+
+#   theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#   geom_signif(stat="identity",
+#               data=data.frame(x=c(1, 1, 2), xend=c(1, 2, 2),
+#                               y=c(plt_max, plt_max+0.25, plt_max+0.25), yend=c(plt_max+0.25, plt_max+0.25, plt_max),
+#                               annotation=c("*")),
+#               aes(x=x,xend=xend, y=y, yend=yend, annotation=annotation), color="grey50")+ylim(plt_min, plt_max+1)+
+#   xlab("Age Group")+ylab("Recently Recruited Myeloid Signature Score")+
+#   geom_text(aes(y=-1, x=age_condition,label=paste0("n = ",comma(CellCount))),cell_num_myeloid, hjust=-0.1, size=3)
+# myeloid_recruit_box
+# 
+# 
+# plt_max<-ceiling(max(plt_not_gene_myeloid$kuffer_like_score1))
+# plt_min<-floor(min(plt_not_gene_myeloid$kuffer_like_score1))+0.5
+# 
+# myeloid_kc_box<-
+#   ggplot(plt_not_gene_myeloid, aes(age_condition,kuffer_like_score1))+
+#   geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=age_condition))+
+#   theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#   xlab("Age Group")+ylab("Kupffer-like Signature Score")+
+#   geom_text(aes(y=-1, x=age_condition,label=paste0("n = ",comma(CellCount))),cell_num_myeloid, hjust=-0.1, size=3)
+# myeloid_kc_box
+# 
+# 
+# plt_max<-ceiling(max(plt_not_gene_myeloid$inflammatory_macs_score1))
+# plt_min<-floor(min(plt_not_gene_myeloid$inflammatory_macs_score1))+0.5
+# 
+# myeloid_MHCII_box<-
+#   ggplot(plt_not_gene_myeloid, aes(age_condition,inflammatory_macs_score1))+
+#   geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1,aes(fill=age_condition))+
+#   theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#   xlab("Age Group")+ylab("MHCII Myeloid Signature Score")+
+#   geom_text(aes(y=-1, x=age_condition,label=paste0("n = ",comma(CellCount))),cell_num_myeloid, hjust=-0.1, size=3)
+# myeloid_MHCII_box
+# 
+# 
+# plt_not_gene_myeloid$Age<-factor(plt_not_gene_myeloid$Age, 
+#                                  levels=c( "7 weeks gestation","8 weeks gestation", "9 weeks gestation", 
+#                                            "11 weeks gestation","12 weeks gestation", "13 weeks gestation",
+#                                           "14 weeks gestation","16 weeks gestation","17 weeks gestation", 
+#                                           "2","3","11","12","13","17","26","48","57","61","65","67","69"))
+# levels(plt_not_gene_myeloid$Age)<-c( "7\nweeks gestation","8\nweeks gestation", "9\nweeks gestation", 
+#                                      "11\nweeks gestation","12\nweeks gestation", "13\nweeks gestation",
+#                                      "14\nweeks gestation","16\nweeks gestation","17\nweeks gestation", 
+#                                      "2","3","11","12","13","17","26","48","57","61","65","67","69")
+# 
+#   ggplot(plt_not_gene_myeloid, aes(Age,inflammatory_macs_score1))+
+#   geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1)+
+#   theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#   xlab("Age")
+#   
+#   ggplot(plt_not_gene_myeloid, aes(Age,kuffer_like_score1))+
+#     geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1)+
+#     theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#     xlab("Age")
+#   
+#   ggplot(plt_not_gene_myeloid, aes(Age,recently_recruited_myeloid1))+
+#     geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1)+
+#     theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#     xlab("Age")
+#   
 # 
