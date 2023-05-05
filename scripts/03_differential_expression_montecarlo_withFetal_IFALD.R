@@ -34,9 +34,15 @@ d10x<-readRDS(file = here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
 ######
 ## add cell type labels
 ######
-load(here("data","adult_ped_cellRefined_withDropletQC.rds"))
+#load(here("/media/redgar/Seagate Portable Drive/fetal_liver/","Fetal_IFALD_adult_ped_cellRough.rds"))
+load(here("data","Fetal_IFALD_adult_ped_cellRough.rds"))
 
 cell_label$index<-rownames(cell_label)
+
+### harmonize fetal and ped/adult labels where possible
+
+
+
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 

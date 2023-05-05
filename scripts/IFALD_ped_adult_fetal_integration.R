@@ -210,22 +210,22 @@ saveRDS(d10x, file = here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
 # ###################
 # load(here("data","Fetal_IFALD_adult_ped_integrated.rds"))
 # 
-# Macrophage_genes<-c( "PTPRC", "MARCO","CD74")
-# LEC_genes<-c("CALCRL","RAMP2")
-# Hepatocyte_genes<-c("ALB", "CYP3A4")
-# Cholangiocytes_genes<-c( "EPCAM", "KRT7")
-# HSCs_genes<-c( "IGFBP7",  "SPARC")
-# T_genes<-c("CD3D","CD8A")
-# NK_genes<-c("NKG7","CD7")
-# gd_genes<-c("GNLY")
-# RBC<-c("HBB","HBA2","HBA1","FCGR3A")
-# MAST<-c("TPSAB1", "AREG")
-# recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
-# kuffer_signature<-c("VSIG4","CD5L")
-# neutro_gene<-c("CSF3R","FCGR3B")
-# MHCII<-c("HLA-DRA","HLA-DPB1")
-# b_genes_noIG<-c("MS4A1", "CD79B")
-# immunoglobins<-c("IGKC","IGHG1")
+Macrophage_genes<-c( "PTPRC", "MARCO","CD74")
+LEC_genes<-c("CALCRL","RAMP2")
+Hepatocyte_genes<-c("ALB", "CYP3A4")
+Cholangiocytes_genes<-c( "EPCAM", "KRT7")
+HSCs_genes<-c( "IGFBP7",  "SPARC")
+T_genes<-c("CD3D","CD8A")
+NK_genes<-c("NKG7","CD7")
+gd_genes<-c("GNLY")
+RBC<-c("HBB","HBA2","HBA1","FCGR3A")
+MAST<-c("TPSAB1", "AREG")
+recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
+kuffer_signature<-c("VSIG4","CD5L")
+neutro_gene<-c("CSF3R","FCGR3B")
+MHCII<-c("HLA-DRA","HLA-DPB1")
+b_genes_noIG<-c("MS4A1", "CD79B")
+immunoglobins<-c("IGKC","IGHG1")
 # 
 # head(d10x.fetal_ped_IFALD)
 # 
@@ -255,6 +255,48 @@ saveRDS(d10x, file = here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
 # save(plt, file=here("data","Fetal_IFALD_adult_ped_pltData.RData"))
 # 
 # 
+
+#############
+## PCAs for plotting
+#############
+## add cell type labels
+load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+cell_label$index<-rownames(cell_label)
+cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
+identical(colnames(d10x), cell_label$index)
+d10x <- AddMetaData(d10x, metadata = cell_label)
+
+
+d10x.combined_myeloid<-subset(d10x, subset = CellType_refined %in% c("Myeloid cells","RR Myeloid","Mono-Mac","Kupffer Cell","KC Like","Macrophage\n(MHCII high)","Macrophage\n(CLEC9A high)",
+                                                                     "Monocyte","pDC precursor","Megakaryocyte", "Cycling Myeloid","DC1","DC2","Monocyte-DC precursor",
+                                                                     "Neutrophil-myeloid progenitor","Mono-NK","Myeloid Erythrocytes\n(phagocytosis)","VCAM1+ Erythroblastic Island Macrophage",
+                                                                     "Erythroblastic Island Macrophage"))
+rm(d10x)
+gc
+
+d10x.combined_myeloid <- NormalizeData(d10x.combined_myeloid)
+d10x.combined_myeloid <- FindVariableFeatures(d10x.combined_myeloid, selection.method = "vst", nfeatures = 2000)
+d10x.combined_myeloid <- ScaleData(d10x.combined_myeloid) 
+d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+
+d10x.combined_myeloid[["pca"]]
+
+head(Embeddings(d10x.combined_myeloid, reduction = "pca")[, 1:5])
+head(Loadings(d10x.combined_myeloid, reduction = "pca")[, 1:5])
+head(Stdev(d10x.combined_myeloid, reduction = "pca"))
+
+#' ## PCA for batch effect
+#Loadings<-as.data.frame(Loadings(d10x.combined_myeloid, reduction = "pca"))
+embed<-as.data.frame(Embeddings(d10x.combined_myeloid, reduction = "pca"))
+vars <- Stdev(d10x.combined_myeloid, reduction = "pca")^2
+Importance<-vars/sum(vars)
+print(Importance[1:10])
+
+meta_categorical <- d10x.combined_myeloid@meta.data[, c("CellType_refined","age_condition","Phase")]  # input column numbers in meta that contain categorical variables
+meta_continuous <- d10x.combined_myeloid@meta.data[, c("percent.mt","nFeature_RNA","Age")]  # input column numbers in meta that contain continuous variables
+
+save(embed,vars, Importance, meta_categorical, meta_continuous, file=here("data","Fetal_ped_IFALD_adult_PCA_myeloid.RData"))
+
 # 
 # #############
 # ### Plots
@@ -306,13 +348,9 @@ saveRDS(d10x, file = here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
 # save_plts(all_UMAP, "UMAP_Fetal_ped_adult_IFALD_seuratclusters", w=16,h=12)
 # 
 # 
-# plt_entropy_individual<-entropy_d10(d10x.combined_myeloid, "individual")
-# entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined_myeloid)
-# save_plts(entropy_individual, "IFALD_entropy_individual_myeloid", w=15,h=10)
-# 
-# 
-# ## entropy on a plt object
-# 
+# ##############
+# ## entropy 
+# ##############
 # entropy_plt<-function(covariate, d10x){
 #   entrophy_cluster_df<-do.call(rbind, lapply(as.character(unique(d10x$seurat_clusters)), function(cluster){
 #     data.frame(seurat_clusters=cluster, entropy=entropy(d10x[,covariate][which(d10x$seurat_clusters==cluster)]))
@@ -460,7 +498,7 @@ saveRDS(d10x, file = here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
 #           plot.margin = margin(0,0,1,1,"cm")),
 #   ncol=1, rel_heights = c(6,2), align = "v", axis="lr")
 # fancy_dotplot
-# save_plts(fancy_dotplot, "dot_plot_celltype_Fetal_ped_adult_IFALD", w=12,h=12)
+# save_plts(fancy_dotplot, "dot_plot_celltype_Fetal_ped_adult_IFALD", w=12,h=13)
 # 
 # 
 # 
@@ -523,14 +561,71 @@ saveRDS(d10x, file = here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
 # save_plts(all_UMAP, "UMAP_Fetal_ped_adult_IFALD", w=20,h=12)
 # 
 # 
+# #############
+# ## Cell Label Harmonization
+# #############
+# plt_not_gene<-plt[which(plt$variable=="MARCO"),]
+# plt_not_gene$CellType_refined<-factor(plt_not_gene$CellType_refined, levels=names(combo_colors))
+# 
+# table(plt_not_gene$CellType_refined[which(plt_not_gene$seurat_clusters==25)])
+# 
+# 
+# plt_not_gene$CellType_harmonized<-as.character(plt_not_gene$CellType_refined)
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("0","2","12","13"))]<-"Erythrocytes"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("1","4","10","23","33","25"))]<-"Kupffer Cell"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("3"))]<-"Macrophage\n(MHCII high)"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("5"))]<-"CD3+ T-cells"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("6","22","28"))]<-"LSEC"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("7","24"))]<-"NK-like cells"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("8"))]<-"Early Erythrocytes"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("9"))]<-"RR Myeloid"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("11","19"))]<-"Hepatocytes"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("14","15"))]<-"B cell"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("16"))]<-"gd T-cells"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("17"))]<-"HSC/MPP"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("18"))]<-"HSC"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("20"))]<-"Megakaryocyte"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("21"))]<-"VCAM1+ Erythroblastic Island Macrophage"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("26"))]<-"Mast cell"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("27"))]<-"ILC precursor"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("29"))]<-"Mono-NK"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("30"))]<-"Plasma cells"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("31"))]<-"Cholangiocytes"
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("32"))]<-"DC"
+# 
+# 
+# d10x.combined_RBC@meta.data$CellType_refined<-as.character(d10x.combined_RBC@meta.data$CellType_refined)
+# d10x.combined_RBC@meta.data$CellType_refined[which(d10x.combined_RBC@meta.data$seurat_clusters%in%c("0","2"))]<-"Erythrocytes"
+# 
+# 
+# 
+# entrophy_cluster_df<-do.call(rbind, lapply(as.character(unique(plt_not_gene$seurat_clusters)), function(cluster){
+#   data.frame(seurat_clusters=cluster, entropy=entropy(plt_not_gene[,"age_condition"][which(plt_not_gene$seurat_clusters==cluster)]))
+# }))
+# fetal_only<-entrophy_cluster_df[which(entrophy_cluster_df$entropy<0.6),]
+# 
+# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%fetal_only$seurat_clusters)]<-paste("Fetal",plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%fetal_only$seurat_clusters)], sep=" ")
+# 
+# 
+# 
+# ggplot(plt_not_gene, aes(UMAP_1,UMAP_2, color=CellType_harmonized))+
+#   geom_point(size=0.5)+
+#   theme_classic()+th+theme(legend.text=element_text(size=10),
+#                            legend.title=element_text(size=12),
+#                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#   guides(colour = guide_legend(override.aes = list(size=5)))+
+#   annotate("text", x = -10, y = -15, label = paste0("n = ",comma(nrow(plt_not_gene))))+
+#   scale_color_manual(name="Cell Type",values = combo_colors, drop = T, limits=force)
+# 
+# 
 # 
 # #############
 # ## Myeloid Score plots
 # #############
-# plt_not_gene_myeloid<-plt_not_gene[which(plt_not_gene$CellType_refined%in%c("Myeloid cells","RR Myeloid","Mono-Mac","Kupffer Cell","KC Like","Macrophage\n(MHCII high)","Macrophage\n(CLEC9A high)",
+# plt_not_gene_myeloid<-plt_not_gene[which(plt_not_gene$CellType_harmonized%in%c("Cycling Myeloid","RR Myeloid","Mono-Mac","Kupffer Cell","KC Like","Macrophage\n(MHCII high)","Macrophage\n(CLEC9A high)",
 #                         "Monocyte","pDC precursor")),]
 # 
-# myeloid_UMAP<-ggplot(plt_not_gene_myeloid, aes(UMAP_1,UMAP_2, color=CellType_refined))+
+# myeloid_UMAP<-ggplot(plt_not_gene_myeloid, aes(UMAP_1,UMAP_2, color=CellType_harmonized))+
 #   geom_point(size=0.5)+
 #   theme_classic()+th+theme(legend.text=element_text(size=10),
 #                            legend.title=element_text(size=12),
@@ -555,7 +650,7 @@ saveRDS(d10x, file = here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
 # countcells$age_condition<-rownames(countcells)
 # 
 # condition_split_UMAP_myeloid<-ggplot(plt_not_gene_myeloid, aes(UMAP_1,UMAP_2))+
-#   geom_point(aes( color=CellType_refined),size=0.5)+
+#   geom_point(aes( color=CellType_harmonized),size=0.5)+
 #   theme_classic()+th+theme(legend.text=element_text(size=10),
 #                            legend.title=element_text(size=12),
 #                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
@@ -622,12 +717,12 @@ saveRDS(d10x, file = here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
 # myeloid_pval_montecarlo<-do.call(rbind, lapply(1:samp_num, function(x){
 #   set.seed(x)
 #   plt_myeloid_adult_random<-plt_myeloid_adult[sample(adult_cellcount,ped_cellcount),]
-#   
+# 
 #   supressive<-t.test(plt_myeloid_adult_random$myeloid_immune_supressive_score1, plt_myeloid_ped$myeloid_immune_supressive_score1)$p.value
 #   inflammatory<-t.test(plt_myeloid_adult_random$inflammatory_macs_score1, plt_myeloid_ped$inflammatory_macs_score1)$p.value
 #   recruit<-t.test(plt_myeloid_adult_random$recently_recruited_myeloid1, plt_myeloid_ped$recently_recruited_myeloid1)$p.value
 #   kuffer<-t.test(plt_myeloid_adult_random$kuffer_like_score1, plt_myeloid_ped$kuffer_like_score1)$p.value
-#   
+# 
 #   data.frame(supressive=supressive, inflammatory=inflammatory, recruit=recruit ,kuffer=kuffer)
 # }))
 # 
@@ -650,12 +745,12 @@ saveRDS(d10x, file = here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
 # myeloid_pval_montecarlo<-do.call(rbind, lapply(1:samp_num, function(x){
 #   set.seed(x)
 #   plt_myeloid_fetal_random<-plt_myeloid_fetal[sample(fetal_cellcount,ped_cellcount),]
-#   
+# 
 #   supressive<-t.test(plt_myeloid_fetal_random$myeloid_immune_supressive_score1, plt_myeloid_ped$myeloid_immune_supressive_score1)$p.value
 #   inflammatory<-t.test(plt_myeloid_fetal_random$inflammatory_macs_score1, plt_myeloid_ped$inflammatory_macs_score1)$p.value
 #   recruit<-t.test(plt_myeloid_fetal_random$recently_recruited_myeloid1, plt_myeloid_ped$recently_recruited_myeloid1)$p.value
 #   kuffer<-t.test(plt_myeloid_fetal_random$kuffer_like_score1, plt_myeloid_ped$kuffer_like_score1)$p.value
-#   
+# 
 #   data.frame(supressive=supressive, inflammatory=inflammatory, recruit=recruit ,kuffer=kuffer)
 # }))
 # 
@@ -721,29 +816,29 @@ saveRDS(d10x, file = here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
 # myeloid_MHCII_box
 # 
 # 
-# plt_not_gene_myeloid$Age<-factor(plt_not_gene_myeloid$Age, 
-#                                  levels=c( "7 weeks gestation","8 weeks gestation", "9 weeks gestation", 
+# plt_not_gene_myeloid$Age<-factor(plt_not_gene_myeloid$Age,
+#                                  levels=c( "7 weeks gestation","8 weeks gestation", "9 weeks gestation",
 #                                            "11 weeks gestation","12 weeks gestation", "13 weeks gestation",
-#                                           "14 weeks gestation","16 weeks gestation","17 weeks gestation", 
+#                                           "14 weeks gestation","16 weeks gestation","17 weeks gestation",
 #                                           "2","3","11","12","13","17","26","48","57","61","65","67","69"))
-# levels(plt_not_gene_myeloid$Age)<-c( "7\nweeks gestation","8\nweeks gestation", "9\nweeks gestation", 
+# levels(plt_not_gene_myeloid$Age)<-c( "7\nweeks gestation","8\nweeks gestation", "9\nweeks gestation",
 #                                      "11\nweeks gestation","12\nweeks gestation", "13\nweeks gestation",
-#                                      "14\nweeks gestation","16\nweeks gestation","17\nweeks gestation", 
+#                                      "14\nweeks gestation","16\nweeks gestation","17\nweeks gestation",
 #                                      "2","3","11","12","13","17","26","48","57","61","65","67","69")
 # 
 #   ggplot(plt_not_gene_myeloid, aes(Age,inflammatory_macs_score1))+
 #   geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1)+
 #   theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
 #   xlab("Age")
-#   
+# 
 #   ggplot(plt_not_gene_myeloid, aes(Age,kuffer_like_score1))+
 #     geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1)+
 #     theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
 #     xlab("Age")
-#   
+# 
 #   ggplot(plt_not_gene_myeloid, aes(Age,recently_recruited_myeloid1))+
 #     geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1)+
 #     theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
 #     xlab("Age")
-#   
-# 
+
+
