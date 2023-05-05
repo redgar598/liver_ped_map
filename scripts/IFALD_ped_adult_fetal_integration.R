@@ -284,7 +284,7 @@ vars <- Stdev(d10x.combined_myeloid, reduction = "pca")^2
 Importance<-vars/sum(vars)
 print(Importance[1:10])
 
-meta_categorical <- d10x.combined_myeloid@meta.data[, c("CellType_refined","age_condition","Phase")]  # input column numbers in meta that contain categorical variables
+meta_categorical <- d10x.combined_myeloid@meta.data[, c("CellType_refined","age_condition")]  # input column numbers in meta that contain categorical variables
 meta_continuous <- d10x.combined_myeloid@meta.data[, c("percent.mt","nFeature_RNA","Age")]  # input column numbers in meta that contain continuous variables
 
 save(embed,vars, Importance, meta_categorical, meta_continuous, file=here("data","Fetal_ped_IFALD_adult_PCA_myeloid.RData"))
