@@ -278,7 +278,7 @@ head(Loadings(d10x.combined_myeloid, reduction = "pca")[, 1:5])
 head(Stdev(d10x.combined_myeloid, reduction = "pca"))
 
 #' ## PCA for batch effect
-#Loadings<-as.data.frame(Loadings(d10x.combined_myeloid, reduction = "pca"))
+Loadings<-as.data.frame(Loadings(d10x.combined_myeloid, reduction = "pca"))
 embed<-as.data.frame(Embeddings(d10x.combined_myeloid, reduction = "pca"))
 vars <- Stdev(d10x.combined_myeloid, reduction = "pca")^2
 Importance<-vars/sum(vars)
@@ -287,7 +287,7 @@ print(Importance[1:10])
 meta_categorical <- d10x.combined_myeloid@meta.data[, c("CellType_refined","age_condition")]  # input column numbers in meta that contain categorical variables
 meta_continuous <- d10x.combined_myeloid@meta.data[, c("percent.mt","nFeature_RNA","Age")]  # input column numbers in meta that contain continuous variables
 
-save(embed,vars, Importance, meta_categorical, meta_continuous, file=here("data","Fetal_ped_IFALD_adult_PCA_myeloid.RData"))
+save(embed,vars, Importance, meta_categorical, meta_continuous,Loadings, file=here("data","Fetal_ped_IFALD_adult_PCA_myeloid.RData"))
 
 # 
 # #############
