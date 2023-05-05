@@ -259,14 +259,6 @@ immunoglobins<-c("IGKC","IGHG1")
 #############
 ## PCAs for plotting
 #############
-## add cell type labels
-load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
-cell_label$index<-rownames(cell_label)
-cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
-identical(colnames(d10x), cell_label$index)
-d10x <- AddMetaData(d10x, metadata = cell_label)
-
-
 d10x.combined_myeloid<-subset(d10x, subset = CellType_refined %in% c("Myeloid cells","RR Myeloid","Mono-Mac","Kupffer Cell","KC Like","Macrophage\n(MHCII high)","Macrophage\n(CLEC9A high)",
                                                                      "Monocyte","pDC precursor","Megakaryocyte", "Cycling Myeloid","DC1","DC2","Monocyte-DC precursor",
                                                                      "Neutrophil-myeloid progenitor","Mono-NK","Myeloid Erythrocytes\n(phagocytosis)","VCAM1+ Erythroblastic Island Macrophage",
