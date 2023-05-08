@@ -259,10 +259,14 @@ immunoglobins<-c("IGKC","IGHG1")
 #############
 ## PCAs for plotting
 #############
-d10x.combined_myeloid<-subset(d10x, subset = CellType_refined %in% c("Myeloid cells","RR Myeloid","Mono-Mac","Kupffer Cell","KC Like",
-                                                                     "Macrophage\n(MHCII high)","Macrophage\n(CLEC9A high)",
-                                                                     "Monocyte","pDC precursor", "Cycling Myeloid","DC1","DC2","Monocyte-DC precursor",
-                                                                     "Neutrophil-myeloid progenitor","Mono-NK"))
+d10x$CellType_harmonized<-d10x$CellType_refined
+
+levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)=="Kupffer Cell")]<-"KC Like"
+levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("Mono-Mac","Monocyte-DC precursor","Monocyte" ))]<-"RR Myeloid"
+levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("DC2","DC1" ))]<-"Macrophage\n(MHCII high)"
+levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("NK-like cells","NK" ))]<-"NK cell"
+
+d10x.combined_myeloid<-subset(d10x, subset = CellType_harmonized %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)"s))
 rm(d10x)
 gc
 
@@ -495,10 +499,10 @@ save(embed,vars, Importance, meta_categorical, meta_continuous,Loadings, file=he
 # 
 # 
 # 
-# #################
-# ## individual gene expression
-# #################
-# countcells<-data.frame(tapply(plt_not_gene_myeloid$cell, plt_not_gene_myeloid$age_condition, function(x) length(unique(x))))
+#################
+## individual gene expression
+#################
+# countcells<-data.frame(tapply(plt_not_gene$cell, plt_not_gene$age_condition, function(x) length(unique(x))))
 # colnames(countcells)<-c("Count")
 # countcells$age_condition<-rownames(countcells)
 # 
@@ -513,8 +517,8 @@ save(embed,vars, Importance, meta_categorical, meta_continuous,Loadings, file=he
 # 
 #   plt_not_gene<-rbind(plt_not_gene[which(is.na(plt_not_gene$gene_exp_limited)),],
 #                       plt_not_gene[which(!(is.na(plt_not_gene$gene_exp_limited))),][(order(plt_not_gene[which(!(is.na(plt_not_gene$gene_exp_limited))),]$gene_exp_limited)),])
-#   
-#   
+# 
+# 
 #   if(splt==F){
 #     umap_plt<-ggplot(plt_not_gene, aes(UMAP_1,UMAP_2, color=log(gene_exp_limited)))+
 #       geom_point(size=0.15)+
@@ -550,72 +554,51 @@ save(embed,vars, Importance, meta_categorical, meta_continuous,Loadings, file=he
 # gene_UMAP("CD68", 0.9,T)
 # gene_UMAP("LYZ", 0.9,T)
 # 
-# save_plts(all_UMAP, "UMAP_Fetal_ped_adult_IFALD", w=20,h=12)
+# gene_UMAP("HLA-DRA", 0.9,T)
+# gene_UMAP("HLA-DPB1", 0.9,T)
+# gene_UMAP("HLA-DRA", 0.9)
+# gene_UMAP("HLA-DPB1", 0.9)
 # 
-# 
+# # 
+# # save_plts(all_UMAP, "UMAP_Fetal_ped_adult_IFALD", w=20,h=12)
+# # 
+# # 
 # #############
 # ## Cell Label Harmonization
 # #############
+# #load(here("/media/redgar/Seagate Portable Drive/fetal_liver/","Fetal_IFALD_adult_ped_pltData.RData"))
+# 
 # plt_not_gene<-plt[which(plt$variable=="MARCO"),]
 # plt_not_gene$CellType_refined<-factor(plt_not_gene$CellType_refined, levels=names(combo_colors))
 # 
-# table(plt_not_gene$CellType_refined[which(plt_not_gene$seurat_clusters==25)])
+# plt_not_gene$CellType_harmonized<-plt_not_gene$CellType_refined
 # 
+# levels(plt_not_gene$CellType_harmonized)[which(levels(plt_not_gene$CellType_harmonized)=="Kupffer Cell")]<-"KC Like"
+# levels(plt_not_gene$CellType_harmonized)[which(levels(plt_not_gene$CellType_harmonized)%in%c("Mono-Mac","Monocyte-DC precursor","Monocyte" ))]<-"RR Myeloid"
+# levels(plt_not_gene$CellType_harmonized)[which(levels(plt_not_gene$CellType_harmonized)%in%c("DC2","DC1" ))]<-"Macrophage\n(MHCII high)"
+# levels(plt_not_gene$CellType_harmonized)[which(levels(plt_not_gene$CellType_harmonized)%in%c("NK-like cells","NK" ))]<-"NK cell"
 # 
-# plt_not_gene$CellType_harmonized<-as.character(plt_not_gene$CellType_refined)
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("0","2","12","13"))]<-"Erythrocytes"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("1","4","10","23","33","25"))]<-"Kupffer Cell"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("3"))]<-"Macrophage\n(MHCII high)"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("5"))]<-"CD3+ T-cells"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("6","22","28"))]<-"LSEC"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("7","24"))]<-"NK-like cells"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("8"))]<-"Early Erythrocytes"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("9"))]<-"RR Myeloid"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("11","19"))]<-"Hepatocytes"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("14","15"))]<-"B cell"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("16"))]<-"gd T-cells"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("17"))]<-"HSC/MPP"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("18"))]<-"HSC"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("20"))]<-"Megakaryocyte"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("21"))]<-"VCAM1+ Erythroblastic Island Macrophage"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("26"))]<-"Mast cell"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("27"))]<-"ILC precursor"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("29"))]<-"Mono-NK"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("30"))]<-"Plasma cells"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("31"))]<-"Cholangiocytes"
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%c("32"))]<-"DC"
+# levels(plt_not_gene$CellType_harmonized)
 # 
-# 
-# d10x.combined_RBC@meta.data$CellType_refined<-as.character(d10x.combined_RBC@meta.data$CellType_refined)
-# d10x.combined_RBC@meta.data$CellType_refined[which(d10x.combined_RBC@meta.data$seurat_clusters%in%c("0","2"))]<-"Erythrocytes"
-# 
-# 
-# 
-# entrophy_cluster_df<-do.call(rbind, lapply(as.character(unique(plt_not_gene$seurat_clusters)), function(cluster){
-#   data.frame(seurat_clusters=cluster, entropy=entropy(plt_not_gene[,"age_condition"][which(plt_not_gene$seurat_clusters==cluster)]))
-# }))
-# fetal_only<-entrophy_cluster_df[which(entrophy_cluster_df$entropy<0.6),]
-# 
-# plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%fetal_only$seurat_clusters)]<-paste("Fetal",plt_not_gene$CellType_harmonized[which(plt_not_gene$seurat_clusters%in%fetal_only$seurat_clusters)], sep=" ")
-# 
+# table(plt_not_gene$CellType_refined,plt_not_gene$seurat_clusters)
+# table(plt_not_gene$CellType_refined[which(plt_not_gene$seurat_clusters=="3")])[order(table(plt_not_gene$CellType_refined[which(plt_not_gene$seurat_clusters=="3")]))]
+# table(plt_not_gene$CellType_harmonized)[order(table(plt_not_gene$CellType_harmonized))]
 # 
 # 
 # ggplot(plt_not_gene, aes(UMAP_1,UMAP_2, color=CellType_harmonized))+
-#   geom_point(size=0.5)+
-#   theme_classic()+th+theme(legend.text=element_text(size=10),
-#                            legend.title=element_text(size=12),
-#                            plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
-#   guides(colour = guide_legend(override.aes = list(size=5)))+
-#   annotate("text", x = -10, y = -15, label = paste0("n = ",comma(nrow(plt_not_gene))))+
-#   scale_color_manual(name="Cell Type",values = combo_colors, drop = T, limits=force)
-# 
+#     geom_point(size=0.5)+
+#     theme_classic()+th+theme(legend.text=element_text(size=10),
+#                              legend.title=element_text(size=12),
+#                              plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
+#     guides(colour = guide_legend(override.aes = list(size=5)))+
+#     annotate("text", x = -10, y = -15, label = paste0("n = ",comma(nrow(plt_not_gene))))+
+#     scale_color_manual(name="Cell Type",values = combo_colors, drop = T, limits=force)
 # 
 # 
 # #############
 # ## Myeloid Score plots
 # #############
-# plt_not_gene_myeloid<-plt_not_gene[which(plt_not_gene$CellType_harmonized%in%c("Cycling Myeloid","RR Myeloid","Mono-Mac","Kupffer Cell","KC Like","Macrophage\n(MHCII high)","Macrophage\n(CLEC9A high)",
-#                         "Monocyte","pDC precursor")),]
+# plt_not_gene_myeloid<-plt_not_gene[which(plt_not_gene$CellType_harmonized%in%c("Cycling Myeloid","RR Myeloid","KC Like","Macrophage\n(MHCII high)")),]
 # 
 # myeloid_UMAP<-ggplot(plt_not_gene_myeloid, aes(UMAP_1,UMAP_2, color=CellType_harmonized))+
 #   geom_point(size=0.5)+
@@ -832,5 +815,5 @@ save(embed,vars, Importance, meta_categorical, meta_continuous,Loadings, file=he
 #     geom_violin(fill="grey80", color="white")+geom_boxplot(width=0.1)+
 #     theme_bw()+th+theme(legend.text=element_text(size=10),legend.title=element_text(size=12),plot.margin = unit(c(0.5,0,0.5,0.7), "cm"))+
 #     xlab("Age")
-
+# 
 

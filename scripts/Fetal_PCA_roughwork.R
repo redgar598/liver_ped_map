@@ -73,15 +73,7 @@ ggplot(boxplt_df[which(boxplt_df$CellType_refined%in%c("RR Myeloid","Monocyte"))
   theme_bw()+facet_wrap(~age_condition)
   
 
-Loadings<-as.data.frame(Loadings(d10x.combined_myeloid, reduction = "pca"))
-rownames(Loadings)[order(Loadings$PC_2)][1:10]
+rownames(Loadings)[order(Loadings$PC_2)][1:20]
 rownames(Loadings)[rev(order(Loadings$PC_2))][1:20]
 
 
-ggplot(boxplt_df, aes(PC_1, PC_2, color=Phase))+geom_point()
-
-comp_simple<-list(c("G1","G2M"),c("G1","S"),c("G2M","S"))
-ggplot(boxplt_df, aes(Phase,PC_1))+geom_boxplot()+  
-  geom_signif(comparisons = comp_simple, step_increase = 0.03,tip_length = 0.01,
-              size = 0.3,vjust = 0.5,
-              textsize = 3,  map_signif_level = T, color="grey60")#
