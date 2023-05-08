@@ -259,10 +259,10 @@ immunoglobins<-c("IGKC","IGHG1")
 #############
 ## PCAs for plotting
 #############
-d10x.combined_myeloid<-subset(d10x, subset = CellType_refined %in% c("Myeloid cells","RR Myeloid","Mono-Mac","Kupffer Cell","KC Like","Macrophage\n(MHCII high)","Macrophage\n(CLEC9A high)",
-                                                                     "Monocyte","pDC precursor","Megakaryocyte", "Cycling Myeloid","DC1","DC2","Monocyte-DC precursor",
-                                                                     "Neutrophil-myeloid progenitor","Mono-NK","Myeloid Erythrocytes\n(phagocytosis)","VCAM1+ Erythroblastic Island Macrophage",
-                                                                     "Erythroblastic Island Macrophage"))
+d10x.combined_myeloid<-subset(d10x, subset = CellType_refined %in% c("Myeloid cells","RR Myeloid","Mono-Mac","Kupffer Cell","KC Like",
+                                                                     "Macrophage\n(MHCII high)","Macrophage\n(CLEC9A high)",
+                                                                     "Monocyte","pDC precursor", "Cycling Myeloid","DC1","DC2","Monocyte-DC precursor",
+                                                                     "Neutrophil-myeloid progenitor","Mono-NK"))
 rm(d10x)
 gc
 

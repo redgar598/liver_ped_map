@@ -1,3 +1,16 @@
+### Load libraries
+library(here)
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(gridExtra)
+library(reshape2)
+library(gtools)
+library(colorspace)
+
+
+source("scripts/00_pretty_plots.R")
 source("scripts/00_Heat_scree_plot_generic.R")
 
 
