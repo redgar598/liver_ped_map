@@ -733,14 +733,54 @@ SCINA_cell_labels$cell<-rownames(SCINA_cell_labels)
 SCINA_cell_labels<-rbind(SCINA_cell_labels, no_refined[which(!(no_refined$cell%in%SCINA_cell_labels$cell)),])
 save(SCINA_cell_labels, file=here("data","IFALD_adult_ped_SCINA_cell_labels.RData"))
 
-
-
-
+# 
+# #######################
+# load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+# load(here("data","IFALD_adult_ped_SCINA_cell_labels.RData"))
+# 
+# length(which(SCINA_cell_labels$cell%in%colnames(d10x.combined)))
+# 
+# SCINA_cell_labels<-SCINA_cell_labels[match(colnames(d10x.combined), SCINA_cell_labels$cell),]
+# identical(colnames(d10x.combined), SCINA_cell_labels$cell)
+# rownames(SCINA_cell_labels)<-SCINA_cell_labels$cell
+# d10x.combined <- AddMetaData(d10x.combined, metadata = SCINA_cell_labels)
+# 
+# d10x.combined$SCINA_refined[which(is.na(d10x.combined$SCINA_refined))]<-d10x.combined$SCINA_broad[which(is.na(d10x.combined$SCINA_refined))]
+# 
+# DimPlot(d10x.combined, reduction = "umap",group.by="SCINA_refined", pt.size=0.15, label=T)+
+#   colscale_cellType+ggtitle("")+
+#   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
+# 
+# 
+# 
+# d10x.combined$SCINA_refined<-as.factor(d10x.combined$SCINA_refined)
+# levels(d10x.combined$SCINA_refined)<-c("CD3+ T-cells","Cholangiocytes","Erythrocytes","Hepatocytes",
+#                                        "HSC","KC Like","LSEC","Mast cell",
+#                                        "Mature B-cells","Macrophage\n(MHCII high)","Neutrophil","NK-like cells",
+#                                        "Plasma cells","Platelets","RR Myeloid","Unknown")
+# 
+# SCINA_cellUMAP<-DimPlot(d10x.combined, reduction = "umap",group.by="SCINA_refined", pt.size=0.15, label=T)+
+#   colscale_cellType+ggtitle("")+
+#   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
+# save_plts(SCINA_cellUMAP, "IFALD_rPCA_SCINA_umap", w=6,h=4)
+# 
+# 
+# #############
+# ## Annotate clusters by majority cells in cluster
+# #############
+# cluster_level<-table(d10x.combined$seurat_clusters, d10x.combined$SCINA_refined)
+# cluster_level
+# cluster_level_percent<-as.data.frame.matrix(signif((cluster_level/rowSums(cluster_level))*100,2))
+# cluster_level_percent$Unknown<-NULL
+# 
+# sapply(1:nrow(cluster_level_percent), function(x) colnames(cluster_level_percent)[which(cluster_level_percent[x,]>20)])
+# sapply(1:nrow(cluster_level_percent), function(x) max(cluster_level_percent[x,]))
 
 # 
 # ########
 # ## refining cell labels
 # ########
+
 # d10x.combined@meta.data$second_best_cell<-as.factor(d10x.combined@meta.data$second_best_cell)
 # levels(d10x.combined@meta.data$second_best_cell)<-c("B-cells","Cholangiocytes","Cholangiocytes\n(Hepatocyte Like)",
 #                                                    "Myeloid cells\n(Hepatocyte Like)",# "LSEC\n(Hepatocyte Like)", "HSC\n(Hepatocyte Like)",
