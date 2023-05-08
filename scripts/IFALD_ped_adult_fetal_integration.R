@@ -266,7 +266,7 @@ levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("Mo
 levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("DC2","DC1" ))]<-"Macrophage\n(MHCII high)"
 levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("NK-like cells","NK" ))]<-"NK cell"
 
-d10x.combined_myeloid<-subset(d10x, subset = CellType_harmonized %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)"s))
+d10x.combined_myeloid<-subset(d10x, subset = CellType_harmonized %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)"))
 rm(d10x)
 gc
 
@@ -288,7 +288,7 @@ vars <- Stdev(d10x.combined_myeloid, reduction = "pca")^2
 Importance<-vars/sum(vars)
 print(Importance[1:10])
 
-meta_categorical <- d10x.combined_myeloid@meta.data[, c("CellType_refined","age_condition")]  # input column numbers in meta that contain categorical variables
+meta_categorical <- d10x.combined_myeloid@meta.data[, c("CellType_refined","CellType_harmonized","age_condition")]  # input column numbers in meta that contain categorical variables
 meta_continuous <- d10x.combined_myeloid@meta.data[, c("percent.mt","nFeature_RNA","Age")]  # input column numbers in meta that contain continuous variables
 
 save(embed,vars, Importance, meta_categorical, meta_continuous,Loadings, file=here("data","Fetal_ped_IFALD_adult_PCA_myeloid.RData"))
