@@ -326,8 +326,6 @@ save(d10x.combined_HSC, file=here("../../../projects/macparland/RE/PediatricAdul
 ########
 load(here("/media/redgar/Seagate Portable Drive/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData"))
 
-d10x.combined_myeloid <- FindVariableFeatures(d10x.combined_myeloid, selection.method = "vst", nfeatures = 2000)
-d10x.combined_myeloid <- ScaleData(d10x.combined_myeloid) #ScaleData(cells, vars.to.regress = c("nUMI","percent.mito","donor.id","S.Score","G2M.Score","batch_10X"))
 d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
 d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
 d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
@@ -344,6 +342,20 @@ save_plts(myeloid_cluster_umap_individual, "IFALD_fetal_myeloid_cluster_umap_ind
 
 DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=F,
         group.by = "CellType_harmonized",split.by = "age_condition", ncol=2)
+
+
+
+d10x.combined_myeloid<-subset(d10x.combined_myeloid, subset = CellType_harmonized %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)",
+                                                                                        "Macrophage\n(CLEC9A high)"))
+d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.2)
+
+DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=F,
+        group.by = "CellType_harmonized",split.by = "age_condition", ncol=2)
+
+
 
 
 ############

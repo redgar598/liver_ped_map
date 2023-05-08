@@ -731,7 +731,10 @@ SCINA_cell_labels<-rbind(#d10x.combined_RBC@meta.data[,c("cell","SCINA_broad","S
 SCINA_cell_labels$cell<-rownames(SCINA_cell_labels)
 
 SCINA_cell_labels<-rbind(SCINA_cell_labels, no_refined[which(!(no_refined$cell%in%SCINA_cell_labels$cell)),])
-save(SCINA_cell_labels, file=paste(here("data/"),"IFALD_adult_ped_SCINA_cell_labels.rds", sep=""))
+save(SCINA_cell_labels, file=here("data","IFALD_adult_ped_SCINA_cell_labels.RData"))
+
+
+
 
 
 # 
