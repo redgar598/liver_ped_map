@@ -42,6 +42,7 @@ ggplot(boxplt_df, aes(CellType_refined,PC_1))+geom_boxplot()
 ggplot(boxplt_df, aes(age_condition,PC_1))+geom_boxplot()
 
 ggplot(boxplt_df, aes(PC_1, PC_2, color=CellType_refined))+geom_point()+scale_color_manual(values=combo_colors)
+ggplot(boxplt_df, aes(PC_1, PC_2, color=CellType_refined))+geom_point()+scale_color_manual(values=combo_colors)
 
 
 ggplot(boxplt_df, aes(PC_1, PC_2, fill=age_condition))+

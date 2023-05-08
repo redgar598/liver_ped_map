@@ -267,8 +267,7 @@ levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("DC
 levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("NK-like cells","NK" ))]<-"NK cell"
 
 d10x.combined_myeloid<-subset(d10x, subset = CellType_harmonized %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)"))
-rm(d10x)
-gc
+
 
 d10x.combined_myeloid <- NormalizeData(d10x.combined_myeloid)
 d10x.combined_myeloid <- FindVariableFeatures(d10x.combined_myeloid, selection.method = "vst", nfeatures = 2000)
