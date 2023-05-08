@@ -16,77 +16,77 @@ library(anndata)
 source("scripts/00_pretty_plots.R")
 source("scripts/00_entropy_d10x.R")
 
-#################
-## Load raw QC'ed data
-#################
-d10x_fetal<-readRDS(here("data","d10x_fetal_raw.rds"))
-#d10x_fetal<-readRDS("/media/redgar/Seagate Portable Drive/fetal_liver/d10x_fetal_raw.rds")
-
-d10x_ped_IFALD<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
-## add cell type labels
-load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
-cell_label$index<-rownames(cell_label)
-cell_label<-cell_label[match(colnames(d10x_ped_IFALD), cell_label$index),]
-identical(colnames(d10x_ped_IFALD), cell_label$index)
-d10x_ped_IFALD <- AddMetaData(d10x_ped_IFALD, metadata = cell_label)
-
-
-#################
-## Match meta data
-#################
-d10x_fetal@meta.data$Barcodes<-NULL
-colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Extract.Name")]<-"Sample"
-colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Characteristics.individual.")]<-"individual"
-d10x_fetal@meta.data$Treatment<-"Healthy"
-d10x_fetal@meta.data$Tissue<-"TLH"
-d10x_fetal@meta.data$chemistry<-"3pr"
-colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Characteristics.sex.")]<-"Sex"
-colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Characteristics.age.")]<-"Age"
-d10x_fetal@meta.data$AgeGroup<-"Fetal"
-d10x_fetal@meta.data$FreshorFrozen<-"fresh"
-d10x_fetal@meta.data$BMI<-NA
-d10x_fetal@meta.data$relALBChange<-NA
-d10x_fetal@meta.data$nuclear_fraction<-NA
-d10x_fetal@meta.data$cell_status<-NA
-colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Cell.Labels")]<-"CellType_refined"
-d10x_fetal@meta.data$age_condition<-paste(d10x_fetal$AgeGroup, d10x_fetal$Treatment, sep=" ")
-
-
-d10x_ped_IFALD@meta.data$file<-NULL
-d10x_ped_IFALD@meta.data$Approx_bam_GB<-NULL
-d10x_ped_IFALD@meta.data$Characteristics.facs.sorting.<-NA
-d10x_ped_IFALD@meta.data$Sample<-d10x_ped_IFALD@meta.data$individual
-d10x_ped_IFALD@meta.data$individual<-sapply(1:nrow(d10x_ped_IFALD@meta.data), function(x) strsplit(d10x_ped_IFALD@meta.data$individual[x],"_")[[1]][1])
-d10x_ped_IFALD@meta.data$CellType_rough <-NULL
-d10x_ped_IFALD@meta.data$second_best_cell  <-NULL
-d10x_ped_IFALD@meta.data$S.Score   <-NULL
-d10x_ped_IFALD@meta.data$G2M.Score <-NULL
-d10x_ped_IFALD@meta.data$Phase     <-NULL
-d10x_ped_IFALD@meta.data$old.ident<-NULL
-d10x_ped_IFALD@meta.data$integrated_snn_res.0.5 <-NULL
-d10x_ped_IFALD@meta.data$seurat_clusters<-NULL
-d10x_ped_IFALD@meta.data$age_id<-NULL
-d10x_ped_IFALD@meta.data$index<-NULL
-
-
-head(d10x_ped_IFALD@meta.data)
-head(d10x_fetal@meta.data)
-
-d10x_fetal@meta.data<-d10x_fetal@meta.data[,colnames(d10x_ped_IFALD@meta.data)]
-
-head(d10x_fetal@meta.data)
-head(d10x_ped_IFALD@meta.data)
-
-
-
-
-
-
-#################
-## Merge
-#################
-d10x <- merge(d10x_ped_IFALD,d10x_fetal, merge.data=TRUE, project = "IFALD_fetal_adult_ped_map")
-saveRDS(d10x, file = here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
+# #################
+# ## Load raw QC'ed data
+# #################
+# d10x_fetal<-readRDS(here("data","d10x_fetal_raw.rds"))
+# #d10x_fetal<-readRDS("/media/redgar/Seagate Portable Drive/fetal_liver/d10x_fetal_raw.rds")
+# 
+# d10x_ped_IFALD<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+# ## add cell type labels
+# load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+# cell_label$index<-rownames(cell_label)
+# cell_label<-cell_label[match(colnames(d10x_ped_IFALD), cell_label$index),]
+# identical(colnames(d10x_ped_IFALD), cell_label$index)
+# d10x_ped_IFALD <- AddMetaData(d10x_ped_IFALD, metadata = cell_label)
+# 
+# 
+# #################
+# ## Match meta data
+# #################
+# d10x_fetal@meta.data$Barcodes<-NULL
+# colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Extract.Name")]<-"Sample"
+# colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Characteristics.individual.")]<-"individual"
+# d10x_fetal@meta.data$Treatment<-"Healthy"
+# d10x_fetal@meta.data$Tissue<-"TLH"
+# d10x_fetal@meta.data$chemistry<-"3pr"
+# colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Characteristics.sex.")]<-"Sex"
+# colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Characteristics.age.")]<-"Age"
+# d10x_fetal@meta.data$AgeGroup<-"Fetal"
+# d10x_fetal@meta.data$FreshorFrozen<-"fresh"
+# d10x_fetal@meta.data$BMI<-NA
+# d10x_fetal@meta.data$relALBChange<-NA
+# d10x_fetal@meta.data$nuclear_fraction<-NA
+# d10x_fetal@meta.data$cell_status<-NA
+# colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Cell.Labels")]<-"CellType_refined"
+# d10x_fetal@meta.data$age_condition<-paste(d10x_fetal$AgeGroup, d10x_fetal$Treatment, sep=" ")
+# 
+# 
+# d10x_ped_IFALD@meta.data$file<-NULL
+# d10x_ped_IFALD@meta.data$Approx_bam_GB<-NULL
+# d10x_ped_IFALD@meta.data$Characteristics.facs.sorting.<-NA
+# d10x_ped_IFALD@meta.data$Sample<-d10x_ped_IFALD@meta.data$individual
+# d10x_ped_IFALD@meta.data$individual<-sapply(1:nrow(d10x_ped_IFALD@meta.data), function(x) strsplit(d10x_ped_IFALD@meta.data$individual[x],"_")[[1]][1])
+# d10x_ped_IFALD@meta.data$CellType_rough <-NULL
+# d10x_ped_IFALD@meta.data$second_best_cell  <-NULL
+# d10x_ped_IFALD@meta.data$S.Score   <-NULL
+# d10x_ped_IFALD@meta.data$G2M.Score <-NULL
+# d10x_ped_IFALD@meta.data$Phase     <-NULL
+# d10x_ped_IFALD@meta.data$old.ident<-NULL
+# d10x_ped_IFALD@meta.data$integrated_snn_res.0.5 <-NULL
+# d10x_ped_IFALD@meta.data$seurat_clusters<-NULL
+# d10x_ped_IFALD@meta.data$age_id<-NULL
+# d10x_ped_IFALD@meta.data$index<-NULL
+# 
+# 
+# head(d10x_ped_IFALD@meta.data)
+# head(d10x_fetal@meta.data)
+# 
+# d10x_fetal@meta.data<-d10x_fetal@meta.data[,colnames(d10x_ped_IFALD@meta.data)]
+# 
+# head(d10x_fetal@meta.data)
+# head(d10x_ped_IFALD@meta.data)
+# 
+# 
+# 
+# 
+# 
+# 
+# #################
+# ## Merge
+# #################
+# d10x <- merge(d10x_ped_IFALD,d10x_fetal, merge.data=TRUE, project = "IFALD_fetal_adult_ped_map")
+# saveRDS(d10x, file = here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
 # 
 # #########
 # ## Signature Scores on unintegrated data
@@ -256,62 +256,142 @@ immunoglobins<-c("IGKC","IGHG1")
 # 
 # 
 
-#############
-## PCAs for plotting
-#############
-d10x$CellType_harmonized<-d10x$CellType_refined
-
-levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)=="Kupffer Cell")]<-"KC Like"
-levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("Mono-Mac","Monocyte-DC precursor","Monocyte" ))]<-"RR Myeloid"
-levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("DC2","DC1" ))]<-"Macrophage\n(MHCII high)"
-levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("NK-like cells","NK" ))]<-"NK cell"
-
-d10x.combined_myeloid<-subset(d10x, subset = CellType_harmonized %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)"))
-
-
-d10x.combined_myeloid <- NormalizeData(d10x.combined_myeloid)
-d10x.combined_myeloid <- FindVariableFeatures(d10x.combined_myeloid, selection.method = "vst", nfeatures = 2000)
-d10x.combined_myeloid <- ScaleData(d10x.combined_myeloid) 
-d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
-
-d10x.combined_myeloid[["pca"]]
-
-head(Embeddings(d10x.combined_myeloid, reduction = "pca")[, 1:5])
-head(Loadings(d10x.combined_myeloid, reduction = "pca")[, 1:5])
-head(Stdev(d10x.combined_myeloid, reduction = "pca"))
-
-#' ## PCA for batch effect
-Loadings<-as.data.frame(Loadings(d10x.combined_myeloid, reduction = "pca"))
-embed<-as.data.frame(Embeddings(d10x.combined_myeloid, reduction = "pca"))
-vars <- Stdev(d10x.combined_myeloid, reduction = "pca")^2
-Importance<-vars/sum(vars)
-print(Importance[1:10])
-
-meta_categorical <- d10x.combined_myeloid@meta.data[, c("CellType_refined","CellType_harmonized","age_condition")]  # input column numbers in meta that contain categorical variables
-meta_continuous <- d10x.combined_myeloid@meta.data[, c("percent.mt","nFeature_RNA","Age")]  # input column numbers in meta that contain continuous variables
-
-save(embed,vars, Importance, meta_categorical, meta_continuous,Loadings, file=here("data","Fetal_ped_IFALD_adult_PCA_myeloid.RData"))
+#' #############
+#' ## PCAs for plotting
+#' #############
+#' d10x$CellType_harmonized<-d10x$CellType_refined
+#' 
+#' levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)=="Kupffer Cell")]<-"KC Like"
+#' levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("Mono-Mac","Monocyte-DC precursor","Monocyte" ))]<-"RR Myeloid"
+#' levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("DC2","DC1" ))]<-"Macrophage\n(MHCII high)"
+#' levels(d10x$CellType_harmonized)[which(levels(d10x$CellType_harmonized)%in%c("NK-like cells","NK" ))]<-"NK cell"
+#' 
+#' d10x.combined_myeloid<-subset(d10x, subset = CellType_harmonized %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)"))
+#' 
+#' 
+#' d10x.combined_myeloid <- NormalizeData(d10x.combined_myeloid)
+#' d10x.combined_myeloid <- FindVariableFeatures(d10x.combined_myeloid, selection.method = "vst", nfeatures = 2000)
+#' d10x.combined_myeloid <- ScaleData(d10x.combined_myeloid) 
+#' d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+#' 
+#' d10x.combined_myeloid[["pca"]]
+#' 
+#' head(Embeddings(d10x.combined_myeloid, reduction = "pca")[, 1:5])
+#' head(Loadings(d10x.combined_myeloid, reduction = "pca")[, 1:5])
+#' head(Stdev(d10x.combined_myeloid, reduction = "pca"))
+#' 
+#' #' ## PCA for batch effect
+#' Loadings<-as.data.frame(Loadings(d10x.combined_myeloid, reduction = "pca"))
+#' embed<-as.data.frame(Embeddings(d10x.combined_myeloid, reduction = "pca"))
+#' vars <- Stdev(d10x.combined_myeloid, reduction = "pca")^2
+#' Importance<-vars/sum(vars)
+#' print(Importance[1:10])
+#' 
+#' meta_categorical <- d10x.combined_myeloid@meta.data[, c("CellType_refined","CellType_harmonized","age_condition")]  # input column numbers in meta that contain categorical variables
+#' meta_continuous <- d10x.combined_myeloid@meta.data[, c("percent.mt","nFeature_RNA","Age")]  # input column numbers in meta that contain continuous variables
+#' 
+#' save(embed,vars, Importance, meta_categorical, meta_continuous,Loadings, file=here("data","Fetal_ped_IFALD_adult_PCA_myeloid.RData"))
 
 
 ############
 ## subset objects for local plotting
 ############
+load(here("data","Fetal_IFALD_adult_ped_integrated.rds"))
 
-d10x.combined_myeloid<-subset(d10x, subset = CellType_harmonized %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)","Cycling Myeloid",
+d10x.fetal_ped_IFALD$CellType_harmonized<-d10x.fetal_ped_IFALD$CellType_refined
+levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFALD$CellType_harmonized)=="Kupffer Cell")]<-"KC Like"
+levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFALD$CellType_harmonized)%in%c("Mono-Mac","Monocyte-DC precursor","Monocyte" ))]<-"RR Myeloid"
+levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFALD$CellType_harmonized)%in%c("DC2","DC1" ))]<-"Macrophage\n(MHCII high)"
+levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFALD$CellType_harmonized)%in%c("NK-like cells","NK" ))]<-"NK cell"
+
+d10x.combined_myeloid<-subset(d10x.fetal_ped_IFALD, subset = CellType_harmonized %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)","Cycling Myeloid",
                                                                         "Macrophage\n(CLEC9A high)","VCAM1+ Erythroblastic Island Macrophage",
                                                                         "pDC precursor","Neutrophil-myeloid progenitor","Mono-NK",
                                                                         "Myeloid Erythrocytes\n(phagocytosis)"))
-d10x.combined_bcell<-subset(d10x, subset = CellType_harmonized %in% c("Mature B-cells","pro B cell","pre pro B cell","B cell",
+d10x.combined_bcell<-subset(d10x.fetal_ped_IFALD, subset = CellType_harmonized %in% c("Mature B-cells","pro B cell","pre pro B cell","B cell",
                                                                       "pre B cell","Plasma cells"))
-d10x.combined_tcell<-subset(d10x, subset = CellType_harmonized %in% c("NK cell","CD3+ T-cells","CLNK T-cells","Cycling T-cells",
+d10x.combined_tcell<-subset(d10x.fetal_ped_IFALD, subset = CellType_harmonized %in% c("NK cell","CD3+ T-cells","CLNK T-cells","Cycling T-cells",
                                                                       "ILC precursor","Early lymphoid/T lymphocyte","Mono-NK",
                                                                       "gd T-cells",""))
-d10x.combined_HSC<-subset(d10x, subset = CellType_harmonized %in% c("HSC"))
+d10x.combined_HSC<-subset(d10x.fetal_ped_IFALD, subset = CellType_harmonized %in% c("HSC"))
 
 save(d10x.combined_myeloid, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData"))
 save(d10x.combined_bcell, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_bcell_only.RData"))
 save(d10x.combined_tcell, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_tcell_only.RData"))
 save(d10x.combined_HSC, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_HSC_only.RData"))
+
+
+# ######## 
+# ## plot
+# ########
+# load(here("/media/redgar/Seagate Portable Drive/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData"))
+# 
+# d10x.combined_myeloid <- ScaleData(d10x.combined_myeloid, verbose = FALSE)
+# d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+# d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+# d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+# d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.2)
+# 
+# 
+# myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T)
+# myeloid_cluster_umap
+# save_plts(myeloid_cluster_umap, "IFALD_fetal_myeloid_cluster_umap", w=5,h=4)
+# 
+# myeloid_cluster_umap_individual<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T, split.by = "age_condition", ncol=2)
+# myeloid_cluster_umap_individual
+# save_plts(myeloid_cluster_umap_individual, "IFALD_fetal_myeloid_cluster_umap_individual", w=10,h=6)
+# 
+# DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=F, 
+#         group.by = "CellType_harmonized",split.by = "age_condition", ncol=2)
+# 
+# 
+# ############
+# ## Myeloid labelling
+# ############
+# recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
+# kuffer_signature<-c("VSIG4","MARCO","CD5L","HMOX1")
+# neutro_gene<-c("CSF3R","FCGR3B","NAMPT","CXCR2","DEFA3","DEFA4")
+# MHCII<-c("HLA-DRA","CD74","HLA-DPB1","HLA-DQB1")
+# LSEC<-c("CALCRL","STAB2","FCN2","FCN3")
+# 
+# FeaturePlot(d10x.combined_myeloid, features = recent_recruit_myeloid, min.cutoff = "q9", pt.size=0.25)
+# FeaturePlot(d10x.combined_myeloid, features = kuffer_signature, min.cutoff = "q9", pt.size=0.25)
+# FeaturePlot(d10x.combined_myeloid, features = neutro_gene, min.cutoff = "q9", pt.size=0.25)
+# FeaturePlot(d10x.combined_myeloid, features = MHCII, min.cutoff = "q9", pt.size=0.25)
+# FeaturePlot(d10x.combined_myeloid, features = LSEC, min.cutoff = "q9", pt.size=0.25)
+# 
+# FeaturePlot(d10x.combined_myeloid, features = c("HBB","HBA2","FCGR3A","MARCO"), min.cutoff = "q9", pt.size=1)
+# #https://www.frontiersin.org/articles/10.3389/fimmu.2019.02035/full
+# FeaturePlot(d10x.combined_myeloid, features = c("CD14","CD5L","FCGR3A","MARCO"), min.cutoff = "q9", pt.size=0.25)
+# FeaturePlot(d10x.combined_myeloid, features = c("LYZ", "S100A8", "CD14", "S100A10", "HLA-DRA", "CD74", "IFI30", "HLA-DPB1", "SECISBP2L"), min.cutoff = "q9", pt.size=0.25)# SLAN: SECISBP2L
+# 
+# ## Dot plot of all markers
+# DefaultAssay(d10x.combined_myeloid) <- "RNA"
+# pdf(file = here("figures/IFALD_dot_plots_myeloid.pdf"), w=10, h=10)
+# DotPlot(object = d10x.combined_myeloid, features = B_genes)+xlab("B Cell Marker")
+# DotPlot(object = d10x.combined_myeloid, features = T_genes)+xlab("T Cell Marker")
+# DotPlot(object = d10x.combined_myeloid, features = NK_genes)+xlab("NK Cell Marker")
+# DotPlot(object = d10x.combined_myeloid, features = LEC_genes)+xlab("LSEC Marker")
+# DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
+# DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
+# DotPlot(object = d10x.combined_myeloid, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
+# DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[1:14])+xlab("HSC Marker")
+# DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[15:27])+xlab("HSC Marker")
+# DotPlot(object = d10x.combined_myeloid, features = Macrophage_genes)+xlab("Macrophage Marker")
+# dev.off()
+# DefaultAssay(d10x.combined_myeloid) <- "integrated"
+# 
+# ## one unclear cluster
+# cluster4.markers <-  FindMarkers(d10x.combined_myeloid, ident.1 = 6,ident.2 = 2, min.pct = 0.25)
+# head(cluster4.markers, n = 10)
+# head(cluster4.markers[which(cluster4.markers$avg_log2FC>0),], n = 20)
+# FeaturePlot(d10x.combined_myeloid, features = c("IDO1","HLA-DOB","C1orf54","CLEC9A"), min.cutoff = "q9", pt.size=1)
+# FeaturePlot(d10x.combined_myeloid, features = c("IDO1","CD83","FOXP1","CLEC9A"), min.cutoff = "q9", pt.size=1)
+# # https://www.frontiersin.org/articles/10.3389/fimmu.2022.1006501/full
+# #https://pesquisa.bvsalud.org/global-literature-on-novel-coronavirus-2019-ncov/resource/fr/covidwho-992926
+# 
+
+
 
 
 # 
