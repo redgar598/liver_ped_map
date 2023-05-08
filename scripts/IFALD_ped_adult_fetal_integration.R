@@ -321,75 +321,76 @@ save(d10x.combined_tcell, file=here("../../../projects/macparland/RE/PediatricAd
 save(d10x.combined_HSC, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_HSC_only.RData"))
 
 
-# ######## 
-# ## plot
-# ########
-# load(here("/media/redgar/Seagate Portable Drive/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData"))
-# 
-# d10x.combined_myeloid <- ScaleData(d10x.combined_myeloid, verbose = FALSE)
-# d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
-# d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
-# d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
-# d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.2)
-# 
-# 
-# myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T)
-# myeloid_cluster_umap
-# save_plts(myeloid_cluster_umap, "IFALD_fetal_myeloid_cluster_umap", w=5,h=4)
-# 
-# myeloid_cluster_umap_individual<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T, split.by = "age_condition", ncol=2)
-# myeloid_cluster_umap_individual
-# save_plts(myeloid_cluster_umap_individual, "IFALD_fetal_myeloid_cluster_umap_individual", w=10,h=6)
-# 
-# DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=F, 
-#         group.by = "CellType_harmonized",split.by = "age_condition", ncol=2)
-# 
-# 
-# ############
-# ## Myeloid labelling
-# ############
-# recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
-# kuffer_signature<-c("VSIG4","MARCO","CD5L","HMOX1")
-# neutro_gene<-c("CSF3R","FCGR3B","NAMPT","CXCR2","DEFA3","DEFA4")
-# MHCII<-c("HLA-DRA","CD74","HLA-DPB1","HLA-DQB1")
-# LSEC<-c("CALCRL","STAB2","FCN2","FCN3")
-# 
-# FeaturePlot(d10x.combined_myeloid, features = recent_recruit_myeloid, min.cutoff = "q9", pt.size=0.25)
-# FeaturePlot(d10x.combined_myeloid, features = kuffer_signature, min.cutoff = "q9", pt.size=0.25)
-# FeaturePlot(d10x.combined_myeloid, features = neutro_gene, min.cutoff = "q9", pt.size=0.25)
-# FeaturePlot(d10x.combined_myeloid, features = MHCII, min.cutoff = "q9", pt.size=0.25)
-# FeaturePlot(d10x.combined_myeloid, features = LSEC, min.cutoff = "q9", pt.size=0.25)
-# 
-# FeaturePlot(d10x.combined_myeloid, features = c("HBB","HBA2","FCGR3A","MARCO"), min.cutoff = "q9", pt.size=1)
-# #https://www.frontiersin.org/articles/10.3389/fimmu.2019.02035/full
-# FeaturePlot(d10x.combined_myeloid, features = c("CD14","CD5L","FCGR3A","MARCO"), min.cutoff = "q9", pt.size=0.25)
-# FeaturePlot(d10x.combined_myeloid, features = c("LYZ", "S100A8", "CD14", "S100A10", "HLA-DRA", "CD74", "IFI30", "HLA-DPB1", "SECISBP2L"), min.cutoff = "q9", pt.size=0.25)# SLAN: SECISBP2L
-# 
-# ## Dot plot of all markers
-# DefaultAssay(d10x.combined_myeloid) <- "RNA"
-# pdf(file = here("figures/IFALD_dot_plots_myeloid.pdf"), w=10, h=10)
-# DotPlot(object = d10x.combined_myeloid, features = B_genes)+xlab("B Cell Marker")
-# DotPlot(object = d10x.combined_myeloid, features = T_genes)+xlab("T Cell Marker")
-# DotPlot(object = d10x.combined_myeloid, features = NK_genes)+xlab("NK Cell Marker")
-# DotPlot(object = d10x.combined_myeloid, features = LEC_genes)+xlab("LSEC Marker")
-# DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
-# DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
-# DotPlot(object = d10x.combined_myeloid, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
-# DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[1:14])+xlab("HSC Marker")
-# DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[15:27])+xlab("HSC Marker")
-# DotPlot(object = d10x.combined_myeloid, features = Macrophage_genes)+xlab("Macrophage Marker")
-# dev.off()
-# DefaultAssay(d10x.combined_myeloid) <- "integrated"
-# 
-# ## one unclear cluster
-# cluster4.markers <-  FindMarkers(d10x.combined_myeloid, ident.1 = 6,ident.2 = 2, min.pct = 0.25)
-# head(cluster4.markers, n = 10)
-# head(cluster4.markers[which(cluster4.markers$avg_log2FC>0),], n = 20)
-# FeaturePlot(d10x.combined_myeloid, features = c("IDO1","HLA-DOB","C1orf54","CLEC9A"), min.cutoff = "q9", pt.size=1)
-# FeaturePlot(d10x.combined_myeloid, features = c("IDO1","CD83","FOXP1","CLEC9A"), min.cutoff = "q9", pt.size=1)
-# # https://www.frontiersin.org/articles/10.3389/fimmu.2022.1006501/full
-# #https://pesquisa.bvsalud.org/global-literature-on-novel-coronavirus-2019-ncov/resource/fr/covidwho-992926
-# 
+########
+## plot
+########
+load(here("/media/redgar/Seagate Portable Drive/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData"))
+
+d10x.combined_myeloid <- FindVariableFeatures(d10x.combined_myeloid, selection.method = "vst", nfeatures = 2000)
+d10x.combined_myeloid <- ScaleData(d10x.combined_myeloid) #ScaleData(cells, vars.to.regress = c("nUMI","percent.mito","donor.id","S.Score","G2M.Score","batch_10X"))
+d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.2)
+
+
+myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T)
+myeloid_cluster_umap
+save_plts(myeloid_cluster_umap, "IFALD_fetal_myeloid_cluster_umap", w=5,h=4)
+
+myeloid_cluster_umap_individual<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T, split.by = "age_condition", ncol=2)
+myeloid_cluster_umap_individual
+save_plts(myeloid_cluster_umap_individual, "IFALD_fetal_myeloid_cluster_umap_individual", w=10,h=6)
+
+DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=F,
+        group.by = "CellType_harmonized",split.by = "age_condition", ncol=2)
+
+
+############
+## Myeloid labelling
+############
+recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
+kuffer_signature<-c("VSIG4","MARCO","CD5L","HMOX1")
+neutro_gene<-c("CSF3R","FCGR3B","NAMPT","CXCR2","DEFA3","DEFA4")
+MHCII<-c("HLA-DRA","CD74","HLA-DPB1","HLA-DQB1")
+LSEC<-c("CALCRL","STAB2","FCN2","FCN3")
+
+FeaturePlot(d10x.combined_myeloid, features = recent_recruit_myeloid, min.cutoff = "q9", pt.size=0.25)
+FeaturePlot(d10x.combined_myeloid, features = kuffer_signature, min.cutoff = "q9", pt.size=0.25)
+FeaturePlot(d10x.combined_myeloid, features = neutro_gene, min.cutoff = "q9", pt.size=0.25)
+FeaturePlot(d10x.combined_myeloid, features = MHCII, min.cutoff = "q9", pt.size=0.25)
+FeaturePlot(d10x.combined_myeloid, features = LSEC, min.cutoff = "q9", pt.size=0.25)
+
+FeaturePlot(d10x.combined_myeloid, features = c("HBB","HBA2","FCGR3A","MARCO"), min.cutoff = "q9", pt.size=1)
+#https://www.frontiersin.org/articles/10.3389/fimmu.2019.02035/full
+FeaturePlot(d10x.combined_myeloid, features = c("CD14","CD5L","FCGR3A","MARCO"), min.cutoff = "q9", pt.size=0.25)
+FeaturePlot(d10x.combined_myeloid, features = c("LYZ", "S100A8", "CD14", "S100A10", "HLA-DRA", "CD74", "IFI30", "HLA-DPB1", "SECISBP2L"), min.cutoff = "q9", pt.size=0.25)# SLAN: SECISBP2L
+
+## Dot plot of all markers
+DefaultAssay(d10x.combined_myeloid) <- "RNA"
+pdf(file = here("figures/IFALD_dot_plots_myeloid.pdf"), w=10, h=10)
+DotPlot(object = d10x.combined_myeloid, features = B_genes)+xlab("B Cell Marker")
+DotPlot(object = d10x.combined_myeloid, features = T_genes)+xlab("T Cell Marker")
+DotPlot(object = d10x.combined_myeloid, features = NK_genes)+xlab("NK Cell Marker")
+DotPlot(object = d10x.combined_myeloid, features = LEC_genes)+xlab("LSEC Marker")
+DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
+DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
+DotPlot(object = d10x.combined_myeloid, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
+DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[1:14])+xlab("HSC Marker")
+DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[15:27])+xlab("HSC Marker")
+DotPlot(object = d10x.combined_myeloid, features = Macrophage_genes)+xlab("Macrophage Marker")
+dev.off()
+DefaultAssay(d10x.combined_myeloid) <- "integrated"
+
+## one unclear cluster
+cluster4.markers <-  FindMarkers(d10x.combined_myeloid, ident.1 = 6,ident.2 = 2, min.pct = 0.25)
+head(cluster4.markers, n = 10)
+head(cluster4.markers[which(cluster4.markers$avg_log2FC>0),], n = 20)
+FeaturePlot(d10x.combined_myeloid, features = c("IDO1","HLA-DOB","C1orf54","CLEC9A"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(d10x.combined_myeloid, features = c("IDO1","CD83","FOXP1","CLEC9A"), min.cutoff = "q9", pt.size=1)
+# https://www.frontiersin.org/articles/10.3389/fimmu.2022.1006501/full
+#https://pesquisa.bvsalud.org/global-literature-on-novel-coronavirus-2019-ncov/resource/fr/covidwho-992926
+
 
 
 

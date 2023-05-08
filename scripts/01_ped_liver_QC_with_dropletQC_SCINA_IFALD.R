@@ -680,6 +680,10 @@ d10x_exp <- GetAssayData(d10x)
 results = SCINA(d10x_exp, signatures, max_iter = 100, convergence_n = 10, 
                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
 d10x$SCINA_broad<-results$cell_labels
+gc()
+
+no_refined<-data.frame(cell=colnames(d10x), SCINA_broad=results$cell_labels, SCINA_refined=NA)
+
 
 ### Cell subsets
 RBCsignatures<-read.csv(here("data/Liver_Markers - Erythrocytes.csv"))
@@ -688,11 +692,11 @@ Tsignatures<-read.csv(here("data/Liver_Markers - Tcell.csv"))
 Bsignatures<-read.csv(here("data/Liver_Markers - Bcell.csv"))
 myeloidsignatures<-read.csv(here("data/Liver_Markers - Myeloid.csv"))
 
-d10x.combined_RBC<-subset(d10x, subset = SCINA_broad == "Erythrocytes")
-d10x_exp <- GetAssayData(d10x.combined_RBC)
-results = SCINA(d10x_exp, RBCsignatures, max_iter = 100, convergence_n = 10, 
-                convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-d10x.combined_RBC$SCINA_refined<-results$cell_labels
+# d10x.combined_RBC<-subset(d10x, subset = SCINA_broad == "Erythrocytes")
+# d10x_exp <- GetAssayData(d10x.combined_RBC)
+# results = SCINA(d10x_exp, RBCsignatures, max_iter = 100, convergence_n = 10, 
+#                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
+# d10x.combined_RBC$SCINA_refined<-results$cell_labels
 
 d10x.combined_myeloid<-subset(d10x, subset = SCINA_broad == "Myeloid")
 d10x_exp <- GetAssayData(d10x.combined_myeloid)
@@ -712,17 +716,21 @@ results = SCINA(d10x_exp, Tsignatures, max_iter = 100, convergence_n = 10,
                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
 d10x.combined_tcell$SCINA_refined<-results$cell_labels
 
-d10x.combined_neutro<-subset(d10x, subset = SCINA_broad == "Neutrophil")
-d10x_exp <- GetAssayData(d10x.combined_neutro)
-results = SCINA(d10x_exp, Neutrosignatures, max_iter = 100, convergence_n = 10, 
-                convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-d10x.combined_neutro$SCINA_refined<-results$cell_labels
+# d10x.combined_neutro<-subset(d10x, subset = SCINA_broad == "Neutrophil")
+# d10x_exp <- GetAssayData(d10x.combined_neutro)
+# results = SCINA(d10x_exp, Neutrosignatures, max_iter = 100, convergence_n = 10, 
+#                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
+# d10x.combined_neutro$SCINA_refined<-results$cell_labels
 
-SCINA_cell_labels<-rbind(d10x.combined_RBC@meta.data[,c("cell","SCINA_broad","SCINA_refined")],
+
+
+SCINA_cell_labels<-rbind(#d10x.combined_RBC@meta.data[,c("cell","SCINA_broad","SCINA_refined")],d10x.combined_neutro@meta.data[,c("cell","SCINA_broad","SCINA_refined")]
                          d10x.combined_myeloid@meta.data[,c("cell","SCINA_broad","SCINA_refined")],
                          d10x.combined_bcell@meta.data[,c("cell","SCINA_broad","SCINA_refined")],
-                         d10x.combined_tcell@meta.data[,c("cell","SCINA_broad","SCINA_refined")],
-                         d10x.combined_neutro@meta.data[,c("cell","SCINA_broad","SCINA_refined")])
+                         d10x.combined_tcell@meta.data[,c("cell","SCINA_broad","SCINA_refined")])
+SCINA_cell_labels$cell<-rownames(SCINA_cell_labels)
+
+SCINA_cell_labels<-rbind(SCINA_cell_labels, no_refined[which(!(no_refined$cell%in%SCINA_cell_labels$cell)),])
 save(SCINA_cell_labels, file=paste(here("data/"),"IFALD_adult_ped_SCINA_cell_labels.rds", sep=""))
 
 
