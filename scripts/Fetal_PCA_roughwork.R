@@ -42,7 +42,7 @@ ggplot(boxplt_df, aes(CellType_refined,PC_1))+geom_boxplot()
 ggplot(boxplt_df, aes(age_condition,PC_1))+geom_boxplot()
 
 ggplot(boxplt_df, aes(PC_1, PC_2, color=CellType_refined))+geom_point()+scale_color_manual(values=combo_colors)
-ggplot(boxplt_df, aes(PC_1, PC_2, color=CellType_refined))+geom_point()+scale_color_manual(values=combo_colors)
+ggplot(boxplt_df, aes(PC_1, PC_2, color=CellType_harmonized))+geom_point()+scale_color_manual(values=combo_colors)
 
 
 ggplot(boxplt_df, aes(PC_1, PC_2, fill=age_condition))+
@@ -53,7 +53,7 @@ ggplot(boxplt_df, aes(PC_1, PC_2, fill=age_condition))+
 ggplot(boxplt_df, aes(PC_1, PC_2, fill=age_condition))+
   geom_point(shape=21)+
   scale_fill_manual(values=c("cornflowerblue","darkgreen","firebrick3","tomato2"))+
-  theme_bw()+facet_wrap(~CellType_refined)
+  theme_bw()+facet_wrap(~CellType_harmonized)
 
 
 boxplt_df$age_condition<-factor(boxplt_df$age_condition, levels=c("Fetal Healthy","Ped Healthy","Ped IFALD","Adult Healthy" ))
