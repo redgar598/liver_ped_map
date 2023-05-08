@@ -293,6 +293,28 @@ meta_continuous <- d10x.combined_myeloid@meta.data[, c("percent.mt","nFeature_RN
 
 save(embed,vars, Importance, meta_categorical, meta_continuous,Loadings, file=here("data","Fetal_ped_IFALD_adult_PCA_myeloid.RData"))
 
+
+############
+## subset objects for local plotting
+############
+
+d10x.combined_myeloid<-subset(d10x, subset = CellType_harmonized %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)","Cycling Myeloid",
+                                                                        "Macrophage\n(CLEC9A high)","VCAM1+ Erythroblastic Island Macrophage",
+                                                                        "pDC precursor","Neutrophil-myeloid progenitor","Mono-NK",
+                                                                        "Myeloid Erythrocytes\n(phagocytosis)"))
+d10x.combined_bcell<-subset(d10x, subset = CellType_harmonized %in% c("Mature B-cells","pro B cell","pre pro B cell","B cell",
+                                                                      "pre B cell","Plasma cells"))
+d10x.combined_tcell<-subset(d10x, subset = CellType_harmonized %in% c("NK cell","CD3+ T-cells","CLNK T-cells","Cycling T-cells",
+                                                                      "ILC precursor","Early lymphoid/T lymphocyte","Mono-NK",
+                                                                      "gd T-cells",""))
+d10x.combined_HSC<-subset(d10x, subset = CellType_harmonized %in% c("HSC"))
+
+save(d10x.combined_myeloid, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData"))
+save(d10x.combined_bcell, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_bcell_only.RData"))
+save(d10x.combined_tcell, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_tcell_only.RData"))
+save(d10x.combined_HSC, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_HSC_only.RData"))
+
+
 # 
 # #############
 # ### Plots
