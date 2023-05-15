@@ -8,10 +8,12 @@ library(gridExtra)
 library(reshape2)
 library(gtools)
 library(colorspace)
+library(cowplot)
 
 
 source("scripts/00_pretty_plots.R")
-
+source("scripts/00_fanciest_UMAP.R")
+source("scripts/00_plot_gene_exp.R")
 
 load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
@@ -23,7 +25,8 @@ d10x.combined_bcell <- RunUMAP(d10x.combined_bcell, reduction = "pca", dims = 1:
 d10x.combined_bcell <- FindNeighbors(d10x.combined_bcell, reduction = "pca", dims = 1:30)
 d10x.combined_bcell <- FindClusters(d10x.combined_bcell, resolution = 0.3)
 
-DimPlot(d10x.combined_bcell, label=T)
+bcell_subtype<-DimPlot(d10x.combined_bcell, label=T)
+save_plts(bcell_subtype, "IFALD_Bcell_map_clusters", w=7,h=6)
 
 bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
   annotate("text",x=-14, y=-12, label=paste0("n = ",comma(ncol(d10x.combined_bcell))))
@@ -36,7 +39,7 @@ bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.2
 bcell_cluster_umap
 save_plts(bcell_cluster_umap, "IFALD_Bcell_map", w=7,h=6)
 
-bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=T,split.by = "age_id", group.by = "CellType_refined", ncol=4)+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=F,split.by = "age_id", group.by = "CellType_refined", ncol=4)+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
   annotate("text",x=-14, y=-12, label=paste0("n = ",comma(ncol(d10x.combined_bcell))))
 bcell_cluster_umap
 
@@ -60,22 +63,24 @@ identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
 d10x_raw_bcell<-subset(d10x, subset = CellType_rough %in% c("B-cells"))
+rm(d10x)
+gc()
 
 identical(colnames(d10x_raw_bcell), colnames(d10x.combined_bcell))
 d10x_raw_bcell <- AddMetaData(d10x_raw_bcell, metadata = d10x.combined_bcell@meta.data)
 
 Idents(d10x_raw_bcell)<-d10x_raw_bcell$integrated_snn_res.0.3
 
-de_4_0<-FindMarkers(d10x_raw_bcell, ident.1 = "4", ident.2 = "0", test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
-sig_de_4_0<-de_4_0[which(de_4_0$p_val_adj < 0.005 & abs(de_4_0$avg_log2FC) > 1),]
-sig_de_4_0[which(sig_de_4_0$avg_log2FC>0),]
-sig_de_4_0[which(sig_de_4_0$avg_log2FC<0),]
+de_7_0<-FindMarkers(d10x_raw_bcell, ident.1 = "7", ident.2 = "0", test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
+sig_de_7_0<-de_7_0[which(de_7_0$p_val_adj < 0.005 & abs(de_7_0$avg_log2FC) > 1),]
+sig_de_7_0[which(sig_de_7_0$avg_log2FC>0),]
+sig_de_7_0[which(sig_de_7_0$avg_log2FC<0),]
 
-de_6<-FindMarkers(d10x_raw_bcell, ident.1 = "6",  test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
-sig_de_6<-de_6[which(de_6$p_val_adj < 0.005 & abs(de_6$avg_log2FC) > 1),]
-head(sig_de_6)
+de_10<-FindMarkers(d10x_raw_bcell, ident.1 = "10",  test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
+sig_de_10<-de_10[which(de_10$p_val_adj < 0.005 & abs(de_10$avg_log2FC) > 1),]
+head(sig_de_10)
 
-b_markers<-FeaturePlot(d10x.combined_bcell, features = c("IRF8","IGLL1","MS4A1","CD79B"), min.cutoff = "q9", pt.size=1)
+b_markers<-FeaturePlot(d10x.combined_bcell, features = c("IL3RA","PLAC8","IGLL1","MS4A1"), min.cutoff = "q9", pt.size=1)
 save_plts(b_markers, "IFALD_bcell_diff_genes", w=7,h=6)
 
 # 4 is Pre Bcell? ^ maybe another type of a doublet?
@@ -85,10 +90,19 @@ save_plts(b_markers, "IFALD_bcell_diff_genes", w=7,h=6)
 # https://www.cell.com/trends/immunology/fulltext/S1471-4906(22)00003-5
 # IGLL1
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5017602/
+# PLAC8 and IL3RA are Plasmacytoid dendritic cell markers
+# https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6861135/
 
+## B cell type markers from:
+# https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6861135/
+b_markers<-FeaturePlot(d10x.combined_bcell, features = c("JCHAIN","IGLL1","CD79B","TCL1A","IGKC","MS4A1","CD19"), min.cutoff = "q9", pt.size=1)
+b_markers
+save_plts(b_markers, "IFALD_bcell_markersfrom_fetalpaper", w=7,h=6)
 
-
-
+DefaultAssay(d10x.combined_bcell) <- "RNA"
+DotPlot(object = d10x.combined_bcell, features = c("JCHAIN","IGLL1","CD79B","TCL1A","IGKC","MS4A1","CD19"))+xlab("B Cell Marker")
+DotPlot(object = d10x.combined_bcell, features = c("JCHAIN","IGKC","PLAC8","IL3RA","CD1C"))+xlab("B Cell Marker")
+DefaultAssay(d10x.combined_bcell) <- "integrated"
 
 
 
@@ -133,22 +147,29 @@ save_plts(bcell_GSEA, "GSEA_IFALD_bcell", w=15,h=3)
 ###########
 ## Composition Bcell "types"
 ###########
-d10x.combined_bcell@meta.data$CellType_rough<-as.character(d10x.combined_bcell@meta.data$CellType_rough)
-d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("1","2","3"))]<-"Plasma"
-d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("5"))]<-"Mature B cell (104)"
-d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("4"))]<-"pre-B"
-d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("0"))]<-"Mature B cell"
-d10x.combined_bcell@meta.data$CellType_rough[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("6"))]<-"IRF8 B cell"
+d10x.combined_bcell@meta.data$CellType_refined<-as.character(d10x.combined_bcell@meta.data$CellType_refined)
+d10x.combined_bcell@meta.data$CellType_refined[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("1","2","5"))]<-"Plasma cells"
+d10x.combined_bcell@meta.data$CellType_refined[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("8"))]<-"Mature B-cells (104)"
+d10x.combined_bcell@meta.data$CellType_refined[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("7"))]<-"pre B-cell"
+d10x.combined_bcell@meta.data$CellType_refined[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("0"))]<-"Mature B-cells"
+d10x.combined_bcell@meta.data$CellType_refined[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("10"))]<-"pDC"
+
+DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")
 
 
-table(d10x.combined_bcell$CellType_rough, d10x.combined_bcell$age_condition)
+d10x.combined_bcell<-subset(d10x.combined_bcell, subset = CellType_refined %in% c("Mature B-cells","Mature B-cells (104)","Plasma cells","pDC","pre B-cell"))
+d10x.combined_bcell <- RunPCA(d10x.combined_bcell, npcs = 30, verbose = FALSE)
+d10x.combined_bcell <- RunUMAP(d10x.combined_bcell, reduction = "pca", dims = 1:30)
+
+
+table(d10x.combined_bcell$CellType_refined, d10x.combined_bcell$age_condition)
 
 cell_counts<-d10x.combined_bcell@meta.data %>% 
-  group_by(individual, CellType_rough, age_condition,Age) %>% 
+  group_by(individual, CellType_refined, age_condition,Age) %>% 
   summarise(count=length(unique(cell))) %>% 
   group_by(individual) %>%
   mutate(countT= sum(count)) %>%
-  group_by(CellType_rough, add=TRUE) %>%
+  group_by(CellType_refined, add=TRUE) %>%
   mutate(per=100*count/countT)
 
 
@@ -162,15 +183,59 @@ cell_counts$label<-sapply(1:nrow(cell_counts), function(x){
 })
 
 cell_counts$label<-factor(cell_counts$label, c("2\n(C104)","11\n(C85)","12\n(C93)", "17\n(C64)", "17\n(C96)",
-                                               "NA\n(IFALD006)", "NA\n(IFALD030)", "NA\n(IFALD073)", 
+                                               "2\n(IFALD073)", "3\n(IFALD030)", "13\n(IFALD006)", 
                                                "26\n(C82)","48\n(C70)", "57\n(C97)","61\n(C68)",
                                                "65\n(C39 NPC)", "65\n(C39 TLH)", "67\n(C54)","69\n(C88)"))
 
 cell_counts_min<-cell_counts[,c("individual","age_condition","Age","countT","label")][!duplicated(cell_counts[,c("individual","age_condition","Age","countT","label")]),]
 
-Bcell_composistion<-ggplot(cell_counts, aes(label, per))+geom_bar(aes(fill=CellType_rough),stat = "identity", color="black")+
-  theme_bw()+th+scale_fill_manual(values=c("#2b103d","#9e5dc9","#e1ceed","#5f2585","#3e105c"), name="Cell Type")+xlab("Age\n(Sample ID)")+ylab("Percent of Cells in Sample")+
+
+cell_counts$CellType_refined<-factor(cell_counts$CellType_refined, levels=c("pre B-cell","Mature B-cells","Mature B-cells (104)","Plasma cells", "pDC"))
+Bcell_composistion<-ggplot(cell_counts, aes(label, per))+geom_bar(aes(fill=CellType_refined),stat = "identity", color="black")+
+  theme_bw()+th+fillscale_cellType+xlab("Age\n(Sample ID)")+ylab("Percent of Cells in Sample")+
   facet_grid(.~age_condition, scale="free_x", space = "free")+
   geom_text(aes(label=countT, y=102), data=cell_counts_min)
 Bcell_composistion
-save_plts(Bcell_composistion, "Bcell_composistion", w=15,h=8)
+save_plts(Bcell_composistion, "Bcell_composistion", w=16,h=10)
+
+
+bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=F, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  annotate("text",x=10, y=-15, label=paste0("n = ",comma(ncol(d10x.combined_bcell))))
+bcell_cluster_umap
+save_plts(bcell_cluster_umap, "IFALD_Bcell_map", w=7,h=5)
+
+cell_num_bell<-as.data.frame(table(d10x.combined_bcell$age_condition))
+colnames(cell_num_bell)<-c("age_condition","CellCount")
+bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=F,split.by = "age_condition", group.by = "CellType_refined", ncol=2)+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  geom_text(aes(x=7, y=-15,label=paste0("n = ",comma(CellCount))),cell_num_bell, hjust=-0.1, size=3)
+bcell_cluster_umap
+save_plts(bcell_cluster_umap, "IFALD_Bcell_map_split", w=8,h=6)
+
+cell_num_bell<-as.data.frame(table(d10x.combined_bcell$age_id))
+colnames(cell_num_bell)<-c("age_id","CellCount")
+bcell_cluster_umap<-DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=F,split.by = "age_id", group.by = "CellType_refined", ncol=4)+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  geom_text(aes(x=7, y=-15,label=paste0("n = ",comma(CellCount))),cell_num_bell, hjust=-0.1, size=3)
+bcell_cluster_umap
+save_plts(bcell_cluster_umap, "IFALD_Bcell_map_split_individual", w=12,h=10)
+
+
+# fancy_bcell<-fanciest_UMAP(d10x.combined_bcell,"KC Like")
+# save_plts(fancy_bcell, "IFALD_bcell_diff_cluster0_highlight", w=4,h=3)
+
+fancy_bcell<-fanciest_UMAP(d10x.combined_bcell, NA,F)
+fancy_bcell
+save_plts(fancy_bcell, "IFALD_bcell_UMAP", w=4,h=3)
+
+fancy_bcell<-fanciest_UMAP(d10x.combined_bcell, NA,T)
+save_plts(fancy_bcell, "IFALD_bcell_UMAP_split", w=8,h=6)
+
+
+###########
+### plot individual genes
+###########
+b_markers<-plot_grid(plot_gene_UMAP(d10x.combined_bcell,"IL3RA", 0),
+          plot_gene_UMAP(d10x.combined_bcell,"PLAC8", 0),
+          plot_gene_UMAP(d10x.combined_bcell,"IGLL1", 0),
+          plot_gene_UMAP(d10x.combined_bcell,"MS4A1", 0))
+b_markers
+save_plts(b_markers, "IFALD_bcell_diff_genes_bcellonly_tidy", w=7,h=5)

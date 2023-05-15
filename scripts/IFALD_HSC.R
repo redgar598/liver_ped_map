@@ -41,6 +41,13 @@ d10x.combined_hsc@meta.data$CellType_rough[which(d10x.combined_hsc@meta.data$seu
 d10x.combined_hsc@meta.data$CellType_rough[which(d10x.combined_hsc@meta.data$seurat_clusters%in%c("1","2"))]<-"adult_IFALD_HSC"
 d10x.combined_hsc@meta.data$CellType_rough[which(d10x.combined_hsc@meta.data$seurat_clusters%in%c("3"))]<-"Outlier HSC"
 
+fancy_HSC<-fanciest_UMAP(d10x.combined_hsc, NA,F)
+fancy_HSC
+save_plts(fancy_HSC, "IFALD_HSC_UMAP", w=4,h=3)
+
+fancy_HSC<-fanciest_UMAP(d10x.combined_hsc, NA,T)
+save_plts(fancy_HSC, "IFALD_HSC_UMAP_split", w=8,h=6)
+
 
 ##############
 ## markers

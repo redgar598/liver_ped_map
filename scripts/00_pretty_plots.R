@@ -5,14 +5,22 @@ save_plts<-function(plt, name, w,h){
   ggsave(plt, file=paste(here("figures/png/"),name,".png", sep=""), w=w, h=h)}
 
 
-myColors_celltype <- c("#660cc7","#8642d1","#5612a3","#4b911d","#7a4202","#2c6e02","#6bbce8","#3469ad","#d17906","#b01e87","#60ba5d","#207537",
-                       "#a0c487","#d9a5a5","#87a4c9","#e8c392","#dea4ce","#79639a",
-                       "#207537","#fa61ad","#b80783","#994676","#431039","#cb181d","maroon1","#67000d",
-                       "grey","#ce1256","#a6d96a","#750c32","#d9667f","#1b4003","#e0a8ce")
-color_possibilities_celltype<-c("B-cells","Mature B-cells","Plasma cells","CD3+ T-cells","Cholangiocytes","gd T-cells","Hepatocytes","HSC","LSEC","Myeloid cells","NK-like cells", "NK and T cells",
-                                "NKT cells\n(Hepatocyte Like)","Cholangiocytes\n(Hepatocyte Like)","HSC\n(Hepatocyte Like)","LSEC\n(Hepatocyte Like)","Myeloid cells\n(Hepatocyte Like)","B-cells\n(Hepatocyte Like)",
-                                "NKT cells","RR Myeloid","KC Like","Neutrophil","Neutrophil\n(DEFA+)","Erythrocytes","Mast cell","Myeloid Erythrocytes\n(phagocytosis)",
-                                "Doublet","Macrophage\n(MHCII high)","Cycling T-cells","Macrophage\n(CLEC9A high)","Platelets","CLNK T-cells","Cycling Myeloid")
+myColors_celltype <- c("#660cc7","#8642d1","#5612a3","#4b911d","#7a4202",
+                       "#2c6e02","#6bbce8","#3469ad","#d17906","#b01e87",
+                       "#60ba5d","#207537","#a0c487","#d9a5a5","#87a4c9",
+                       "#e8c392","#dea4ce","#79639a","#207537","#fa61ad",
+                       "#b80783","#994676","#431039","#cb181d","maroon1",
+                       "#b01629","grey","#ce1256","#a6d96a","#750c32",
+                       "#d9667f","#1b4003","#e0a8ce","#8a68b0","#3d1b63",
+                       "#c9a8ed","#c48db4","#a3588d")
+color_possibilities_celltype<-c("B-cells","Mature B-cells","Plasma cells","CD3+ T-cells","Cholangiocytes",
+                                "gd T-cells","Hepatocytes","HSC","LSEC","Myeloid cells",
+                                "NK-like cells", "NK and T cells","NKT cells\n(Hepatocyte Like)","Cholangiocytes\n(Hepatocyte Like)","HSC\n(Hepatocyte Like)",
+                                "LSEC\n(Hepatocyte Like)","Myeloid cells\n(Hepatocyte Like)","B-cells\n(Hepatocyte Like)","NKT cells","RR Myeloid",
+                                "KC Like","Neutrophil","Neutrophil\n(DEFA+)","Erythrocytes","Mast cell",
+                                "Myeloid Erythrocytes\n(phagocytosis)","Doublet","Macrophage\n(MHCII high)","Cycling T-cells","Macrophage\n(CLEC9A high)",
+                                "Platelets","CLNK T-cells","Cycling Myeloid","Mature B-cells (104)","pDC",
+                                "pre B-cell","KC Like\n(Hepatocyte Like)","KC Like (C97)")
 names(myColors_celltype) <- color_possibilities_celltype
 fillscale_cellType <- scale_fill_manual(name="Cell Type",
                                         values = myColors_celltype, drop = T, limits=force)
@@ -20,7 +28,7 @@ colscale_cellType <- scale_color_manual(name="Cell Type",
                                         values = myColors_celltype, drop = T, limits=force)
 
 
-myColors_age <- c("#348595","#d6604d")
+myColors_age <- c("#D64A56","cornflowerblue")
 color_possibilities_age<-c( "Adult","Ped")
 names(myColors_age) <- color_possibilities_age
 fillscale_age <- scale_fill_manual(name="Age\nGroup",
@@ -28,6 +36,13 @@ fillscale_age <- scale_fill_manual(name="Age\nGroup",
 colscale_age <- scale_color_manual(name="Age\nGroup",
                                          values = myColors_age, drop = T, limits=force)
 
+myColors_agecondition <- c("#D64A56","cornflowerblue","#374eb8")
+color_possibilities_agecondition<-c( "Adult Healthy","Ped Healthy","Ped IFALD")
+names(myColors_agecondition) <- color_possibilities_agecondition
+fillscale_agecondition <- scale_fill_manual(name="Age\nGroup",
+                                   values = myColors_agecondition, drop = T, limits=force)
+colscale_agecondition <- scale_color_manual(name="Age\nGroup",
+                                   values = myColors_agecondition, drop = T, limits=force)
 
 
 

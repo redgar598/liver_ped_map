@@ -17,7 +17,8 @@ library(DropletQC)
 
 source("scripts/00_pretty_plots.R")
 source("scripts/00_entropy_d10x.R")
-
+source("scripts/00_fanciest_UMAP.R")
+source("scripts/00_plot_gene_exp.R")
 
 ####################################
 ## Fancy dot plot
@@ -91,3 +92,16 @@ fancy_dotplot<-plot_grid(
           plot.margin = margin(0,0,1,1,"cm")),
   ncol=1, rel_heights = c(6,1.3), align = "v", axis="lr")
 save_plts(fancy_dotplot, "dot_plot_celltype", w=6,h=10)
+
+
+####################################
+## individual gene expression
+####################################
+load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+
+allcell_keymakers<-plot_grid(plot_gene_UMAP(d10x.combined,"PTPRC", 0.9),
+                                plot_gene_UMAP(d10x.combined,"ALB", 0.9))
+allcell_keymakers
+save_plts(allcell_keymakers, "IFALD_all_cell_key_markers", w=11,h=5)
+
+
