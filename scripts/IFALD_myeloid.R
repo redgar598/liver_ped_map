@@ -178,7 +178,8 @@ save_plts(fancy_myeloid, "IFALD_myeloid_diff_cluster0_highlight", w=4,h=3)
 fancy_myeloid<-fanciest_UMAP(d10x.combined_myeloid, NA,F)
 save_plts(fancy_myeloid, "IFALD_myeloid_UMAP", w=4,h=3)
 
-
+fancy_myeloid<-fanciest_UMAP(d10x.combined_myeloid, NA,T)
+save_plts(fancy_myeloid, "IFALD_myeloid_UMAP_split", w=6,h=4)
 
 
 
@@ -486,4 +487,144 @@ save_plts(myeloid_age_heat, "Myeloid_age_heat", w=10,h=4)
 myeloid_IFALD_heat<-plot_heat_map(d10x.combined_myeloid,c(kc_ifald,mhcII_ifald,rr_ifald ), 
               c("RR Myeloid","Macrophage\n(MHCII high)","KC Like" ))
 save_plts(myeloid_IFALD_heat, "Myeloid_IFALD_heat", w=10,h=4)
+
+
+
+
+##############
+## Differential expression with age and IFALD in RR
+##############
+## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
+# but not normalized or scaled
+d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+
+load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+cell_label$index<-rownames(cell_label)
+cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
+identical(colnames(d10x), cell_label$index)
+
+d10x <- AddMetaData(d10x, metadata = cell_label)
+
+d10x_raw_RR<-subset(d10x, subset = CellType_refined %in% c("RR Myeloid"))
+d10x_raw_mhcII<-subset(d10x, subset = CellType_refined %in% c("Macrophage\n(MHCII high)"))
+
+Idents(d10x_raw_RR)<-d10x_raw_RR$age_condition
+Idents(d10x_raw_mhcII)<-d10x_raw_mhcII$age_condition
+
+d10x$cellname<-colnames(d10x)
+d10x_raw_myeloidcluster0 <- subset(d10x, subset = cellname %in% cluster0)
+
+d10x_raw_myeloidcluster0$age_condition<-paste(d10x_raw_myeloidcluster0$AgeGroup, d10x_raw_myeloidcluster0$Treatment, sep=" ")
+Idents(d10x_raw_myeloidcluster0)<-d10x_raw_myeloidcluster0$age_condition
+
+## age differential
+de_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+de_KC<-FindMarkers(d10x_raw_myeloidcluster0, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+de_MHCII<-FindMarkers(d10x_raw_mhcII, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+
+
+## pathway adult/IFALD versus healthy ped
+source("scripts/00_GSEA_function.R")
+GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
+
+### Age
+de_RR$gene<-rownames(de_RR)
+gene_list = de_RR$avg_log2FC
+names(gene_list) = de_RR$gene
+gene_list = sort(gene_list, decreasing = TRUE)
+gene_list = gene_list[!duplicated(names(gene_list))]
+res_RR = GSEA(gene_list, GO_file, pval = 0.05)
+res_RR<-res_RR$Results
+res_RR$test<-"RR"
+
+de_KC$gene<-rownames(de_KC)
+gene_list = de_KC$avg_log2FC
+names(gene_list) = de_KC$gene
+gene_list = sort(gene_list, decreasing = TRUE)
+gene_list = gene_list[!duplicated(names(gene_list))]
+res_KC = GSEA(gene_list, GO_file, pval = 0.05)
+res_KC<-res_KC$Results
+res_KC$test<-"KC"
+
+de_MHCII$gene<-rownames(de_MHCII)
+gene_list = de_MHCII$avg_log2FC
+names(gene_list) = de_MHCII$gene
+gene_list = sort(gene_list, decreasing = TRUE)
+gene_list = gene_list[!duplicated(names(gene_list))]
+res_MHCII = GSEA(gene_list, GO_file, pval = 0.05)
+res_MHCII<-res_MHCII$Results
+res_MHCII$test<-"MHCII"
+
+myeloid_res_overlap<-rbind(res_MHCII, res_KC, res_RR)
+
+myeloid_res_overlap$pathway<-sapply(1:nrow(myeloid_res_overlap), function(x) strsplit(myeloid_res_overlap$pathway[x], "%")[[1]][1])
+myeloid_res_overlap$Enrichment_Cell<-"Up-regulated in \nAdult"
+myeloid_res_overlap$Enrichment_Cell[which(myeloid_res_overlap$Enrichment=="Down-regulated")]<-"Up-regulated in \nPed"
+
+myeloid_res_overlap$label<-lapply(1:nrow(myeloid_res_overlap), function(x) paste0(myeloid_res_overlap$leadingEdge[x][[1]][1:4], collapse = ", "))
+
+myeloid_res_overlap$direction_label<-as.factor(myeloid_res_overlap$Enrichment)
+levels(myeloid_res_overlap$direction_label)<-c(0.1,-0.1)
+myeloid_res_overlap$direction_label<-as.numeric(as.character(myeloid_res_overlap$direction_label))
+
+# common<-names(table(myeloid_res_overlap$pathway)[which(table(myeloid_res_overlap$pathway)>2)])
+# myeloid_res_overlap<-myeloid_res_overlap[which(myeloid_res_overlap$pathway%in%common),]
+# 
+# myeloid_GSEA_common<-ggplot(myeloid_res_overlap, aes(test, NES))+
+#   geom_bar(aes(fill=Enrichment_Cell), stat="identity")+
+#   theme_bw()+th_present+ylab("")+xlab("Normalized Enrichment Score")+
+#   scale_fill_manual(values=c("#D64A56","cornflowerblue"))+
+#   facet_wrap(~pathway, ncol=1)
+# myeloid_GSEA_common
+
+RR<-myeloid_res_overlap[which(myeloid_res_overlap$test=="RR"),]
+KC<-myeloid_res_overlap[which(myeloid_res_overlap$test=="KC"),]
+MHCII<-myeloid_res_overlap[which(myeloid_res_overlap$test=="MHCII"),]
+
+three<-names(table(myeloid_res_overlap$pathway)[which(table(myeloid_res_overlap$pathway)>2)])
+two<-intersect(KC$pathway, MHCII$pathway)[which(!(intersect(KC$pathway, MHCII$pathway)%in%three))]
+two2<-intersect(RR$pathway, MHCII$pathway)[which(!(intersect(RR$pathway, MHCII$pathway)%in%c(three,two)))]
+two3<-intersect(RR$pathway, KC$pathway)[which(!(intersect(RR$pathway, KC$pathway)%in%c(three,two, two2)))]
+one<-myeloid_res_overlap[which(!(myeloid_res_overlap$pathway%in%c(three, two, two2, two3))),]
+one<-as.data.frame(one %>% group_by(test) %>% slice_max(abs(NES), n = 5))
+one<-one$pathway
+
+myeloid_res_overlap_plt<-myeloid_res_overlap[which(myeloid_res_overlap$pathway%in%c(three, two, two2, two3, one)),]
+myeloid_res_overlap_plt$pathway<-factor(myeloid_res_overlap_plt$pathway, levels=rev(c(three, two, two2, two3, one)))
+
+myeloid_res_overlap_plt_unique<-myeloid_res_overlap_plt[,c("pathway","label")]
+myeloid_res_overlap_plt_unique<-myeloid_res_overlap_plt_unique[!duplicated(myeloid_res_overlap_plt_unique$pathway),]
+
+GSEA_all_myeloid<-plot_grid(ggplot(myeloid_res_overlap_plt, aes(test,pathway, fill=NES))+
+            geom_tile()+
+            th+theme_classic()+scale_fill_gradientn(colours = colorRampPalette(rev(brewer.pal(8, 'RdBu')), space='Lab')(100), 
+                                                    name="",breaks = c(min(myeloid_res_overlap_plt$NES),
+                                                                               max(myeloid_res_overlap_plt$NES)),
+                                                    labels = c("Enriched\nPed",
+                                                               "Enriched\nAdult"))+
+            ylab("")+xlab("")+ggtitle("gsea NES")+
+              geom_hline(yintercept = 5.5, color="grey")+
+              geom_hline(yintercept = 10.5, color="grey")+
+              geom_hline(yintercept = 15.5, color="grey")+
+              geom_hline(yintercept = 24.5, color="grey")+
+              geom_hline(yintercept = 32.5, color="grey")+
+              geom_hline(yintercept = 35.5, color="grey")+
+            theme(legend.position="top",legend.justification = "left", legend.title.align = 7,
+                  title = element_text(size=9)),
+          ggplot(myeloid_res_overlap_plt_unique, aes(0,pathway))+
+            geom_text(aes(label=label, hjust = 0), color="grey40", size=3)+
+            th+theme_classic()+theme(axis.text = element_blank(),
+                                     axis.line = element_line(colour="white"),
+                                     axis.ticks = element_line(colour="white"))+
+            ylab("")+xlab("")+xlim(0,1)+
+            geom_hline(yintercept = 5.5, color="grey")+
+            geom_hline(yintercept = 10.5, color="grey")+
+            geom_hline(yintercept = 15.5, color="grey")+
+            geom_hline(yintercept = 24.5, color="grey")+
+            geom_hline(yintercept = 32.5, color="grey")+
+            geom_hline(yintercept = 35.5, color="grey"),
+          align="h",axis="tb", rel_widths = c(2,1))
+save_plts(GSEA_all_myeloid, "Myeloid_age_GSEA_heat", w=10.5,h=10)
+
+
 

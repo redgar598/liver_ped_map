@@ -97,7 +97,6 @@ scp /media/redgar/Seagate\ Portable\ Drive/spinalcord_tutorial_data/d10x_78_SCI_
 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/d10x_SCI_fullintegrated.rds /media/redgar/Seagate\ Portable\ Drive/spinalcord_tutorial_data 
 
-
 #################
 ### Moving files
 #################
@@ -120,6 +119,7 @@ scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParlnd_Sai__C
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sonya__SingleCell_iFALD073_Biopsy_25Jan21_3pr_v3 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Catia__HSC_IF030_3pr_v3 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sonya__HSC-FI_006 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sonya__SingleCell_iFALD073_PBMC_25Jan21_3pr_v3 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 
 
 
@@ -135,11 +135,18 @@ scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/Fetal_IFALD_adult_ped_cellRough.rds /media/redgar/Seagate\ Portable\ Drive/fetal_liver 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/Fetal_IFALD_adult_ped_pltData.RData /media/redgar/Seagate\ Portable\ Drive/fetal_liver 
 
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/Fetal_ped_IFALD_adult_PCA_myeloid.RData /home/redgar/Documents/liver_ped_map/data
+
+
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_*_only.RData /media/redgar/Seagate\ Portable\ Drive/processed_data
+
+
+scp /home/redgar/Documents/liver_ped_map/data/Liver_Markers*.csv t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data
+
 
 
 ## general file moving moving files
 scp /home/redgar/Documents/tissue_MHCI/R_functions/pretty_plots.R t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn
-scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/input_metadata.txt /home/redgar/Documents/liver_ped_map/data
 
 
 cp -R /cluster/projects/macparland/DN/PediatricAdult /cluster/projects/macparland/RE
@@ -169,6 +176,8 @@ scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_ma
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_d10x_adult_ped_raw.rds /home/redgar/Documents/liver_ped_map/data
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_cellRefined_withDropletQC.rds /home/redgar/Documents/liver_ped_map/data
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds /home/redgar/Documents/liver_ped_map/data
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_SCINA_cell_labels.RData /home/redgar/Documents/liver_ped_map/data
+
 
 scp /home/redgar/Documents/liver_ped_map/data/IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data
 scp /home/redgar/Documents/liver_ped_map/data/IFALD_adult_ped_cellRefined_withDropletQC.rds t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data

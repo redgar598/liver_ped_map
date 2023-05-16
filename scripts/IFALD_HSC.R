@@ -98,6 +98,16 @@ save_plts(Fib_markers, "IFALD_HSC_diff_genes", w=7,h=6)
 
 FeaturePlot(d10x.combined_hsc, features = c("MYH11","SPARCL1","ADIRF","MCAM"), min.cutoff = "q9", pt.size=0.25)
 
+###########
+### plot individual genes
+###########
+HSC_markers<-plot_grid(plot_gene_UMAP(d10x.combined_hsc,"PDGFRA", 0),
+                     plot_gene_UMAP(d10x.combined_hsc,"CXCL12", 0),
+                     plot_gene_UMAP(d10x.combined_hsc,"COL1A1", 0),
+                     plot_gene_UMAP(d10x.combined_hsc,"IGFBP3", 0))
+HSC_markers
+save_plts(HSC_markers, "IFALD_HSC_diff_genes_fancy", w=7,h=5)
+
 
 #########
 ## pathway adult/IFALD versus healthy ped
