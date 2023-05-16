@@ -260,7 +260,7 @@ source("scripts/00_fanciest_UMAP.R")
 #' d10x
 
 #saveRDS(d10x, file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_d10x_adult_ped_raw_PBMC.rds"))
-d10x<-readRDS(file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_d10x_adult_ped_raw_PBMC.rds"))
+d10x<-readRDS(file = here("../../../projects/macparland/RE/PediatricAdult/processed_data/IFALD_d10x_adult_ped_raw_PBMC.rds"))
 
 
 ################
