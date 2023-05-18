@@ -265,6 +265,14 @@ save_plts(myeloid_differential_violin, "IFALD_myeloid_diff_genes_withIFALD_myelo
 
 
 
+myeloid_differential_violin<-plot_grid(plot_gene_UMAP(d10x_integrated_myeloidcluster0,"LY96",0),
+                                       plot_gene_UMAP(d10x_integrated_myeloidcluster0,"CETP",0),
+                                       plot_gene_UMAP(d10x_integrated_myeloidcluster0,"CCL4",0),
+                                       plot_gene_UMAP(d10x_integrated_myeloidcluster0,"CTSB",0))
+myeloid_differential_violin
+save_plts(myeloid_differential_violin, "IFALD_myeloid_diff_genes_withIFALD_myeloidonly_umap", w=8,h=9)
+
+
 
 
 
