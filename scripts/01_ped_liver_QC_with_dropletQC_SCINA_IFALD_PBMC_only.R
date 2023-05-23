@@ -262,129 +262,129 @@ source("scripts/00_fanciest_UMAP.R")
 #' #saveRDS(d10x, file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_d10x_adult_ped_raw_PBMC.rds"))
 #' saveRDS(d10x, file = here("/media/redgar/Seagate Portable Drive/processed_data","IFALD_d10x_adult_ped_raw_PBMC.rds"))
 #' 
-#' d10x<-readRDS(file = here("/media/redgar/Seagate Portable Drive/processed_data","IFALD_d10x_adult_ped_raw_PBMC.rds"))
-#' 
-#' 
-#' ################
-#' ## Normalize scale and UMAP
-#' ################
-#' d10x <- NormalizeData(d10x)
-#' d10x <- FindVariableFeatures(d10x, selection.method = "vst", nfeatures = 2000)
-#' d10x <- ScaleData(d10x) #ScaleData(cells, vars.to.regress = c("nUMI","percent.mito","donor.id","S.Score","G2M.Score","batch_10X"))
-#' 
-#' # dimension reduction
-#' d10x <- RunPCA(d10x, ndims.print = 1:10, nfeatures.print = 10)
-#' d10x <- RunUMAP(d10x, dims = 1:30)
-#' d10x <- RunTSNE(d10x, dims = 1:30)
-#' 
-#' 
-#' 
-#' ######################
-#' ## cell cycle gene expression
-#' ######################
-#' # A list of cell cycle markers, from Tirosh et al, 2015, is loaded with Seurat.  We can
-#' # segregate this list into markers of G2/M phase and markers of S phase
-#' s.genes <- cc.genes$s.genes
-#' g2m.genes <- cc.genes$g2m.genes
-#' 
-#' d10x <- CellCycleScoring(d10x, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
-#' 
-#' pca_cellcycle<-DimPlot(d10x, reduction="pca",  group.by = "Phase")
-#' save_plts(pca_cellcycle, "IFALD_pca_cellcycle_PBMC", w=6,h=4)
-#' 
-#' pca_nfeature<-FeaturePlot(d10x, features = "nFeature_RNA",reduction = "pca", min.cutoff = "q9", pt.size=1)
-#' save_plts(pca_nfeature, "IFALD_pca_nfeature_PBMC", w=6,h=4)
-#' 
-#' 
-#' 
-#' ## regress out cell cycle and other covariates
-#' #Transformed data will be available in the SCT assay, which is set as the default after running sctransform
-#' #By default, sctransform accounts for cellular sequencing depth, or nUMIs.
-#' d10x <- SCTransform(d10x, vars.to.regress = c("nFeature_RNA","S.Score", "G2M.Score"), verbose = FALSE)
-#' 
-#' # dimension reduction
-#' d10x <- RunPCA(d10x, verbose = FALSE)
-#' d10x <- RunUMAP(d10x, dims = 1:30)
-#' d10x <- RunTSNE(d10x, dims = 1:30)
-#' 
-#' # cluster
-#' d10x <- FindNeighbors(d10x, reduction = "pca", dims = 1:20)
-#' d10x <- FindClusters(d10x, resolution = 0.5)
-#' 
-#' 
-#' 
-#' ###############
-#' ## visualize
-#' ###############
-#' SCT_cluster_umap<-DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T)
-#' save_plts(SCT_cluster_umap, "IFALD_SCT_cluster_umap_PBMC", w=6,h=4)
-#' 
-#' SCT_cluster_tsne<-DimPlot(d10x, reduction = "tsne", pt.size=0.25, label=T)
-#' save_plts(SCT_cluster_tsne, "IFALD_SCT_cluster_tsne_PBMC", w=6,h=4)
-#' 
-#' cell_pca_SCT<-DimPlot(d10x, reduction="pca", group.by="Phase")
-#' save_plts(cell_pca_SCT, "IFALD_cell_PCA_afterSCT_PBMC", w=6,h=4)
-#' 
-#' drop_pca_SCT<-DimPlot(d10x, reduction="pca", group.by="cell_status")
-#' save_plts(drop_pca_SCT, "IFALD_cell_PCA_afterSCT_DropletQC_PBMC", w=6,h=4)
-#' 
-#' nFeature_UMAP_SCT<-FeaturePlot(d10x, features = "nFeature_RNA",reduction = "pca", min.cutoff = "q9", pt.size=1)
-#' save_plts(nFeature_UMAP_SCT, "IFALD_nfeature_UMAP_afterSCT_PBMC", w=6,h=4)
-#' 
-#' 
-#' 
-#' ## Low quality cluster?
-#' MT_umap_SCT<-FeaturePlot(d10x, features = "percent.mt", min.cutoff = "q9", pt.size=1)
-#' save_plts(MT_umap_SCT, "IFALD_MT_umap_PBMC", w=6,h=4)
-#' 
-#' ncount_umap_SCT<-FeaturePlot(d10x, features = "nCount_RNA", min.cutoff = "q9", pt.size=1)
-#' save_plts(ncount_umap_SCT, "IFALD_ncount_umap_SCT_PBMC", w=6,h=4)
-#' 
-#' nfeature_umap_SCT<-FeaturePlot(d10x, features = "nFeature_RNA", min.cutoff = "q9", pt.size=1)
-#' save_plts(nfeature_umap_SCT, "IFALD_nfeature_umap_SCT_PBMC", w=6,h=4)
-#' 
-#' ###############
-#' ## Cell Cluster Labeling
-#' ###############
-#' DefaultAssay(d10x)<-"RNA"
-#' d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
-#' 
-#' signatures<-read.csv(here("data/PBMC_markers.csv"))
-#' 
-#' d10x_exp <- GetAssayData(d10x)
-#' results = SCINA(d10x_exp, signatures, max_iter = 100, convergence_n = 10,
-#'                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-#' d10x$SCINA_broad<-results$cell_labels
-#' gc()
-#' 
-#' DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T, group.by = "SCINA_broad")
-#' DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T)
-#' 
-#' signatur_gene<-unique(c(as.character(signatures[2,]),as.character(signatures[1,])))
-#' DotPlot(object = d10x, features = signatur_gene)
-#' 
-#' FeaturePlot(d10x, features=c("CD8A","NKG7","FCGR3B","TRAC","TRDC","CD3D"))
-#' DotPlot(object = d10x, features = c("FCGR3B","TRAC","TRDC","CD3D","CD27"))
-#' 
-#' DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T, group.by = "")
-#' ggplot(d10x@meta.data, aes(seurat_clusters, nuclear_fraction))+geom_violin()
-#' ggplot(d10x@meta.data, aes(seurat_clusters, nFeature_RNA))+geom_violin()
-#' ggplot(d10x@meta.data, aes(seurat_clusters, nCount_RNA))+geom_violin()
-#' 
-#' 
-#' ## Sum SCINA to cluster level
-#' d10x@meta.data$CellType_refined<-as.character(d10x@meta.data$SCINA_broad)
-#' d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("1","2","6","9","10"))]<-"Mature B-cells"
-#' d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("16"))]<-"Plasma cells"
-#' d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("0","13"))]<-"Naive CD4 T-cells"
-#' d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("5","11"))]<-"Memory CD4 T-cells"
-#' d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("3","7"))]<-"CD8 T-cells"
-#' d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("4","8","14"))]<-"NK cells"
-#' d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("15"))]<-"DC"
-#' d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("12"))]<-"Neutrophil"
-#' 
-#' DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")
-#' 
+# d10x<-readRDS(file = here("/media/redgar/Seagate Portable Drive/processed_data","IFALD_d10x_adult_ped_raw_PBMC.rds"))
+# 
+# 
+# ################
+# ## Normalize scale and UMAP
+# ################
+# d10x <- NormalizeData(d10x)
+# d10x <- FindVariableFeatures(d10x, selection.method = "vst", nfeatures = 2000)
+# d10x <- ScaleData(d10x) #ScaleData(cells, vars.to.regress = c("nUMI","percent.mito","donor.id","S.Score","G2M.Score","batch_10X"))
+# 
+# # dimension reduction
+# d10x <- RunPCA(d10x, ndims.print = 1:10, nfeatures.print = 10)
+# d10x <- RunUMAP(d10x, dims = 1:30)
+# d10x <- RunTSNE(d10x, dims = 1:30)
+# 
+# 
+# 
+# ######################
+# ## cell cycle gene expression
+# ######################
+# # A list of cell cycle markers, from Tirosh et al, 2015, is loaded with Seurat.  We can
+# # segregate this list into markers of G2/M phase and markers of S phase
+# s.genes <- cc.genes$s.genes
+# g2m.genes <- cc.genes$g2m.genes
+# 
+# d10x <- CellCycleScoring(d10x, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
+# 
+# pca_cellcycle<-DimPlot(d10x, reduction="pca",  group.by = "Phase")
+# save_plts(pca_cellcycle, "IFALD_pca_cellcycle_PBMC", w=6,h=4)
+# 
+# pca_nfeature<-FeaturePlot(d10x, features = "nFeature_RNA",reduction = "pca", min.cutoff = "q9", pt.size=1)
+# save_plts(pca_nfeature, "IFALD_pca_nfeature_PBMC", w=6,h=4)
+# 
+# 
+# 
+# ## regress out cell cycle and other covariates
+# #Transformed data will be available in the SCT assay, which is set as the default after running sctransform
+# #By default, sctransform accounts for cellular sequencing depth, or nUMIs.
+# d10x <- SCTransform(d10x, vars.to.regress = c("nFeature_RNA","S.Score", "G2M.Score"), verbose = FALSE)
+# 
+# # dimension reduction
+# d10x <- RunPCA(d10x, verbose = FALSE)
+# d10x <- RunUMAP(d10x, dims = 1:30)
+# d10x <- RunTSNE(d10x, dims = 1:30)
+# 
+# # cluster
+# d10x <- FindNeighbors(d10x, reduction = "pca", dims = 1:20)
+# d10x <- FindClusters(d10x, resolution = 0.5)
+# 
+# 
+# 
+# ###############
+# ## visualize
+# ###############
+# SCT_cluster_umap<-DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T)
+# save_plts(SCT_cluster_umap, "IFALD_SCT_cluster_umap_PBMC", w=6,h=4)
+# 
+# SCT_cluster_tsne<-DimPlot(d10x, reduction = "tsne", pt.size=0.25, label=T)
+# save_plts(SCT_cluster_tsne, "IFALD_SCT_cluster_tsne_PBMC", w=6,h=4)
+# 
+# cell_pca_SCT<-DimPlot(d10x, reduction="pca", group.by="Phase")
+# save_plts(cell_pca_SCT, "IFALD_cell_PCA_afterSCT_PBMC", w=6,h=4)
+# 
+# drop_pca_SCT<-DimPlot(d10x, reduction="pca", group.by="cell_status")
+# save_plts(drop_pca_SCT, "IFALD_cell_PCA_afterSCT_DropletQC_PBMC", w=6,h=4)
+# 
+# nFeature_UMAP_SCT<-FeaturePlot(d10x, features = "nFeature_RNA",reduction = "pca", min.cutoff = "q9", pt.size=1)
+# save_plts(nFeature_UMAP_SCT, "IFALD_nfeature_UMAP_afterSCT_PBMC", w=6,h=4)
+# 
+# 
+# 
+# ## Low quality cluster?
+# MT_umap_SCT<-FeaturePlot(d10x, features = "percent.mt", min.cutoff = "q9", pt.size=1)
+# save_plts(MT_umap_SCT, "IFALD_MT_umap_PBMC", w=6,h=4)
+# 
+# ncount_umap_SCT<-FeaturePlot(d10x, features = "nCount_RNA", min.cutoff = "q9", pt.size=1)
+# save_plts(ncount_umap_SCT, "IFALD_ncount_umap_SCT_PBMC", w=6,h=4)
+# 
+# nfeature_umap_SCT<-FeaturePlot(d10x, features = "nFeature_RNA", min.cutoff = "q9", pt.size=1)
+# save_plts(nfeature_umap_SCT, "IFALD_nfeature_umap_SCT_PBMC", w=6,h=4)
+# 
+# ###############
+# ## Cell Cluster Labeling
+# ###############
+# DefaultAssay(d10x)<-"RNA"
+# d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+# 
+# signatures<-read.csv(here("data/PBMC_markers.csv"))
+# 
+# d10x_exp <- GetAssayData(d10x)
+# results = SCINA(d10x_exp, signatures, max_iter = 100, convergence_n = 10,
+#                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
+# d10x$SCINA_broad<-results$cell_labels
+# gc()
+# 
+# DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T, group.by = "SCINA_broad")
+# DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T)
+# 
+# signatur_gene<-unique(c(as.character(signatures[2,]),as.character(signatures[1,])))
+# DotPlot(object = d10x, features = signatur_gene)
+# 
+# FeaturePlot(d10x, features=c("CD8A","NKG7","FCGR3B","TRAC","TRDC","CD3D"))
+# DotPlot(object = d10x, features = c("FCGR3B","TRAC","TRDC","CD3D","CD27"))
+# 
+# DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T, group.by = "")
+# ggplot(d10x@meta.data, aes(seurat_clusters, nuclear_fraction))+geom_violin()
+# ggplot(d10x@meta.data, aes(seurat_clusters, nFeature_RNA))+geom_violin()
+# ggplot(d10x@meta.data, aes(seurat_clusters, nCount_RNA))+geom_violin()
+# 
+# 
+# ## Sum SCINA to cluster level
+# d10x@meta.data$CellType_refined<-as.character(d10x@meta.data$SCINA_broad)
+# d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("1","2","6","9","10"))]<-"Mature B-cells"
+# d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("16"))]<-"Plasma cells"
+# d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("0","13"))]<-"Naive CD4 T-cells"
+# d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("5","11"))]<-"Memory CD4 T-cells"
+# d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("3","7"))]<-"CD8 T-cells"
+# d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("4","8","14"))]<-"NK cells"
+# d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("15"))]<-"DC"
+# d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("12"))]<-"Neutrophil"
+# 
+# DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")
+
 
 ###############
 ## Integration with liver samples
