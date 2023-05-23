@@ -473,7 +473,7 @@ age_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "individual", s
 save_plts(age_split, "IFALD_age_facet_rPCA_UMAP_PBMC", w=10,h=5)
 
 saveRDS(d10x.combined, file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_PBMC_integrated.rds"))
-save(d10x.combined, file=paste(here("data/"),"IFALD_adult_ped_PBMC_integrated.rds", sep=""))
+#save(d10x.combined, file=paste(here("data/"),"IFALD_adult_ped_PBMC_integrated.rds", sep=""))
 
 print("SAVED")
 
