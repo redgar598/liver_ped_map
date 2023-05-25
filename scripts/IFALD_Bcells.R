@@ -156,6 +156,9 @@ d10x.combined_bcell@meta.data$CellType_refined[which(d10x.combined_bcell@meta.da
 
 DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")
 
+cell_label_bcell<-d10x.combined_bcell@meta.data
+save(cell_label_bcell, file=paste(here("data/"),"IFALD_B_cell_labels.rds", sep=""))
+
 
 d10x.combined_bcell<-subset(d10x.combined_bcell, subset = CellType_refined %in% c("Mature B-cells","Mature B-cells (104)","Plasma cells","pDC","pre B-cell"))
 d10x.combined_bcell <- RunPCA(d10x.combined_bcell, npcs = 30, verbose = FALSE)

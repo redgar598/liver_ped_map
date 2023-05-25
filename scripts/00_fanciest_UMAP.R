@@ -7,7 +7,7 @@ get_leg = function(a.gplot){
 }
 
 
-fanciest_UMAP<-function(d10x, highlight, split){
+fanciest_UMAP<-function(d10x, highlight, split, label=F){
   umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x, reduction = "umap"))#
   umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
   meta_myeloid<-d10x@meta.data
@@ -75,6 +75,9 @@ fanciest_UMAP<-function(d10x, highlight, split){
   }else{
     fanciest_UMAP <- fanciest_UMAP + annotate("text",x = min(plt_myeloid$UMAP_1)+(0.95*len_x_bar), y = min(plt_myeloid$UMAP_2)+(0.5*len_y_bar), label=paste0("n = ",comma(ncol(d10x))), size=2)
   }}}
+  
+  ### cluster labels
+  if(label==T){fanciest_UMAP <- fanciest_UMAP+geom_label(aes(mean_umap1, mean_umap2, label=CellType_refined), data=celltype_label,size=1, color="black", fill="white")}
   
   plot_grid(fanciest_UMAP,nice_legend, rel_widths = c(5,2))
   

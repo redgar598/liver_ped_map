@@ -364,9 +364,10 @@ source("scripts/00_fanciest_UMAP.R")
 # DotPlot(object = d10x, features = signatur_gene)
 # 
 # FeaturePlot(d10x, features=c("CD8A","NKG7","FCGR3B","TRAC","TRDC","CD3D"))
+# FeaturePlot(d10x, features=c("CD14","LYZ"))
+# 
 # DotPlot(object = d10x, features = c("FCGR3B","TRAC","TRDC","CD3D","CD27"))
 # 
-# DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T, group.by = "")
 # ggplot(d10x@meta.data, aes(seurat_clusters, nuclear_fraction))+geom_violin()
 # ggplot(d10x@meta.data, aes(seurat_clusters, nFeature_RNA))+geom_violin()
 # ggplot(d10x@meta.data, aes(seurat_clusters, nCount_RNA))+geom_violin()
@@ -377,14 +378,23 @@ source("scripts/00_fanciest_UMAP.R")
 # d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("1","2","6","9","10"))]<-"Mature B-cells"
 # d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("16"))]<-"Plasma cells"
 # d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("0","13"))]<-"Naive CD4 T-cells"
-# d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("5","11"))]<-"Memory CD4 T-cells"
+# d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("11"))]<-"Memory CD4 T-cells"
 # d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("3","7"))]<-"CD8 T-cells"
 # d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("4","8","14"))]<-"NK cells"
 # d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("15"))]<-"DC"
 # d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("12"))]<-"Neutrophil"
+# d10x@meta.data$CellType_refined[which(d10x@meta.data$seurat_clusters%in%c("5"))]<-"CD14+ Mono"
+# 
+# 
+# 
 # 
 # DimPlot(d10x, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")
-
+# 
+# PBMC_fancy<-fanciest_UMAP(d10x, NA, F)
+# save_plts(PBMC_fancy, "IFALD_073_liver_PBMC", w=5,h=4)
+# 
+# cell_label_PBMC<-d10x@meta.data
+# save(cell_label_PBMC, file=paste(here("data/"),"IFALD_PBMC_cell_labels.rds", sep=""))
 
 ###############
 ## Integration with liver samples
