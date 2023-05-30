@@ -26,6 +26,25 @@ d10x_liver<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
 
 d10x_liver_IFALD073<-subset(d10x_liver, subset = individual %in% c("IFALD073"))
 
+#############
+## Merged Only
+#############
+d10x <- merge(d10x_liver_IFALD073, y= d10x_PBMC, merge.data=TRUE, project = "PBMC_liver073")#add.cell.ids = alldata_names2,
+d10x
+
+d10x <- NormalizeData(d10x)
+d10x <- FindVariableFeatures(d10x, selection.method = "vst", nfeatures = 2000)
+d10x <- ScaleData(d10x) #ScaleData(cells, vars.to.regress = c("nUMI","percent.mito","donor.id","S.Score","G2M.Score","batch_10X"))
+
+# dimension reduction
+d10x <- RunPCA(d10x, ndims.print = 1:10, nfeatures.print = 10)
+d10x <- RunUMAP(d10x, dims = 1:30)
+d10x <- RunTSNE(d10x, dims = 1:30)
+
+
+#############
+## Integration
+#############
 d10x.list<- list(PBMC = d10x_PBMC, liver = d10x_liver_IFALD073)
 
 ## run integration across donor and hopefully that will also smooth out differences with chemistry?
