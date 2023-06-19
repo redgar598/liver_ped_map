@@ -165,3 +165,28 @@ save_plts(fancy_individual, "IFALD_individual_fancy", w=15,h=10)
 
 
 
+####################################
+## Cell type counts in map
+####################################
+load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+table(cell_label$CellType_refined, cell_label$age_condition)
+table(cell_label$age_condition)
+
+
+cell_label_immune<-cell_label[which(!(cell_label$CellType_refined %in% c("Cholangiocytes","LSEC","HSC","Hepatocytes","Doublet","Low Quality"))),]
+table(cell_label_immune$CellType_refined, cell_label_immune$age_condition)
+
+cell_label_immune_ped<-cell_label_immune[which(!(cell_label_immune$age_condition %in% c("Adult Healthy"))),]
+table(cell_label_immune_ped$CellType_refined)
+nrow(cell_label_immune_ped)
+
+# mean in individual
+cell_label_qc<-cell_label[which(!(cell_label$CellType_refined %in% c("Doublet","Low Quality"))),]
+cell_label_all_ped<-cell_label_qc[which(!(cell_label_qc$age_condition %in% c("Adult Healthy"))),]
+table(cell_label_all_ped$CellType_refined)
+
+
+means<-table(cell_label_immune_ped$individual)/table(cell_label_all_ped$individual)
+
+
+means<-table(cell_label_immune$individual)/table(cell_label_qc$individual)

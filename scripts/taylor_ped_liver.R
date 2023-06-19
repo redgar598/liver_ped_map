@@ -16,7 +16,7 @@ library(SCINA)
 
 
 source("scripts/00_pretty_plots.R")
-source("scripts/00_entropy_taylor_liver.R")
+source("scripts/00_entropy_d10x.R")
 source("scripts/00_fanciest_UMAP.R")
 source("scripts/00_plot_gene_exp.R")
 
@@ -290,14 +290,20 @@ head(cluster4.markers, n = 10)
 head(cluster4.markers[which(cluster4.markers$avg_log2FC>0),], n = 20)
 head(cluster4.markers[which(cluster4.markers$avg_log2FC<0),], n = 20)
 
-FeaturePlot(taylor_liver, features = c("XIST","NEAT1","FCN3","TPT1"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(taylor_liver, features = c("XIST","NEAT1","TPT1","CCNL1"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(taylor_liver, features = c("CALCRL","LYVE1","ID1","MEG3"), min.cutoff = "q9", pt.size=1)
 
 cluster12.markers <-  FindMarkers(taylor_liver, ident.1 = 12, min.pct = 0.25)
 head(cluster12.markers, n = 10)
 head(cluster12.markers[which(cluster12.markers$avg_log2FC>0),], n = 20)
 FeaturePlot(taylor_liver, features = c("NEAT1","S100A16","IGFBP7","SEPP1"), min.cutoff = "q9", pt.size=1)
+FeaturePlot(taylor_liver, features = c("CFH","LINC00299","KRT86","SPINK2"), min.cutoff = "q9", pt.size=1)
 
 
 ## relabel some
-taylor_liver@meta.data$cluster_consensus[which(taylor_liver@meta.data$seurat_clusters%in%c("3","4"))]<-"LSEC"
+taylor_liver@meta.data$cluster_consensus[which(taylor_liver@meta.data$seurat_clusters%in%c("3"))]<-"LSEC"
 
+SCINA_cellUMAP<-DimPlot(taylor_liver, reduction = "umap",group.by="cluster_consensus", pt.size=0.15, label=F)+
+  colscale_cellType+ggtitle("")+
+  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(taylor_liver))))
+SCINA_cellUMAP

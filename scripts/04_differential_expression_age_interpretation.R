@@ -314,6 +314,35 @@ save_plts(HSC_GSEA, "GSEA_adult_ped_HSClike", w=15,h=7)
 MHC_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="Marcophage_MHCII_Adult"),])
 save_plts(MHC_GSEA, "GSEA_adult_ped_MHCII", w=15,h=7)
 
+
+
+##### For Cytoscape
+pathway_cyto<-function(de, direction){
+  gene_list = de$avg_log2FC
+  names(gene_list) = de$gene
+  gene_list = sort(gene_list, decreasing = TRUE)
+  gene_list = gene_list[!duplicated(names(gene_list))]
+  
+  res = GSEA(gene_list, GO_file, pval = 0.05)
+  
+  plt_path<-res$Results
+  # plt_path$ID<-sapply(1:nrow(plt_path), function(x) strsplit(plt_path$pathway[x], "%")[[1]][3])
+  # plt_path$pathway<-sapply(1:nrow(plt_path), function(x) strsplit(plt_path$pathway[x], "%")[[1]][1])
+  if(direction=="UP"){plt_path<-plt_path[which(plt_path$Enrichment=="Up-regulated"),]}else{
+    plt_path<-plt_path[which(plt_path$Enrichment=="Down-regulated"),]}
+  plt_path$leadingEdge<-lapply(1:nrow(plt_path), function(x) paste0(plt_path$leadingEdge[x][[1]], collapse = ", "))
+  plt_path$leadingEdge<-as.character(plt_path$leadingEdge)
+  plt_path[,c("pathway","pval","padj")]#,"Phenotype","leadingEdge","size","NES"
+}
+
+RR_GSEA_cytoscape<-pathway_cyto(diff_exp_all[which(diff_exp_all$cell.1=="RR Myeloid_Adult"),], "UP")
+write.table(RR_GSEA_cytoscape, file=here("data","RR_GSEA_cytoscape_up.txt"), quote=F, row.names = F, sep="\t")
+
+RR_GSEA_cytoscape<-pathway_cyto(diff_exp_all[which(diff_exp_all$cell.1=="RR Myeloid_Adult"),], "DOWN")
+write.table(RR_GSEA_cytoscape, file=here("data","RR_GSEA_cytoscape_down.txt"), quote=F, row.names = F, sep="\t")
+
+
+
 ##############
 ## Volcano
 ##############
