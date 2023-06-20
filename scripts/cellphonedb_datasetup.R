@@ -50,7 +50,7 @@ meta_data$Cell<-rownames(meta_data)
 meta_data$CellType_refined<-gsub("\n"," ", meta_data$CellType_refined)
 
 write.csv(meta_data[,c("Cell","CellType_refined")], 
-          file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"Ped_healthy_meta_mini.csv", sep=""),  
+          file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"Ped_healthy_meta.csv", sep=""),  
           row.names = F,  quote = F)
 
 
@@ -58,5 +58,5 @@ write.csv(meta_data[,c("Cell","CellType_refined")],
 micro_env<-data.frame(cell_type = unique(meta_data$CellType_refined), microenvironment = c("Env1"))
 
 write.csv(micro_env, 
-          file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"Ped_healthy_microenv_mini.csv", sep=""),  
+          file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"Ped_healthy_microenv.csv", sep=""),  
           row.names = F,  quote = F)
