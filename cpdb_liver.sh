@@ -9,10 +9,9 @@
 
 
 ### generate data for cpdb
-module load R/4.2.1
+#module load R/4.2.1
+#Rscript scripts/cellphonedb_datasetup.R
 
-Rscript scripts/cellphonedb_datasetup.R
-
-
+source /cluster/home/t117652uhn/miniconda3/etc/profile.d/conda.sh
 conda activate cpdb 
-python -u psorasis_import.py
+python -u scripts/cpdb_ped_healthy.py

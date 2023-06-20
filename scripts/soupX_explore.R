@@ -348,3 +348,52 @@ save_plts(cont_box, "SoupX_contamination", w=3,h=5)
 # RR_GSEA<-pathway_plt(diff_exp_all[which(diff_exp_all$cell.1=="RR Myeloid_Adult"),])
 # save_plts(RR_GSEA, "GSEA_adult_ped_recently_recruited", w=20,h=10)
 # 
+
+
+
+
+################
+## checking soupx doesn't remove cell how you ran it
+################
+dataset_loc <- here("/media/redgar/Seagate Portable Drive/ped_liver_map_raw")
+
+samples<-list.files(dataset_loc)
+print(samples)
+
+meta<-read.table(here("data/data_transfer_updated_mar20_2023_IFALD.csv"), header=T, sep=",")
+
+y=7
+caud<-meta$Sample_ID[which(meta$file == samples[y])]
+print(caud)
+print(file.path(dataset_loc,paste(samples[y],"/outs", sep=""),"filtered_feature_bc_matrix"))
+d10x <- Read10X(file.path(dataset_loc,paste(samples[y],"/outs", sep=""),"filtered_feature_bc_matrix"))
+colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),caud,sep="-")
+# print(dim(d10x))
+#' Initialize the Seurat object with the raw (non-normalized data).
+d10x<-CreateSeuratObject(counts = d10x, project = "ped_adult_map", min.cells = 0, min.features = 0)
+
+## SoupX needs clusters so quickly make clusters for each sample
+d10x    <- SCTransform(d10x, verbose = F)
+d10x    <- RunPCA(d10x, verbose = F)
+d10x    <- RunUMAP(d10x, dims = 1:30, verbose = F)
+d10x    <- FindNeighbors(d10x, dims = 1:30, verbose = F)
+d10x    <- FindClusters(d10x, verbose = T)
+meta_clusters    <- d10x@meta.data
+
+sc = load10X(file.path(dataset_loc,paste(samples[y],"/outs", sep="")))
+sc = setClusters(sc, setNames(meta_clusters$seurat_clusters, rownames(meta_clusters)))
+
+
+######
+## Load data and estimate soup profile
+######
+# Estimate rho
+sc = autoEstCont(sc, forceAccept=TRUE)
+#Genes with highest expression in background. These are often enriched for ribosomal proteins.
+print(head(sc$soupProfile[order(sc$soupProfile$est, decreasing = T), ], n = 20))
+print(unique(sc$metaData$rho))
+# Clean the data
+out = adjustCounts(sc)
+
+## make seurat object of adjusted counts
+d10x_soupx = CreateSeuratObject(out)
