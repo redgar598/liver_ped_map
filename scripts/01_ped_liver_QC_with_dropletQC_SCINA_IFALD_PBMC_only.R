@@ -28,8 +28,8 @@ source("scripts/00_fanciest_UMAP.R")
 #' #samples<-samples[-grep("data_transfer",samples)]
 #' print(samples)
 #' 
-#' meta<-read.table(here("data/data_transfer_updated_may15_2023_IFALD_PBMC.csv"), header=T, sep=",")
-#' #meta<-read.table(here(dataset_loc,"data_transfer_updated_may15_2023_IFALD_PBMC.csv"), header=T, sep=",")
+#' meta<-read.table(here("data/data_transfer_updated_june21_2023_IFALD_PBMC.csv"), header=T, sep=",")
+#' #meta<-read.table(here(dataset_loc,"data_transfer_updated_june21_2023_IFALD_PBMC.csv"), header=T, sep=",")
 #' 
 #' samples<-samples[which(samples%in%meta$file)]
 #' 
