@@ -61,6 +61,13 @@ CCL_sig[,c(1:12)]
 CCL_plt<-melt(CCL_sig, id=colnames(CCL_sig)[1:12])
 CCL_plt$variable<-as.character(CCL_plt$variable)
 
+
+## split cell types interacting into columns
+CCL_plt[204,]
+x=204
+CCL_plt$variable[x]
+"RR.Myeloid","CD3..T.cells","gd.T.cells",""
+
 CCL_plt$Cell1<-sapply(1:nrow(CCL_plt), function(x) strsplit(CCL_plt$variable[x], "[.]")[[1]][1])
 CCL_plt$Cell2<-sapply(1:nrow(CCL_plt), function(x) strsplit(CCL_plt$variable[x], "[.]")[[1]][1])
 CCL_plt<-CCL_plt[which(!(is.na(CCL_plt$value))),]

@@ -27,6 +27,8 @@ d10x.combined.subset<-subset(d10x.combined, subset = age_condition == "Ped Healt
 rm(d10x.combined)
 gc()
 
+levels(d10x.combined.subset$CellType_refined)<-gsub(" |[+]|-|[\n(]","_", levels(d10x.combined.subset$CellType_refined))
+levels(d10x.combined.subset$CellType_refined)<-gsub("[)]","", levels(d10x.combined.subset$CellType_refined))
 
               #levels(d10x.combined.subset$CellType_refined)[c(6,12)]<-c("CLNK_T_cell","KC_like")
               
