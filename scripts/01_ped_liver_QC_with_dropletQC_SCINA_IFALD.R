@@ -260,7 +260,8 @@ d10x <- merge(d10x.list[[1]], y= d10x.list[2:length(d10x.list)], merge.data=TRUE
 
 d10x
 
-saveRDS(d10x, file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+#saveRDS(d10x, file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+saveRDS(d10x, file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_d10x_adult_ped_raw.rds"))
 
 
 ################
@@ -576,9 +577,12 @@ table(d10x.combined$second_best_cell, d10x.combined$CellType_rough)
 ##############
 ## Save integrated to look local
 ##############
-save(d10x.combined, file=paste(here("data/"),"IFALD_adult_ped_integrated.rds", sep=""))
+#save(d10x.combined, file=paste(here("data/"),"IFALD_adult_ped_integrated.rds", sep=""))
+saveRDS(d10x.combined, file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_integrated.rds"))
+
 cell_label<-d10x.combined@meta.data
-save(cell_label, file=paste(here("data/"),"IFALD_adult_ped_cellRough.rds", sep=""))
+#save(cell_label, file=paste(here("data/"),"IFALD_adult_ped_cellRough.rds", sep=""))
+saveRDS(cell_label, file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_cellRough.rds"))
 
 # 
 # load(here("data","IFALD_adult_ped_integrated.rds"))
