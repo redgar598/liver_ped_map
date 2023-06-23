@@ -49,68 +49,213 @@ ggplot(plt_mean, aes(mean_umap1,mean_umap2))+
 ###############
 ## Ped Healthy Output
 ###############
-means<-read.table(here("data/cellphonedb/statistical_analysis_significant_means_06_20_2023_17:10:20.txt"), sep="\t", header=T)
+means<-read.table(here("data/cellphonedb/statistical_analysis_significant_means_06_22_2023_09:47:59.txt"), sep="\t", header=T)
 means[1:5,1:10]
 
 CCR_sig<-means[grep("CCR",means$interacting_pair), ]
-lapply(1:nrow(CCR_sig), function(x) cbind(CCR_sig[x,c(1:12)],CCR_sig[x,13:496][which(!(is.na(CCR_sig[x,13:496])))]) )
-
 CCL_sig<-means[grep("CCL3|CCL4",means$interacting_pair), ]
 CCL_sig[,c(1:12)]
 
 CCL_plt<-melt(CCL_sig, id=colnames(CCL_sig)[1:12])
 CCL_plt$variable<-as.character(CCL_plt$variable)
 
-
-## split cell types interacting into columns
-CCL_plt[204,]
-x=204
-CCL_plt$variable[x]
-"RR.Myeloid","CD3..T.cells","gd.T.cells",""
-
 CCL_plt$Cell1<-sapply(1:nrow(CCL_plt), function(x) strsplit(CCL_plt$variable[x], "[.]")[[1]][1])
-CCL_plt$Cell2<-sapply(1:nrow(CCL_plt), function(x) strsplit(CCL_plt$variable[x], "[.]")[[1]][1])
+CCL_plt$Cell2<-sapply(1:nrow(CCL_plt), function(x) strsplit(CCL_plt$variable[x], "[.]")[[1]][2])
 CCL_plt<-CCL_plt[which(!(is.na(CCL_plt$value))),]
 
-CCL_plt
+## fix cell labels
+CCL_plt$Cell1<-as.factor(CCL_plt$Cell1)
+levels(CCL_plt$Cell1)<-c("CD3+ T-cells", "CLNK T-cells", "Cycling Myeloid",
+                         "Cycling T-cells","Doublet","gd T-cells",  
+                         "KC Like","Low_Quality",  "Macrophage\n(CLEC9A high)",
+                         "Macrophage\n(MHCII high)","Myeloid Erythrocytes\n(phagocytosis)",
+                         "NK-like cells","Plasma cells", "Platelets","RR Myeloid")
+CCL_plt$Cell2<-as.factor(CCL_plt$Cell2)
+levels(CCL_plt$Cell2)<-c("CD3+ T-cells", "CLNK T-cells", "Cycling Myeloid",
+                         "Cycling T-cells","Doublet", 
+                         "KC Like","Low_Quality", 
+                         "Macrophage\n(MHCII high)","Myeloid Erythrocytes\n(phagocytosis)",
+                         "NK-like cells","RR Myeloid")
 
 
-# Sample data
-points <- data.frame(
-  x = c(1, 2, 3, 4, 5),    # x-coordinates of points
-  y = c(3, 2, 4, 5, 1)     # y-coordinates of points
-)
+CCL_plt<-merge(CCL_plt,plt_mean, by.x="Cell1", by.y="CellType_refined")
+colnames(CCL_plt)[which(colnames(CCL_plt)%in%c("mean_umap1","mean_umap2"))]<-c("Cell1x","Cell1y")
+CCL_plt<-merge(CCL_plt,plt_mean, by.x="Cell2", by.y="CellType_refined")
+colnames(CCL_plt)[which(colnames(CCL_plt)%in%c("mean_umap1","mean_umap2"))]<-c("Cell2x","Cell2y")
 
-interactions <- data.frame(
-  from = CCL_plt$Cell1,  # Index of the point where interaction starts
-  to = CCL_plt$Cell2,    # Index of the point where interaction ends
-  value = CCL_plt$value  # Interaction values
-)
 
-# Create a new data frame to store line coordinates
-lines <- data.frame(
-  xstart = points$x[interactions$from],
-  xend = points$x[interactions$to],
-  ystart = points$y[interactions$from],
-  yend = points$y[interactions$to])
+## self interactions
+CCL_plt_self<-do.call(rbind,lapply(1:nrow(CCL_plt), function(x) if(CCL_plt$Cell1[x]==CCL_plt$Cell2[x]){CCL_plt[x,]}else{}))
+CCL_plt_notself<-do.call(rbind,lapply(1:nrow(CCL_plt), function(x) if(CCL_plt$Cell1[x]==CCL_plt$Cell2[x]){}else{CCL_plt[x,]}))
+
+## CCL only in KC
+CCL_plt_notself_KC<-CCL_plt_notself[which(CCL_plt_notself$Cell1=="KC Like" & CCL_plt_notself$gene_a%in%c("CCL3","CCL4")),]
 
 # Plotting the network
-ggplot() +
+interacting_UMAP<-ggplot() +   
+  annotate("segment", 
+                      x = arr$x, xend = arr$x + c(arr$x_len, 0), 
+                      y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
+                      arrow = arrow(type = "closed", length = unit(2, 'pt'))) +
+  theme_void()+theme(plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
+                     axis.title.x = element_text(size=5,hjust = 0.05),
+                     axis.title.y = element_text(size=5,hjust = 0.05,angle = 90),
+                     legend.position = "none")+xlab("UMAP 1")+ylab("UMAP 2")+
+  geom_point(aes(UMAP_1,UMAP_2), data=plt, size = 0.6, colour= "black", stroke = 1)+
+  geom_point(aes(UMAP_1,UMAP_2, color=CellType_refined), data=plt,size=0.5)+xlab("UMAP 1")+ylab("UMAP 2")+
+  #geom_rect(aes(xmin=range(plt$UMAP_1)[1]*1.1, xmax=range(plt$UMAP_1)[2]*1.1, ymin=range(plt$UMAP_2)[1]*1.1, ymax=range(plt$UMAP_2)[2]*1.1), fill="white", alpha=0.8) +
   geom_curve(
-    data = lines,
-    aes(x = xstart, y = ystart, xend = xend, yend = yend, color = as.factor(order)),
-    curvature = 0.2,
-    size = interactions$value,
-    alpha = 0.7,
-    lineend = "round"
-  ) +
-  geom_point(
-    data = points,
-    aes(x, y),
-    size = 3,
-    color = "black"
-  ) +
-  scale_color_manual(values = c("blue", "red")) +
-  xlim(0, 6) +
-  ylim(0, 6) +
-  theme_minimal()
+    data = CCL_plt_notself_KC[which(CCL_plt_notself_KC$interacting_pair=="CCL4_CCR5"),],
+    aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y), 
+    color = "red",curvature = 0.2,
+    lineend = "round") +
+  geom_curve(
+    data = CCL_plt_notself_KC[which(CCL_plt_notself_KC$interacting_pair=="CCL3_CCR5"),],
+    aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y), 
+    color = "blue",curvature = 0.4,
+    lineend = "round") +
+  geom_curve(
+    data = CCL_plt_notself_KC[which(CCL_plt_notself_KC$interacting_pair=="CCL3_CCR1"),],
+    aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y), 
+    color = "grey",curvature = -0.4,
+    lineend = "round") +
+  geom_label(aes(mean_umap1, mean_umap2, label=CellType_refined, fill=CellType_refined), data=plt_mean, size=1.25, color="black")+
+  geom_text(aes(x=range(plt$UMAP_1)[2]*0.9, y=range(plt$UMAP_2)[1]*0.9, label=unique(CCL_plt_notself_KC$interacting_pair)[1]), size=2, color="red")+
+  geom_text(aes(x=range(plt$UMAP_1)[2]*0.9, y=range(plt$UMAP_2)[1]*0.95, label=unique(CCL_plt_notself_KC$interacting_pair)[2]), size=2, color="blue")+
+  geom_text(aes(x=range(plt$UMAP_1)[2]*0.9, y=range(plt$UMAP_2)[1], label=unique(CCL_plt_notself_KC$interacting_pair)[3]), size=2, color="grey")+
+  colscale_cellType+fillscale_cellType
+
+save_plts(interacting_UMAP, "interacting_UMAP_KC_CCL34", w=5,h=5)
+
+
+
+
+###################################################################################################################
+
+
+##############
+## Differential expression with age and IFALD in RR
+##############
+load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+
+d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_refined %in% c("RR Myeloid","Macrophage\n(MHCII high)","KC Like","Macrophage\n(CLEC9A high)","Cycling Myeloid","Myeloid Erythrocytes\n(phagocytosis)"))
+rm(d10x.combined)
+gc()
+d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.3)
+cluster0<-rownames(d10x.combined_myeloid@meta.data)[(d10x.combined_myeloid@meta.data$seurat_clusters==0)]
+
+
+## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
+# but not normalized or scaled
+d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+
+load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+cell_label$index<-rownames(cell_label)
+cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
+identical(colnames(d10x), cell_label$index)
+
+d10x <- AddMetaData(d10x, metadata = cell_label)
+
+d10x_raw_RR<-subset(d10x, subset = CellType_refined %in% c("RR Myeloid"))
+d10x_raw_mhcII<-subset(d10x, subset = CellType_refined %in% c("Macrophage\n(MHCII high)"))
+
+Idents(d10x_raw_RR)<-d10x_raw_RR$age_condition
+Idents(d10x_raw_mhcII)<-d10x_raw_mhcII$age_condition
+
+d10x$cellname<-colnames(d10x)
+d10x_raw_myeloidcluster0 <- subset(d10x, subset = cellname %in% cluster0)
+
+d10x_raw_myeloidcluster0$age_condition<-paste(d10x_raw_myeloidcluster0$AgeGroup, d10x_raw_myeloidcluster0$Treatment, sep=" ")
+Idents(d10x_raw_myeloidcluster0)<-d10x_raw_myeloidcluster0$age_condition
+
+## age differential
+de_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+de_KC<-FindMarkers(d10x_raw_myeloidcluster0, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+de_MHCII<-FindMarkers(d10x_raw_mhcII, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+
+
+###############
+## Ped Healthy Output
+###############
+means<-read.table(here("data/cellphonedb/statistical_analysis_significant_means_06_22_2023_09:47:59.txt"), sep="\t", header=T)
+means[1:5,1:10]
+
+differentialexp_cpdbsig<-means[which(means$gene_a%in%rownames(de_KC) | means$gene_b%in%rownames(de_KC)), ]
+CCL_sig<-means[grep("CCL3|CCL4",means$interacting_pair), ]
+CCL_sig[,c(1:12)]
+
+CCL_plt<-melt(CCL_sig, id=colnames(CCL_sig)[1:12])
+CCL_plt$variable<-as.character(CCL_plt$variable)
+
+CCL_plt$Cell1<-sapply(1:nrow(CCL_plt), function(x) strsplit(CCL_plt$variable[x], "[.]")[[1]][1])
+CCL_plt$Cell2<-sapply(1:nrow(CCL_plt), function(x) strsplit(CCL_plt$variable[x], "[.]")[[1]][2])
+CCL_plt<-CCL_plt[which(!(is.na(CCL_plt$value))),]
+
+## fix cell labels
+CCL_plt$Cell1<-as.factor(CCL_plt$Cell1)
+levels(CCL_plt$Cell1)<-c("CD3+ T-cells", "CLNK T-cells", "Cycling Myeloid",
+                         "Cycling T-cells","Doublet","gd T-cells",  
+                         "KC Like","Low_Quality",  "Macrophage\n(CLEC9A high)",
+                         "Macrophage\n(MHCII high)","Myeloid Erythrocytes\n(phagocytosis)",
+                         "NK-like cells","Plasma cells", "Platelets","RR Myeloid")
+CCL_plt$Cell2<-as.factor(CCL_plt$Cell2)
+levels(CCL_plt$Cell2)<-c("CD3+ T-cells", "CLNK T-cells", "Cycling Myeloid",
+                         "Cycling T-cells","Doublet", 
+                         "KC Like","Low_Quality", 
+                         "Macrophage\n(MHCII high)","Myeloid Erythrocytes\n(phagocytosis)",
+                         "NK-like cells","RR Myeloid")
+
+
+CCL_plt<-merge(CCL_plt,plt_mean, by.x="Cell1", by.y="CellType_refined")
+colnames(CCL_plt)[which(colnames(CCL_plt)%in%c("mean_umap1","mean_umap2"))]<-c("Cell1x","Cell1y")
+CCL_plt<-merge(CCL_plt,plt_mean, by.x="Cell2", by.y="CellType_refined")
+colnames(CCL_plt)[which(colnames(CCL_plt)%in%c("mean_umap1","mean_umap2"))]<-c("Cell2x","Cell2y")
+
+
+## self interactions
+CCL_plt_self<-do.call(rbind,lapply(1:nrow(CCL_plt), function(x) if(CCL_plt$Cell1[x]==CCL_plt$Cell2[x]){CCL_plt[x,]}else{}))
+CCL_plt_notself<-do.call(rbind,lapply(1:nrow(CCL_plt), function(x) if(CCL_plt$Cell1[x]==CCL_plt$Cell2[x]){}else{CCL_plt[x,]}))
+
+## CCL only in KC
+CCL_plt_notself_KC<-CCL_plt_notself[which(CCL_plt_notself$Cell1=="KC Like" & CCL_plt_notself$gene_a%in%c("CCL3","CCL4")),]
+
+# Plotting the network
+interacting_UMAP<-ggplot() +   
+  annotate("segment", 
+           x = arr$x, xend = arr$x + c(arr$x_len, 0), 
+           y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
+           arrow = arrow(type = "closed", length = unit(2, 'pt'))) +
+  theme_void()+theme(plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
+                     axis.title.x = element_text(size=5,hjust = 0.05),
+                     axis.title.y = element_text(size=5,hjust = 0.05,angle = 90),
+                     legend.position = "none")+xlab("UMAP 1")+ylab("UMAP 2")+
+  geom_point(aes(UMAP_1,UMAP_2), data=plt, size = 0.6, colour= "black", stroke = 1)+
+  geom_point(aes(UMAP_1,UMAP_2, color=CellType_refined), data=plt,size=0.5)+xlab("UMAP 1")+ylab("UMAP 2")+
+  #geom_rect(aes(xmin=range(plt$UMAP_1)[1]*1.1, xmax=range(plt$UMAP_1)[2]*1.1, ymin=range(plt$UMAP_2)[1]*1.1, ymax=range(plt$UMAP_2)[2]*1.1), fill="white", alpha=0.8) +
+  geom_curve(
+    data = CCL_plt_notself_KC[which(CCL_plt_notself_KC$interacting_pair=="CCL4_CCR5"),],
+    aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y), 
+    color = "red",curvature = 0.2,
+    lineend = "round") +
+  geom_curve(
+    data = CCL_plt_notself_KC[which(CCL_plt_notself_KC$interacting_pair=="CCL3_CCR5"),],
+    aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y), 
+    color = "blue",curvature = 0.4,
+    lineend = "round") +
+  geom_curve(
+    data = CCL_plt_notself_KC[which(CCL_plt_notself_KC$interacting_pair=="CCL3_CCR1"),],
+    aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y), 
+    color = "grey",curvature = -0.4,
+    lineend = "round") +
+  geom_label(aes(mean_umap1, mean_umap2, label=CellType_refined, fill=CellType_refined), data=plt_mean, size=1.25, color="black")+
+  geom_text(aes(x=range(plt$UMAP_1)[2]*0.9, y=range(plt$UMAP_2)[1]*0.9, label=unique(CCL_plt_notself_KC$interacting_pair)[1]), size=2, color="red")+
+  geom_text(aes(x=range(plt$UMAP_1)[2]*0.9, y=range(plt$UMAP_2)[1]*0.95, label=unique(CCL_plt_notself_KC$interacting_pair)[2]), size=2, color="blue")+
+  geom_text(aes(x=range(plt$UMAP_1)[2]*0.9, y=range(plt$UMAP_2)[1], label=unique(CCL_plt_notself_KC$interacting_pair)[3]), size=2, color="grey")+
+  colscale_cellType+fillscale_cellType
+
+save_plts(interacting_UMAP, "interacting_UMAP_KC_CCL34", w=5,h=5)
+
+

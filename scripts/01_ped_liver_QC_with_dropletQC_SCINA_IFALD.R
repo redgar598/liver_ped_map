@@ -580,119 +580,119 @@ save(d10x.combined, file=paste(here("data/"),"IFALD_adult_ped_integrated.rds", s
 cell_label<-d10x.combined@meta.data
 save(cell_label, file=paste(here("data/"),"IFALD_adult_ped_cellRough.rds", sep=""))
 
-
-load(here("data","IFALD_adult_ped_integrated.rds"))
-
-
-#####
-## plot cell types
-#####
-d10x.combined@meta.data$CellType_rough<-as.factor(d10x.combined@meta.data$CellType_rough)
-levels(d10x.combined@meta.data$CellType_rough)<-c("B-cells","Cholangiocytes",
-                                                  "Hepatocytes",
-                                                  "HSC","LSEC","Myeloid cells","NK and T cells")
-
-roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15, label=T)+colscale_cellType+ggtitle("")+
-  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
-roughcell_cluster_umap
-save_plts(roughcell_cluster_umap, "IFALD_rPCA_roughcellType_cluster_umap", w=6,h=4)
-roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15)+colscale_cellType+ggtitle("")+
-  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
-roughcell_cluster_umap
-save_plts(roughcell_cluster_umap, "IFALD_rPCA_roughcellType_cluster_umap_nolab", w=6,h=4)
-
-roughcell_cluster_tsne<-DimPlot(d10x.combined, reduction = "tsne",group.by="CellType_rough", pt.size=0.15)+colscale_cellType+ggtitle("")+
-  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
-roughcell_cluster_tsne
-save_plts(roughcell_cluster_tsne, "IFALD_rPCA_roughcellType_cluster_tsne_nolab", w=6,h=4)
-
-########
-## DropletQC
-########
-nuclearfraction_cluster_umap<-FeaturePlot(d10x.combined, reduction = "umap",feature="nuclear_fraction", pt.size=0.15, label=F)+ggtitle("")+
-  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
-nuclearfraction_cluster_umap
-save_plts(nuclearfraction_cluster_umap, "IFALD_rPCA_nuclearfraction_cluster_umap", w=6,h=4)
-damaged_empty_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="cell_status", pt.size=0.15)+ggtitle("")+
-  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))+
-  scale_color_manual(values=c("grey","red","cornflowerblue"),name="Nuclear\nFraction")
-damaged_empty_cluster_umap
-save_plts(damaged_empty_cluster_umap, "IFALD_rPCA_damaged_empty_cluster_umap", w=6,h=4)
-
-#other QC
-nFeature_cluster_umap<-FeaturePlot(d10x.combined, reduction = "umap",feature="nFeature_RNA", pt.size=0.15, label=F)+ggtitle("")+
-  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
-nFeature_cluster_umap
-save_plts(nFeature_cluster_umap, "IFALD_rPCA_nFeature_cluster_umap", w=6,h=4)
-
-
-
-
-#################
-## SCINA
-#################
-d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
-d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
-
-signatures<-read.csv(here("data/Liver_Markers - Human_for_SCINA.csv"))
-
-d10x_exp <- GetAssayData(d10x)
-results = SCINA(d10x_exp, signatures, max_iter = 100, convergence_n = 10,
-                convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-d10x$SCINA_broad<-results$cell_labels
-gc()
-
-no_refined<-data.frame(cell=colnames(d10x), SCINA_broad=results$cell_labels, SCINA_refined=NA)
-
-
-### Cell subsets
-RBCsignatures<-read.csv(here("data/Liver_Markers - Erythrocytes.csv"))
-Neutrosignatures<-read.csv(here("data/Liver_Markers - Neurtophil.csv"))
-Tsignatures<-read.csv(here("data/Liver_Markers - Tcell.csv"))
-Bsignatures<-read.csv(here("data/Liver_Markers - Bcell.csv"))
-myeloidsignatures<-read.csv(here("data/Liver_Markers - Myeloid.csv"))
-
-# d10x.combined_RBC<-subset(d10x, subset = SCINA_broad == "Erythrocytes")
-# d10x_exp <- GetAssayData(d10x.combined_RBC)
-# results = SCINA(d10x_exp, RBCsignatures, max_iter = 100, convergence_n = 10,
+# 
+# load(here("data","IFALD_adult_ped_integrated.rds"))
+# 
+# 
+# #####
+# ## plot cell types
+# #####
+# d10x.combined@meta.data$CellType_rough<-as.factor(d10x.combined@meta.data$CellType_rough)
+# levels(d10x.combined@meta.data$CellType_rough)<-c("B-cells","Cholangiocytes",
+#                                                   "Hepatocytes",
+#                                                   "HSC","LSEC","Myeloid cells","NK and T cells")
+# 
+# roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15, label=T)+colscale_cellType+ggtitle("")+
+#   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
+# roughcell_cluster_umap
+# save_plts(roughcell_cluster_umap, "IFALD_rPCA_roughcellType_cluster_umap", w=6,h=4)
+# roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15)+colscale_cellType+ggtitle("")+
+#   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
+# roughcell_cluster_umap
+# save_plts(roughcell_cluster_umap, "IFALD_rPCA_roughcellType_cluster_umap_nolab", w=6,h=4)
+# 
+# roughcell_cluster_tsne<-DimPlot(d10x.combined, reduction = "tsne",group.by="CellType_rough", pt.size=0.15)+colscale_cellType+ggtitle("")+
+#   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
+# roughcell_cluster_tsne
+# save_plts(roughcell_cluster_tsne, "IFALD_rPCA_roughcellType_cluster_tsne_nolab", w=6,h=4)
+# 
+# ########
+# ## DropletQC
+# ########
+# nuclearfraction_cluster_umap<-FeaturePlot(d10x.combined, reduction = "umap",feature="nuclear_fraction", pt.size=0.15, label=F)+ggtitle("")+
+#   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
+# nuclearfraction_cluster_umap
+# save_plts(nuclearfraction_cluster_umap, "IFALD_rPCA_nuclearfraction_cluster_umap", w=6,h=4)
+# damaged_empty_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="cell_status", pt.size=0.15)+ggtitle("")+
+#   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))+
+#   scale_color_manual(values=c("grey","red","cornflowerblue"),name="Nuclear\nFraction")
+# damaged_empty_cluster_umap
+# save_plts(damaged_empty_cluster_umap, "IFALD_rPCA_damaged_empty_cluster_umap", w=6,h=4)
+# 
+# #other QC
+# nFeature_cluster_umap<-FeaturePlot(d10x.combined, reduction = "umap",feature="nFeature_RNA", pt.size=0.15, label=F)+ggtitle("")+
+#   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
+# nFeature_cluster_umap
+# save_plts(nFeature_cluster_umap, "IFALD_rPCA_nFeature_cluster_umap", w=6,h=4)
+# 
+# 
+# 
+# 
+# #################
+# ## SCINA
+# #################
+# d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+# d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+# 
+# signatures<-read.csv(here("data/Liver_Markers - Human_for_SCINA.csv"))
+# 
+# d10x_exp <- GetAssayData(d10x)
+# results = SCINA(d10x_exp, signatures, max_iter = 100, convergence_n = 10,
 #                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-# d10x.combined_RBC$SCINA_refined<-results$cell_labels
-
-d10x.combined_myeloid<-subset(d10x, subset = SCINA_broad == "Myeloid")
-d10x_exp <- GetAssayData(d10x.combined_myeloid)
-results = SCINA(d10x_exp, myeloidsignatures, max_iter = 100, convergence_n = 10,
-                convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-d10x.combined_myeloid$SCINA_refined<-results$cell_labels
-
-d10x.combined_bcell<-subset(d10x, subset = SCINA_broad == "B_cell")
-d10x_exp <- GetAssayData(d10x.combined_bcell)
-results = SCINA(d10x_exp, Bsignatures, max_iter = 100, convergence_n = 10,
-                convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-d10x.combined_bcell$SCINA_refined<-results$cell_labels
-
-d10x.combined_tcell<-subset(d10x, subset = SCINA_broad == "T_cell")
-d10x_exp <- GetAssayData(d10x.combined_tcell)
-results = SCINA(d10x_exp, Tsignatures, max_iter = 100, convergence_n = 10,
-                convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-d10x.combined_tcell$SCINA_refined<-results$cell_labels
-
-# d10x.combined_neutro<-subset(d10x, subset = SCINA_broad == "Neutrophil")
-# d10x_exp <- GetAssayData(d10x.combined_neutro)
-# results = SCINA(d10x_exp, Neutrosignatures, max_iter = 100, convergence_n = 10,
+# d10x$SCINA_broad<-results$cell_labels
+# gc()
+# 
+# no_refined<-data.frame(cell=colnames(d10x), SCINA_broad=results$cell_labels, SCINA_refined=NA)
+# 
+# 
+# ### Cell subsets
+# RBCsignatures<-read.csv(here("data/Liver_Markers - Erythrocytes.csv"))
+# Neutrosignatures<-read.csv(here("data/Liver_Markers - Neurtophil.csv"))
+# Tsignatures<-read.csv(here("data/Liver_Markers - Tcell.csv"))
+# Bsignatures<-read.csv(here("data/Liver_Markers - Bcell.csv"))
+# myeloidsignatures<-read.csv(here("data/Liver_Markers - Myeloid.csv"))
+# 
+# # d10x.combined_RBC<-subset(d10x, subset = SCINA_broad == "Erythrocytes")
+# # d10x_exp <- GetAssayData(d10x.combined_RBC)
+# # results = SCINA(d10x_exp, RBCsignatures, max_iter = 100, convergence_n = 10,
+# #                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
+# # d10x.combined_RBC$SCINA_refined<-results$cell_labels
+# 
+# d10x.combined_myeloid<-subset(d10x, subset = SCINA_broad == "Myeloid")
+# d10x_exp <- GetAssayData(d10x.combined_myeloid)
+# results = SCINA(d10x_exp, myeloidsignatures, max_iter = 100, convergence_n = 10,
 #                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-# d10x.combined_neutro$SCINA_refined<-results$cell_labels
-
-
-
-SCINA_cell_labels<-rbind(#d10x.combined_RBC@meta.data[,c("cell","SCINA_broad","SCINA_refined")],d10x.combined_neutro@meta.data[,c("cell","SCINA_broad","SCINA_refined")]
-                         d10x.combined_myeloid@meta.data[,c("cell","SCINA_broad","SCINA_refined")],
-                         d10x.combined_bcell@meta.data[,c("cell","SCINA_broad","SCINA_refined")],
-                         d10x.combined_tcell@meta.data[,c("cell","SCINA_broad","SCINA_refined")])
-SCINA_cell_labels$cell<-rownames(SCINA_cell_labels)
-
-SCINA_cell_labels<-rbind(SCINA_cell_labels, no_refined[which(!(no_refined$cell%in%SCINA_cell_labels$cell)),])
-save(SCINA_cell_labels, file=here("data","IFALD_adult_ped_SCINA_cell_labels.RData"))
-
+# d10x.combined_myeloid$SCINA_refined<-results$cell_labels
+# 
+# d10x.combined_bcell<-subset(d10x, subset = SCINA_broad == "B_cell")
+# d10x_exp <- GetAssayData(d10x.combined_bcell)
+# results = SCINA(d10x_exp, Bsignatures, max_iter = 100, convergence_n = 10,
+#                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
+# d10x.combined_bcell$SCINA_refined<-results$cell_labels
+# 
+# d10x.combined_tcell<-subset(d10x, subset = SCINA_broad == "T_cell")
+# d10x_exp <- GetAssayData(d10x.combined_tcell)
+# results = SCINA(d10x_exp, Tsignatures, max_iter = 100, convergence_n = 10,
+#                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
+# d10x.combined_tcell$SCINA_refined<-results$cell_labels
+# 
+# # d10x.combined_neutro<-subset(d10x, subset = SCINA_broad == "Neutrophil")
+# # d10x_exp <- GetAssayData(d10x.combined_neutro)
+# # results = SCINA(d10x_exp, Neutrosignatures, max_iter = 100, convergence_n = 10,
+# #                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
+# # d10x.combined_neutro$SCINA_refined<-results$cell_labels
+# 
+# 
+# 
+# SCINA_cell_labels<-rbind(#d10x.combined_RBC@meta.data[,c("cell","SCINA_broad","SCINA_refined")],d10x.combined_neutro@meta.data[,c("cell","SCINA_broad","SCINA_refined")]
+#                          d10x.combined_myeloid@meta.data[,c("cell","SCINA_broad","SCINA_refined")],
+#                          d10x.combined_bcell@meta.data[,c("cell","SCINA_broad","SCINA_refined")],
+#                          d10x.combined_tcell@meta.data[,c("cell","SCINA_broad","SCINA_refined")])
+# SCINA_cell_labels$cell<-rownames(SCINA_cell_labels)
+# 
+# SCINA_cell_labels<-rbind(SCINA_cell_labels, no_refined[which(!(no_refined$cell%in%SCINA_cell_labels$cell)),])
+# save(SCINA_cell_labels, file=here("data","IFALD_adult_ped_SCINA_cell_labels.RData"))
+# 
 # 
 # #######################
 # load(here("data","IFALD_adult_ped_integrated.rds"))
