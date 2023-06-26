@@ -31,20 +31,6 @@ len_y_bar<-((range(plt$UMAP_2))[2]-(range(plt$UMAP_2))[1])/10
 arr <- list(x = min(plt$UMAP_1), y = min(plt$UMAP_2), x_len = len_x_bar, y_len = len_y_bar)
 
 
-ggplot(plt_mean, aes(mean_umap1,mean_umap2))+
-  geom_point(size = 0.06, colour= "black", stroke = 1)+
-  geom_point(aes(color=CellType_refined),size=0.05)+xlab("UMAP 1")+ylab("UMAP 2")+
-  colscale_cellType+
-  annotate("segment", 
-           x = arr$x, xend = arr$x + c(arr$x_len, 0), 
-           y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
-           arrow = arrow(type = "closed", length = unit(2, 'pt'))) +
-  theme_void()+theme(plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
-                     axis.title.x = element_text(size=5,hjust = 0.05),
-                     axis.title.y = element_text(size=5,hjust = 0.05,angle = 90),
-                     legend.position = "none")+
-  geom_label(aes(mean_umap1, mean_umap2, label=CellType_refined), size=1, color="black", fill="white")
-
 
 ###############
 ## Ped Healthy Output
