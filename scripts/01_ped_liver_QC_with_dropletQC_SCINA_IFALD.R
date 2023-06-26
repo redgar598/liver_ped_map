@@ -584,9 +584,10 @@ source("scripts/00_fanciest_UMAP.R")
 #' #save(cell_label, file=paste(here("data/"),"IFALD_adult_ped_cellRough.rds", sep=""))
 #' saveRDS(cell_label, file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_cellRough.rds"))
 #' 
-#' 
-#load(here("data","IFALD_adult_ped_integrated.rds"))
-d10x.combined<-readRDS(here("data","IFALD_adult_ped_integrated.rds"))
+
+
+#d10x.combined<-readRDS(here("data","IFALD_adult_ped_integrated.rds"))
+d10x.combined<-readRDS(file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_integrated.rds"))
 
 #####
 ## plot cell types
