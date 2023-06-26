@@ -585,57 +585,59 @@ source("scripts/00_fanciest_UMAP.R")
 #' saveRDS(cell_label, file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_cellRough.rds"))
 #' 
 #' 
-#' #load(here("data","IFALD_adult_ped_integrated.rds"))
-#' d10x.combined<-readRDS(here("data","IFALD_adult_ped_integrated.rds"))
-#' 
-#' #####
-#' ## plot cell types
-#' #####
-#' d10x.combined@meta.data$CellType_rough<-as.factor(d10x.combined@meta.data$CellType_rough)
-#' levels(d10x.combined@meta.data$CellType_rough)<-c("B-cells","Cholangiocytes",
-#'                                                   "Hepatocytes",
-#'                                                   "HSC","LSEC","Myeloid cells","NK and T cells")
-#' 
-#' roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15, label=T)+colscale_cellType+ggtitle("")+
-#'   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
-#' roughcell_cluster_umap
-#' save_plts(roughcell_cluster_umap, "IFALD_rPCA_roughcellType_cluster_umap", w=6,h=4)
-#' roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15)+colscale_cellType+ggtitle("")+
-#'   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
-#' roughcell_cluster_umap
-#' save_plts(roughcell_cluster_umap, "IFALD_rPCA_roughcellType_cluster_umap_nolab", w=6,h=4)
-#' 
-#' roughcell_cluster_tsne<-DimPlot(d10x.combined, reduction = "tsne",group.by="CellType_rough", pt.size=0.15)+colscale_cellType+ggtitle("")+
-#'   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
-#' roughcell_cluster_tsne
-#' save_plts(roughcell_cluster_tsne, "IFALD_rPCA_roughcellType_cluster_tsne_nolab", w=6,h=4)
-#' 
-#' ########
-#' ## DropletQC
-#' ########
-#' nuclearfraction_cluster_umap<-FeaturePlot(d10x.combined, reduction = "umap",feature="nuclear_fraction", pt.size=0.15, label=F)+ggtitle("")+
-#'   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
-#' nuclearfraction_cluster_umap
-#' save_plts(nuclearfraction_cluster_umap, "IFALD_rPCA_nuclearfraction_cluster_umap", w=6,h=4)
-#' damaged_empty_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="cell_status", pt.size=0.15)+ggtitle("")+
-#'   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))+
-#'   scale_color_manual(values=c("grey","red","cornflowerblue"),name="Nuclear\nFraction")
-#' damaged_empty_cluster_umap
-#' save_plts(damaged_empty_cluster_umap, "IFALD_rPCA_damaged_empty_cluster_umap", w=6,h=4)
-#' 
-#' #other QC
-#' nFeature_cluster_umap<-FeaturePlot(d10x.combined, reduction = "umap",feature="nFeature_RNA", pt.size=0.15, label=F)+ggtitle("")+
-#'   annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
-#' nFeature_cluster_umap
-#' save_plts(nFeature_cluster_umap, "IFALD_rPCA_nFeature_cluster_umap", w=6,h=4)
-#' 
-#' 
+#load(here("data","IFALD_adult_ped_integrated.rds"))
+d10x.combined<-readRDS(here("data","IFALD_adult_ped_integrated.rds"))
+
+#####
+## plot cell types
+#####
+d10x.combined@meta.data$CellType_rough<-as.factor(d10x.combined@meta.data$CellType_rough)
+levels(d10x.combined@meta.data$CellType_rough)<-c("B-cells","Cholangiocytes",
+                                                  "Hepatocytes",
+                                                  "HSC","LSEC","Myeloid cells","NK and T cells")
+
+roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15, label=T)+colscale_cellType+ggtitle("")+
+  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
+roughcell_cluster_umap
+save_plts(roughcell_cluster_umap, "IFALD_rPCA_roughcellType_cluster_umap", w=6,h=4)
+roughcell_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="CellType_rough", pt.size=0.15)+colscale_cellType+ggtitle("")+
+  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
+roughcell_cluster_umap
+save_plts(roughcell_cluster_umap, "IFALD_rPCA_roughcellType_cluster_umap_nolab", w=6,h=4)
+
+roughcell_cluster_tsne<-DimPlot(d10x.combined, reduction = "tsne",group.by="CellType_rough", pt.size=0.15)+colscale_cellType+ggtitle("")+
+  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
+roughcell_cluster_tsne
+save_plts(roughcell_cluster_tsne, "IFALD_rPCA_roughcellType_cluster_tsne_nolab", w=6,h=4)
+
+########
+## DropletQC
+########
+nuclearfraction_cluster_umap<-FeaturePlot(d10x.combined, reduction = "umap",feature="nuclear_fraction", pt.size=0.15, label=F)+ggtitle("")+
+  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
+nuclearfraction_cluster_umap
+save_plts(nuclearfraction_cluster_umap, "IFALD_rPCA_nuclearfraction_cluster_umap", w=6,h=4)
+damaged_empty_cluster_umap<-DimPlot(d10x.combined, reduction = "umap",group.by="cell_status", pt.size=0.15)+ggtitle("")+
+  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))+
+  scale_color_manual(values=c("grey","red","cornflowerblue"),name="Nuclear\nFraction")
+damaged_empty_cluster_umap
+save_plts(damaged_empty_cluster_umap, "IFALD_rPCA_damaged_empty_cluster_umap", w=6,h=4)
+
+#other QC
+nFeature_cluster_umap<-FeaturePlot(d10x.combined, reduction = "umap",feature="nFeature_RNA", pt.size=0.15, label=F)+ggtitle("")+
+  annotate("text", x=-9, y=-14, label = paste0("n = ",comma(ncol(d10x.combined))))
+nFeature_cluster_umap
+save_plts(nFeature_cluster_umap, "IFALD_rPCA_nFeature_cluster_umap", w=6,h=4)
+
+
 
 
 #################
 ## SCINA
 #################
-d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+#d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+d10x<-readRDS(file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_d10x_adult_ped_raw.rds"))
+
 d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
 
 signatures<-read.csv(here("data/Liver_Markers - Human_for_SCINA.csv"))
