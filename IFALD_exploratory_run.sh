@@ -15,6 +15,8 @@ module load R/4.2.1
 ##Rscript R_functions/test.R
 ##Rscript R_functions/test_notarget.R
 
-Rscript scripts/01_ped_liver_QC_with_dropletQC_SCINA_IFALD.R
+#Rscript scripts/01_ped_liver_QC_with_dropletQC_SCINA_IFALD.R
+
+Rscript scripts/01_ped_liver_QC_with_dropletQC_SCINA_IFALD_PBMC_only	
 
 #Rscript scripts/03_PBMC_correction_IFALD.R

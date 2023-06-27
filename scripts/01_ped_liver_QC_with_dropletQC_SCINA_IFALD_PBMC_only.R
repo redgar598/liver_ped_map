@@ -408,7 +408,7 @@ print("RUNNING INTEGRATION")
 d10x_PBMC<-readRDS(file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_d10x_adult_ped_raw_PBMC.rds"))
 print("PBMC size")
 d10x_PBMC
-d10x_liver<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+d10x_liver<-readRDS(file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_d10x_adult_ped_raw.rds"))
 print("liver size")
 d10x_liver
 

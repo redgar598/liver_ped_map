@@ -76,9 +76,14 @@ sig_de_7_0<-de_7_0[which(de_7_0$p_val_adj < 0.005 & abs(de_7_0$avg_log2FC) > 1),
 sig_de_7_0[which(sig_de_7_0$avg_log2FC>0),]
 sig_de_7_0[which(sig_de_7_0$avg_log2FC<0),]
 
-de_10<-FindMarkers(d10x_raw_bcell, ident.1 = "10",  test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
-sig_de_10<-de_10[which(de_10$p_val_adj < 0.005 & abs(de_10$avg_log2FC) > 1),]
-head(sig_de_10)
+de_8<-FindMarkers(d10x_raw_bcell, ident.1 = "8",  test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
+sig_de_8<-de_8[which(de_8$p_val_adj < 0.005 & abs(de_8$avg_log2FC) > 1),]
+head(sig_de_8)
+sig_de_8[which(sig_de_8$avg_log2FC > 1),]
+
+de_9<-FindMarkers(d10x_raw_bcell, ident.1 = "9",  test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
+sig_de_9<-de_9[which(de_9$p_val_adj < 0.005 & abs(de_9$avg_log2FC) > 1),]
+head(sig_de_9) # high MT
 
 b_markers<-FeaturePlot(d10x.combined_bcell, features = c("IL3RA","PLAC8","IGLL1","MS4A1"), min.cutoff = "q9", pt.size=1)
 save_plts(b_markers, "IFALD_bcell_diff_genes", w=7,h=6)
@@ -88,6 +93,7 @@ save_plts(b_markers, "IFALD_bcell_diff_genes", w=7,h=6)
 # https://www.ncbi.nlm.nih.gov/gene/7441
 # Immature B cells: CHCHD10+, CD79a+, CD79b+, CD19+, MS4A1–/low, CD74–, Mki67+, Stmn1+
 # https://www.cell.com/trends/immunology/fulltext/S1471-4906(22)00003-5
+
 # IGLL1
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5017602/
 # PLAC8 and IL3RA are Plasmacytoid dendritic cell markers
@@ -95,7 +101,7 @@ save_plts(b_markers, "IFALD_bcell_diff_genes", w=7,h=6)
 
 ## B cell type markers from:
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6861135/
-b_markers<-FeaturePlot(d10x.combined_bcell, features = c("JCHAIN","IGLL1","CD79B","TCL1A","IGKC","MS4A1","CD19"), min.cutoff = "q9", pt.size=1)
+b_markers<-FeaturePlot(d10x.combined_bcell, features = c("JCHAIN","IGLL1","CD79B","TCL1A","IGKC","MS4A1","CD19","PLAC8","IL3RA"), min.cutoff = "q9", pt.size=1)
 b_markers
 save_plts(b_markers, "IFALD_bcell_markersfrom_fetalpaper", w=7,h=6)
 
@@ -105,42 +111,42 @@ DotPlot(object = d10x.combined_bcell, features = c("JCHAIN","IGKC","PLAC8","IL3R
 DefaultAssay(d10x.combined_bcell) <- "integrated"
 
 
-
-#########
-## pathway adult/IFALD versus healthy ped
-#########
-source("scripts/00_GSEA_function.R")
-GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
-
-de_4_0$gene<-rownames(de_4_0)
-de<-de_4_0
-gene_list = de$avg_log2FC
-names(gene_list) = de$gene
-gene_list = sort(gene_list, decreasing = TRUE)
-gene_list = gene_list[!duplicated(names(gene_list))]
-
-res = GSEA(gene_list, GO_file, pval = 0.05)
-
-plt_path<-res$Results
-plt_path$pathway<-sapply(1:nrow(plt_path), function(x) strsplit(plt_path$pathway[x], "%")[[1]][1])
-plt_path$Enrichment_Cell<-"Up-regulated in \nIFALD"
-plt_path$Enrichment_Cell[which(plt_path$Enrichment=="Down-regulated")]<-"Up-regulated in \nHealthy"
-
-plt_path$label<-lapply(1:nrow(plt_path), function(x) paste0(plt_path$leadingEdge[x][[1]][1:4], collapse = ", "))
-
-plt_path$direction_label<-as.factor(plt_path$Enrichment)
-levels(plt_path$direction_label)<-c(0.1,-0.1)
-plt_path$direction_label<-as.numeric(as.character(plt_path$direction_label))
-
-# top and bottom 15
-#plt_path<-rbind(plt_path[1:15,], plt_path[(nrow(plt_path)-15):(nrow(plt_path)),])
-
-bcell_GSEA<-ggplot(plt_path, aes(NES, reorder(pathway, NES)))+geom_point(aes(size=size, fill=Enrichment_Cell), shape=21)+
-  theme_bw()+th_present+ylab("")+xlab("Normalized Enrichment Score")+
-  geom_text(aes(label=label),hjust="inward",  nudge_x = plt_path$direction_label, color="grey50", size=3)+
-  geom_hline(yintercept=16.5, color="grey")
-save_plts(bcell_GSEA, "GSEA_IFALD_bcell", w=15,h=3)
-
+              # 
+              # #########
+              # ## pathway adult/IFALD versus healthy ped
+              # #########
+              # source("scripts/00_GSEA_function.R")
+              # GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
+              # 
+              # de_4_0$gene<-rownames(de_4_0)
+              # de<-de_4_0
+              # gene_list = de$avg_log2FC
+              # names(gene_list) = de$gene
+              # gene_list = sort(gene_list, decreasing = TRUE)
+              # gene_list = gene_list[!duplicated(names(gene_list))]
+              # 
+              # res = GSEA(gene_list, GO_file, pval = 0.05)
+              # 
+              # plt_path<-res$Results
+              # plt_path$pathway<-sapply(1:nrow(plt_path), function(x) strsplit(plt_path$pathway[x], "%")[[1]][1])
+              # plt_path$Enrichment_Cell<-"Up-regulated in \nIFALD"
+              # plt_path$Enrichment_Cell[which(plt_path$Enrichment=="Down-regulated")]<-"Up-regulated in \nHealthy"
+              # 
+              # plt_path$label<-lapply(1:nrow(plt_path), function(x) paste0(plt_path$leadingEdge[x][[1]][1:4], collapse = ", "))
+              # 
+              # plt_path$direction_label<-as.factor(plt_path$Enrichment)
+              # levels(plt_path$direction_label)<-c(0.1,-0.1)
+              # plt_path$direction_label<-as.numeric(as.character(plt_path$direction_label))
+              # 
+              # # top and bottom 15
+              # #plt_path<-rbind(plt_path[1:15,], plt_path[(nrow(plt_path)-15):(nrow(plt_path)),])
+              # 
+              # bcell_GSEA<-ggplot(plt_path, aes(NES, reorder(pathway, NES)))+geom_point(aes(size=size, fill=Enrichment_Cell), shape=21)+
+              #   theme_bw()+th_present+ylab("")+xlab("Normalized Enrichment Score")+
+              #   geom_text(aes(label=label),hjust="inward",  nudge_x = plt_path$direction_label, color="grey50", size=3)+
+              #   geom_hline(yintercept=16.5, color="grey")
+              # save_plts(bcell_GSEA, "GSEA_IFALD_bcell", w=15,h=3)
+              # 
 
 
 
@@ -148,11 +154,9 @@ save_plts(bcell_GSEA, "GSEA_IFALD_bcell", w=15,h=3)
 ## Composition Bcell "types"
 ###########
 d10x.combined_bcell@meta.data$CellType_refined<-as.character(d10x.combined_bcell@meta.data$CellType_refined)
-d10x.combined_bcell@meta.data$CellType_refined[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("1","2","5"))]<-"Plasma cells"
-d10x.combined_bcell@meta.data$CellType_refined[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("8"))]<-"Mature B-cells (104)"
+d10x.combined_bcell@meta.data$CellType_refined[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("9"))]<-"Mature B-cells (104)"
 d10x.combined_bcell@meta.data$CellType_refined[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("7"))]<-"pre B-cell"
-d10x.combined_bcell@meta.data$CellType_refined[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("0"))]<-"Mature B-cells"
-d10x.combined_bcell@meta.data$CellType_refined[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("10"))]<-"pDC"
+d10x.combined_bcell@meta.data$CellType_refined[which(d10x.combined_bcell@meta.data$seurat_clusters%in%c("8"))]<-"pDC"
 
 DimPlot(d10x.combined_bcell, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")
 
@@ -185,8 +189,8 @@ cell_counts$label<-sapply(1:nrow(cell_counts), function(x){
     paste(cell_counts$Age[x], "\n(", strsplit(cell_counts$individual[x],"_")[[1]][1],")", sep="")}}
 })
 
-cell_counts$label<-factor(cell_counts$label, c("2\n(C104)","11\n(C85)","12\n(C93)", "17\n(C64)", "17\n(C96)",
-                                               "2\n(IFALD073)", "3\n(IFALD030)", "13\n(IFALD006)", 
+cell_counts$label<-factor(cell_counts$label, c("2\n(C104)","9\n(C105)","11\n(C85)","12\n(C93)", "16\n(C102)","17\n(C64)", "17\n(C96)",
+                                               "0.33\n(IFALD030)","0.58\n(IFALD073)", "9\n(IFALD006)", 
                                                "26\n(C82)","48\n(C70)", "57\n(C97)","61\n(C68)",
                                                "65\n(C39 NPC)", "65\n(C39 TLH)", "67\n(C54)","69\n(C88)"))
 
@@ -242,3 +246,9 @@ b_markers<-plot_grid(plot_gene_UMAP(d10x.combined_bcell,"IL3RA", 0),
           plot_gene_UMAP(d10x.combined_bcell,"MS4A1", 0))
 b_markers
 save_plts(b_markers, "IFALD_bcell_diff_genes_bcellonly_tidy", w=7,h=5)
+
+b_markers<-plot_grid(plot_gene_UMAP(d10x.combined_bcell,"IGLL1", 0),
+                     plot_gene_UMAP(d10x.combined_bcell,"MS4A1", 0))
+b_markers
+save_plts(b_markers, "IFALD_prebcell_diff_genes_bcellonly_tidy", w=7,h=2.5)
+

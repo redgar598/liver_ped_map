@@ -8,10 +8,12 @@ library(gridExtra)
 library(reshape2)
 library(gtools)
 library(colorspace)
+library(cowplot)
 
 
 source("scripts/00_pretty_plots.R")
-
+source("scripts/00_plot_gene_exp.R")
+source("scripts/00_fanciest_UMAP.R")
 
 load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
@@ -104,9 +106,9 @@ FeaturePlot(d10x.combined_hsc, features = c("MYH11","SPARCL1","ADIRF","MCAM"), m
 HSC_markers<-plot_grid(plot_gene_UMAP(d10x.combined_hsc,"PDGFRA", 0),
                      plot_gene_UMAP(d10x.combined_hsc,"CXCL12", 0),
                      plot_gene_UMAP(d10x.combined_hsc,"COL1A1", 0),
-                     plot_gene_UMAP(d10x.combined_hsc,"IGFBP3", 0))
+                     plot_gene_UMAP(d10x.combined_hsc,"IGFBP3", 0), ncol=4)
 HSC_markers
-save_plts(HSC_markers, "IFALD_HSC_diff_genes_fancy", w=7,h=5)
+save_plts(HSC_markers, "IFALD_HSC_diff_genes_fancy", w=14,h=2.5)
 
 
 #########
@@ -168,8 +170,8 @@ cell_counts$label<-sapply(1:nrow(cell_counts), function(x){
     paste(cell_counts$Age[x], "\n(", strsplit(cell_counts$individual[x],"_")[[1]][1],")", sep="")}}
 })
 
-cell_counts$label<-factor(cell_counts$label, c("2\n(C104)","11\n(C85)","12\n(C93)", "17\n(C64)", "17\n(C96)",
-                                               "NA\n(IFALD006)", "NA\n(IFALD030)", "NA\n(IFALD073)", 
+cell_counts$label<-factor(cell_counts$label, c("2\n(C104)","9\n(C105)","11\n(C85)","12\n(C93)", "16\n(C102)","17\n(C64)", "17\n(C96)",
+                                               "0.33\n(IFALD030)","0.58\n(IFALD073)", "9\n(IFALD006)", 
                                                "26\n(C82)","48\n(C70)", "57\n(C97)","61\n(C68)",
                                                "65\n(C39 NPC)", "65\n(C39 TLH)", "67\n(C54)","69\n(C88)"))
 cell_counts$CellType_rough<-factor(cell_counts$CellType_rough, c("healthy_ped_HSC","Outlier HSC","adult_IFALD_HSC"))
@@ -181,6 +183,6 @@ HSC_composistion<-ggplot(cell_counts, aes(label, per))+geom_bar(aes(fill=CellTyp
     facet_grid(.~age_condition, scale="free_x", space = "free")+
     geom_text(aes(label=countT, y=102), data=cell_counts_min)
 HSC_composistion
-save_plts(HSC_composistion, "HSC_composistion", w=15,h=8)
+save_plts(HSC_composistion, "HSC_composistion", w=16,h=8)
 
   

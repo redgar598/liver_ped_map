@@ -1,6 +1,6 @@
 01_ped_liver_QC_with_dropletQC_SCINA_IFALD.R
-#01_ped_liver_QC_with_dropletQC_SCINA_IFALD_PBMC_only.R
-02_IFALD_ped_adult_fetal_integration.R
+01_ped_liver_QC_with_dropletQC_SCINA_IFALD_PBMC_only.R
+#02_IFALD_ped_adult_fetal_integration.R
 cellxgene_ped_adult_ifald.R
 
 03_PBMC_correction_IFALD
