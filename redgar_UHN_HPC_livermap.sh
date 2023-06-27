@@ -39,6 +39,9 @@ module load R/4.2.1
 cd liver_ped_map
 git pull
 sbatch exploratory_run.sh
+
+
+
 sbatch de_monte_carlo_notparallel.sh
 sbatch metacell.sh
 
@@ -123,6 +126,10 @@ scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Catia
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sonya__HSC-FI_006 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sonya__SingleCell_iFALD073_PBMC_25Jan21_3pr_v3 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 
+scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Diana__C105_Frozen_5pr_V2 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Diana__C102_5pr_V2 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+
+
 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_d10x_adult_ped_raw_PBMC.rds /media/redgar/Seagate\ Portable\ Drive/processed_data 
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_integrated_PBMC.rds /media/redgar/Seagate\ Portable\ Drive/processed_data 
@@ -172,6 +179,7 @@ scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_ma
 
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/IFALD_*pdf /home/redgar/Documents/liver_ped_map/figures
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/jpeg/IFALD_*jpeg /home/redgar/Documents/liver_ped_map/figures/jpeg
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/jpeg/IFALD_*png /home/redgar/Documents/liver_ped_map/figures/png
 
 
 #grab data
@@ -189,6 +197,15 @@ scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_ma
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_cellRefined_withDropletQC.rds /home/redgar/Documents/liver_ped_map/data
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds /home/redgar/Documents/liver_ped_map/data
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_SCINA_cell_labels.RData /home/redgar/Documents/liver_ped_map/data
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_cellRough.rds /home/redgar/Documents/liver_ped_map/data
+
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_integrated.rds /home/redgar/Documents/liver_ped_map/data
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_cellRough.rds /home/redgar/Documents/liver_ped_map/data
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_d10x_adult_ped_raw.rds /home/redgar/Documents/liver_ped_map/data
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_SCINA_cell_labels.RData /home/redgar/Documents/liver_ped_map/data
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds /home/redgar/Documents/liver_ped_map/data
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_cellRefined_withDropletQC.rds /home/redgar/Documents/liver_ped_map/data
+
 
 
 scp /home/redgar/Documents/liver_ped_map/data/IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data
@@ -237,3 +254,13 @@ scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_ma
 
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/fetal/*pdf /home/redgar/Documents/liver_ped_map/figures/fetal
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/fetal/jpeg/*jpeg /home/redgar/Documents/liver_ped_map/figures/fetal/jpeg
+
+
+
+
+mv /cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_integrated.rds /cluster/projects/macparland/RE/PediatricAdult/processed_data
+mv /cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_cellRough.rds /cluster/projects/macparland/RE/PediatricAdult/processed_data
+mv /cluster/home/t117652uhn/liver_ped_map/data/IFALD_d10x_adult_ped_raw.rds /cluster/projects/macparland/RE/PediatricAdult/processed_data
+
+
+scp /home/redgar/Documents/liver_ped_map/data/IFALD_B_cell_labels.rds t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data

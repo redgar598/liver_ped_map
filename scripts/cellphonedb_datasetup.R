@@ -16,7 +16,8 @@ source("scripts/00_pretty_plots.R")
 source("scripts/00_fanciest_UMAP.R")
 source("scripts/00_plot_gene_exp.R")
 
-load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+#load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+load(here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
 
 

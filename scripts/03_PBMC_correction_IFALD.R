@@ -27,10 +27,7 @@ source("scripts/00_plot_gene_exp.R")
 ###########
 ## Integrated
 ###########
-d10x_PBMC_liver<-readRDS(file = here("/media/redgar/Seagate Portable Drive/processed_data","IFALD_adult_ped_PBMC_integrated.rds"))
-
-#some IFLAD didn't get labelled biopsy
-d10x_PBMC_liver@meta.data$Tissue[which(d10x_PBMC_liver@meta.data$individual%in%c("IFALD030", "IFALD006"))]<-"Biopsy"
+d10x_PBMC_liver<-readRDS(file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_PBMC_integrated.rds"))
 
 
 SCT_cluster_umap<-DimPlot(d10x_PBMC_liver, reduction = "umap", pt.size=0.25, label=T)
@@ -47,7 +44,7 @@ save_plts(individual_umap_sct, "IFALD_individual_rPCA_UMAP_PBMC", w=6,h=5)
 ###########
 ## Add cell type
 ###########
-load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+load(here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 cell_label$index<-rownames(cell_label)
 
 load(here("data","IFALD_B_cell_labels.rds"))

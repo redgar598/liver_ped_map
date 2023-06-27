@@ -16,3 +16,10 @@ sbatch cpdb_liver.sh
 
 
 nano cpdb_ped_healthy.out
+
+
+
+/cluster/projects/macparland/RE/PediatricAdult/processed_data/statistical_analysis_significant_means_06_20_2023_17:10:20.txt
+
+
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/statistical_analysis_*.txt /home/redgar/Documents/liver_ped_map/data/cellphonedb
