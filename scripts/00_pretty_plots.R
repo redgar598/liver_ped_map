@@ -103,48 +103,57 @@ color_possibilities_celltype_fetalonly<-c( "Fetal B cell","Fetal Erythrocytes","
 names(myColors_celltype_fetalonly) <- color_possibilities_celltype_fetalonly
 
 #### Combined
-combo_colors<-c(myColors_celltype, myColors_celltype_fetal,myColors_celltype_fetalonly)
-combo_colors<-combo_colors[which(names(combo_colors)%in%c("B-cells","Mature B-cells","Plasma cells","pre B cell","pro B cell","B cell","pre pro B cell ","Fetal B cell",
-                                                          
-                                                          "CD3+ T-cells","gd T-cells","NK-like cells", "NK and T cells","Early lymphoid/T lymphocyte","CLNK T-cells",
-                                                          "Cycling T-cells","NK","ILC precursor","NKT cells","Fetal ILC precursor",
-                                                          
-                                                          "Cholangiocytes", "LSEC","Endothelial cell",
-                                                          
-                                                          "Myeloid cells","RR Myeloid","Mono-Mac","Kupffer Cell","KC Like","Macrophage\n(MHCII high)","Macrophage\n(CLEC9A high)",
-                                                          "Monocyte","pDC precursor","Megakaryocyte","Fetal Megakaryocyte",
-                                                          "Cycling Myeloid","DC1","DC2","Monocyte-DC precursor","Neutrophil-myeloid progenitor","Mono-NK",
-                                                          "Fetal Kupffer Cell","Fetal Mono-NK", 
-                                                          
-                                                          "Myeloid Erythrocytes\n(phagocytosis)","VCAM1+ Erythroblastic Island Macrophage",
-                                                          "Fetal VCAM1+ Erythroblastic Island Macrophage",
-                                                          "Early Erythrocytes","Mid  Erythroid","Late Erythroid","Erythrocytes","MEMP","Fetal Erythrocytes",
-                                                          "Fetal Early Erythrocytes", 
-                                                          "Neutrophil","Neutrophil\n(DEFA+)",
-                                                          "Mast cell","Fetal Mast cell", 
-                                                          "HSC","HSC/MPP","Fetal HSC/MPP",
-                                                          "Hepatocytes","Hepatocyte","Fetal Hepatocytes",
-                                                          "Doublet","Fetal NA"))]
 
-combo_colors<-combo_colors[match(c("B-cells","Mature B-cells","Plasma cells","pre B cell","pro B cell","B cell","pre pro B cell ","Fetal B cell",
-                                   
-                                   "CD3+ T-cells","gd T-cells","NK-like cells", "NK and T cells","Early lymphoid/T lymphocyte","CLNK T-cells",
-                                   "Cycling T-cells","NK","ILC precursor","NKT cells","Fetal ILC precursor",
-                                   
-                                   "Cholangiocytes", "LSEC","Endothelial cell",
-                                   
-                                   "Myeloid cells","RR Myeloid","Mono-Mac","Kupffer Cell","KC Like","Macrophage\n(MHCII high)","Macrophage\n(CLEC9A high)",
-                                   "Monocyte","pDC precursor","Megakaryocyte","Fetal Megakaryocyte",
-                                   "Cycling Myeloid","DC1","DC2","Monocyte-DC precursor","Neutrophil-myeloid progenitor","Mono-NK",
-                                   "Fetal Kupffer Cell","Fetal Mono-NK", 
-                                   
-                                   "Myeloid Erythrocytes\n(phagocytosis)","VCAM1+ Erythroblastic Island Macrophage",
-                                   "Fetal VCAM1+ Erythroblastic Island Macrophage",
-                                   "Early Erythrocytes","Mid  Erythroid","Late Erythroid","Erythrocytes","MEMP","Fetal Erythrocytes",
-                                   "Fetal Early Erythrocytes", 
-                                   "Neutrophil","Neutrophil\n(DEFA+)",
-                                   "Mast cell","Fetal Mast cell", 
-                                   "HSC","HSC/MPP","Fetal HSC/MPP",
-                                   "Hepatocytes","Hepatocyte","Fetal Hepatocytes",
-                                   "Doublet","Fetal NA"),names(combo_colors))]
+
+fillscale_cellType_fetal_combo <- scale_fill_manual(name="Cell Type",
+                                        values = c(myColors_celltype,myColors_celltype_fetal), drop = T, limits=force)
+colscale_cellType_fetal_combo <- scale_color_manual(name="Cell Type",
+                                        values = c(myColors_celltype,myColors_celltype_fetal), drop = T, limits=force)
+
+
+
+# combo_colors<-c(myColors_celltype, myColors_celltype_fetal,myColors_celltype_fetalonly)
+# combo_colors<-combo_colors[which(names(combo_colors)%in%c("B-cells","Mature B-cells","Plasma cells","pre B cell","pro B cell","B cell","pre pro B cell ","Fetal B cell",
+#                                                           
+#                                                           "CD3+ T-cells","gd T-cells","NK-like cells", "NK and T cells","Early lymphoid/T lymphocyte","CLNK T-cells",
+#                                                           "Cycling T-cells","NK","ILC precursor","NKT cells","Fetal ILC precursor",
+#                                                           
+#                                                           "Cholangiocytes", "LSEC","Endothelial cell",
+#                                                           
+#                                                           "Myeloid cells","RR Myeloid","Mono-Mac","Kupffer Cell","KC Like","Macrophage\n(MHCII high)","Macrophage\n(CLEC9A high)",
+#                                                           "Monocyte","pDC precursor","Megakaryocyte","Fetal Megakaryocyte",
+#                                                           "Cycling Myeloid","DC1","DC2","Monocyte-DC precursor","Neutrophil-myeloid progenitor","Mono-NK",
+#                                                           "Fetal Kupffer Cell","Fetal Mono-NK", 
+#                                                           
+#                                                           "Myeloid Erythrocytes\n(phagocytosis)","VCAM1+ Erythroblastic Island Macrophage",
+#                                                           "Fetal VCAM1+ Erythroblastic Island Macrophage",
+#                                                           "Early Erythrocytes","Mid  Erythroid","Late Erythroid","Erythrocytes","MEMP","Fetal Erythrocytes",
+#                                                           "Fetal Early Erythrocytes", 
+#                                                           "Neutrophil","Neutrophil\n(DEFA+)",
+#                                                           "Mast cell","Fetal Mast cell", 
+#                                                           "HSC","HSC/MPP","Fetal HSC/MPP",
+#                                                           "Hepatocytes","Hepatocyte","Fetal Hepatocytes",
+#                                                           "Doublet","Fetal NA"))]
+# 
+# combo_colors<-combo_colors[match(c("B-cells","Mature B-cells","Plasma cells","pre B cell","pro B cell","B cell","pre pro B cell ","Fetal B cell",
+#                                    
+#                                    "CD3+ T-cells","gd T-cells","NK-like cells", "NK and T cells","Early lymphoid/T lymphocyte","CLNK T-cells",
+#                                    "Cycling T-cells","NK","ILC precursor","NKT cells","Fetal ILC precursor",
+#                                    
+#                                    "Cholangiocytes", "LSEC","Endothelial cell",
+#                                    
+#                                    "Myeloid cells","RR Myeloid","Mono-Mac","Kupffer Cell","KC Like","Macrophage\n(MHCII high)","Macrophage\n(CLEC9A high)",
+#                                    "Monocyte","pDC precursor","Megakaryocyte","Fetal Megakaryocyte",
+#                                    "Cycling Myeloid","DC1","DC2","Monocyte-DC precursor","Neutrophil-myeloid progenitor","Mono-NK",
+#                                    "Fetal Kupffer Cell","Fetal Mono-NK", 
+#                                    
+#                                    "Myeloid Erythrocytes\n(phagocytosis)","VCAM1+ Erythroblastic Island Macrophage",
+#                                    "Fetal VCAM1+ Erythroblastic Island Macrophage",
+#                                    "Early Erythrocytes","Mid  Erythroid","Late Erythroid","Erythrocytes","MEMP","Fetal Erythrocytes",
+#                                    "Fetal Early Erythrocytes", 
+#                                    "Neutrophil","Neutrophil\n(DEFA+)",
+#                                    "Mast cell","Fetal Mast cell", 
+#                                    "HSC","HSC/MPP","Fetal HSC/MPP",
+#                                    "Hepatocytes","Hepatocyte","Fetal Hepatocytes",
+#                                    "Doublet","Fetal NA"),names(combo_colors))]
 

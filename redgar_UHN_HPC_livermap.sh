@@ -155,6 +155,7 @@ scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map
 
 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_*_only.RData /media/redgar/Seagate\ Portable\ Drive/processed_data
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData /media/redgar/Seagate\ Portable\ Drive/processed_data
 
 
 scp /home/redgar/Documents/liver_ped_map/data/Liver_Markers*.csv t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data
