@@ -1,134 +1,3 @@
-### Load libraries
-library(here)
-library(Seurat)
-library(ggplot2)
-library(dplyr)
-library(scales)
-library(gridExtra)
-library(reshape2)
-library(gtools)
-library(colorspace)
-library(cowplot)
-
-
-source("scripts/00_pretty_plots.R")
-source("scripts/00_fanciest_UMAP.R")
-source("scripts/00_plot_gene_exp.R")
-
-load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
-
-umap_mat<-as.data.frame(Embeddings(object = d10x.combined, reduction = "umap"))#
-umap_mat$cell<-rownames(umap_mat)
-meta<-d10x.combined@meta.data
-meta$cell<-rownames(meta)
-plt<-merge(meta, umap_mat, by="cell")
-rm(d10x.combined)
-gc()
-
-plt_mean<-plt %>% group_by(CellType_refined) %>% summarize(mean_umap1=mean(UMAP_1), mean_umap2=mean(UMAP_2))
-plt_mean<-as.data.frame(plt_mean)
-
-len_x_bar<-((range(plt$UMAP_1))[2]-(range(plt$UMAP_1))[1])/10
-len_y_bar<-((range(plt$UMAP_2))[2]-(range(plt$UMAP_2))[1])/10
-arr <- list(x = min(plt$UMAP_1), y = min(plt$UMAP_2), x_len = len_x_bar, y_len = len_y_bar)
-
-
-
-###############
-## Ped Healthy Output
-###############
-means<-read.table(here("data/cellphonedb/statistical_analysis_significant_means_06_22_2023_09:47:59.txt"), sep="\t", header=T)
-means[1:5,1:10]
-
-CCR_sig<-means[grep("CCR",means$interacting_pair), ]
-CCL_sig<-means[grep("CCL3|CCL4",means$interacting_pair), ]
-CCL_sig[,c(1:12)]
-
-CCL_plt<-melt(CCL_sig, id=colnames(CCL_sig)[1:12])
-CCL_plt$variable<-as.character(CCL_plt$variable)
-
-CCL_plt$Cell1<-sapply(1:nrow(CCL_plt), function(x) strsplit(CCL_plt$variable[x], "[.]")[[1]][1])
-CCL_plt$Cell2<-sapply(1:nrow(CCL_plt), function(x) strsplit(CCL_plt$variable[x], "[.]")[[1]][2])
-CCL_plt<-CCL_plt[which(!(is.na(CCL_plt$value))),]
-
-## fix cell labels
-CCL_plt$Cell1<-as.factor(CCL_plt$Cell1)
-levels(CCL_plt$Cell1)<-c("CD3+ T-cells", "CLNK T-cells", "Cycling Myeloid",
-                         "Cycling T-cells","Doublet","gd T-cells",  
-                         "KC Like","Low_Quality",  "Macrophage\n(CLEC9A high)",
-                         "Macrophage\n(MHCII high)","Myeloid Erythrocytes\n(phagocytosis)",
-                         "NK-like cells","Plasma cells", "Platelets","RR Myeloid")
-CCL_plt$Cell2<-as.factor(CCL_plt$Cell2)
-levels(CCL_plt$Cell2)<-c("CD3+ T-cells", "CLNK T-cells", "Cycling Myeloid",
-                         "Cycling T-cells","Doublet", 
-                         "KC Like","Low_Quality", 
-                         "Macrophage\n(MHCII high)","Myeloid Erythrocytes\n(phagocytosis)",
-                         "NK-like cells","RR Myeloid")
-
-
-CCL_plt<-merge(CCL_plt,plt_mean, by.x="Cell1", by.y="CellType_refined")
-colnames(CCL_plt)[which(colnames(CCL_plt)%in%c("mean_umap1","mean_umap2"))]<-c("Cell1x","Cell1y")
-CCL_plt<-merge(CCL_plt,plt_mean, by.x="Cell2", by.y="CellType_refined")
-colnames(CCL_plt)[which(colnames(CCL_plt)%in%c("mean_umap1","mean_umap2"))]<-c("Cell2x","Cell2y")
-
-
-## self interactions
-CCL_plt_self<-do.call(rbind,lapply(1:nrow(CCL_plt), function(x) if(CCL_plt$Cell1[x]==CCL_plt$Cell2[x]){CCL_plt[x,]}else{}))
-CCL_plt_notself<-do.call(rbind,lapply(1:nrow(CCL_plt), function(x) if(CCL_plt$Cell1[x]==CCL_plt$Cell2[x]){}else{CCL_plt[x,]}))
-
-## CCL only in KC
-CCL_plt_notself_KC<-CCL_plt_notself[which(CCL_plt_notself$Cell1=="KC Like" & CCL_plt_notself$gene_a%in%c("CCL3","CCL4")),]
-
-# Plotting the network
-interacting_UMAP<-ggplot() +   
-  annotate("segment", 
-                      x = arr$x, xend = arr$x + c(arr$x_len, 0), 
-                      y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
-                      arrow = arrow(type = "closed", length = unit(2, 'pt'))) +
-  theme_void()+theme(plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
-                     axis.title.x = element_text(size=5,hjust = 0.05),
-                     axis.title.y = element_text(size=5,hjust = 0.05,angle = 90),
-                     legend.position = "none")+xlab("UMAP 1")+ylab("UMAP 2")+
-  geom_point(aes(UMAP_1,UMAP_2), data=plt, size = 0.6, colour= "black", stroke = 1)+
-  geom_point(aes(UMAP_1,UMAP_2, color=CellType_refined), data=plt,size=0.5)+xlab("UMAP 1")+ylab("UMAP 2")+
-  #geom_rect(aes(xmin=range(plt$UMAP_1)[1]*1.1, xmax=range(plt$UMAP_1)[2]*1.1, ymin=range(plt$UMAP_2)[1]*1.1, ymax=range(plt$UMAP_2)[2]*1.1), fill="white", alpha=0.8) +
-  geom_curve(
-    data = CCL_plt_notself_KC[which(CCL_plt_notself_KC$interacting_pair=="CCL4_CCR5"),],
-    aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y), 
-    color = "red",curvature = 0.2,
-    lineend = "round") +
-  geom_curve(
-    data = CCL_plt_notself_KC[which(CCL_plt_notself_KC$interacting_pair=="CCL3_CCR5"),],
-    aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y), 
-    color = "blue",curvature = 0.4,
-    lineend = "round") +
-  geom_curve(
-    data = CCL_plt_notself_KC[which(CCL_plt_notself_KC$interacting_pair=="CCL3_CCR1"),],
-    aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y), 
-    color = "grey",curvature = -0.4,
-    lineend = "round") +
-  geom_label(aes(mean_umap1, mean_umap2, label=CellType_refined, fill=CellType_refined), data=plt_mean, size=1.25, color="black")+
-  geom_text(aes(x=range(plt$UMAP_1)[2]*0.9, y=range(plt$UMAP_2)[1]*0.9, label=unique(CCL_plt_notself_KC$interacting_pair)[1]), size=2, color="red")+
-  geom_text(aes(x=range(plt$UMAP_1)[2]*0.9, y=range(plt$UMAP_2)[1]*0.95, label=unique(CCL_plt_notself_KC$interacting_pair)[2]), size=2, color="blue")+
-  geom_text(aes(x=range(plt$UMAP_1)[2]*0.9, y=range(plt$UMAP_2)[1], label=unique(CCL_plt_notself_KC$interacting_pair)[3]), size=2, color="grey")+
-  colscale_cellType+fillscale_cellType
-interacting_UMAP
-save_plts(interacting_UMAP, "interacting_UMAP_KC_CCL34", w=5,h=5)
-
-
-
-
-###################################################################################################################
-
-
-##############
-## Differential expression with age and IFALD in RR
-##############
-
-## age differential
-de_RR<-read.csv(here("data","differential_age_RR.csv"))
-de_KC<-read.csv(here("data","differential_age_KC.csv"))
-de_MHCII<-read.csv(here("data","differential_age_MHCII.csv"))
 
 
 plt_median<-plt %>% group_by(CellType_refined) %>% summarize(mean_umap1=median(UMAP_1), mean_umap2=median(UMAP_2))
@@ -195,21 +64,21 @@ interacting_UMAP<-function(interaction_pair){
   differentialexp_plt_notself_pair<-differentialexp_plt_notself[which(differentialexp_plt_notself$interacting_pair==interaction_pair),]
   
   umap_network<-ggplot() +   
-    theme_void()+theme(plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
-                       axis.title.x = element_text(size=8,hjust = 0.05),
-                       axis.title.y = element_text(size=8,hjust = 0.05,angle = 90),
-                       legend.position = "none")+xlab("UMAP 1")+ylab("UMAP 2")+
-    geom_point(aes(UMAP_1,UMAP_2), data=plt, size = 0.6, colour= "black", stroke = 1)+
-    geom_point(aes(UMAP_1,UMAP_2, color=CellType_refined), data=plt,size=0.5)+
-    geom_rect(data=plt_median, mapping=aes(xmin=min(mean_umap1)*1.1, xmax=max(mean_umap1)*1.21, ymin=min(mean_umap2)*1.25, ymax=max(mean_umap2)*1.5), fill = "white", alpha=0.05)+
-    geom_point(aes(mean_umap1,mean_umap2, fill=CellType_refined), data=plt_median,size=2, shape=21)+
-    geom_curve(
-      data = differentialexp_plt_notself_pair,
-      aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y, alpha=as.factor(differential)), 
-      arrow = arrow(length = unit(0.01, "npc"),type = "closed"),
-      color = "grey10",curvature = -0.3,
-      lineend = "round") +  scale_alpha_manual(values=c(1,0.5)) +
-    fillscale_cellType+colscale_cellType+
+  theme_void()+theme(plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
+                     axis.title.x = element_text(size=8,hjust = 0.05),
+                     axis.title.y = element_text(size=8,hjust = 0.05,angle = 90),
+                     legend.position = "none")+xlab("UMAP 1")+ylab("UMAP 2")+
+  geom_point(aes(UMAP_1,UMAP_2), data=plt, size = 0.6, colour= "black", stroke = 1)+
+  geom_point(aes(UMAP_1,UMAP_2, color=CellType_refined), data=plt,size=0.5)+
+  geom_rect(data=plt_median, mapping=aes(xmin=min(mean_umap1)*1.1, xmax=max(mean_umap1)*1.21, ymin=min(mean_umap2)*1.25, ymax=max(mean_umap2)*1.5), fill = "white", alpha=0.05)+
+  geom_point(aes(mean_umap1,mean_umap2, fill=CellType_refined), data=plt_median,size=2, shape=21)+
+  geom_curve(
+    data = differentialexp_plt_notself_pair,
+    aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y, alpha=as.factor(differential)), 
+    arrow = arrow(length = unit(0.01, "npc"),type = "closed"),
+    color = "grey10",curvature = -0.3,
+    lineend = "round") +  scale_alpha_manual(values=c(1,0.5)) +
+  fillscale_cellType+colscale_cellType+
     annotate("segment", 
              x = arr$x, xend = arr$x + c(arr$x_len, 0), 
              y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
@@ -244,8 +113,8 @@ interacting_UMAP<-function(interaction_pair){
                             y = max(plt$UMAP_2)*0.95, yend = max(plt$UMAP_2)*0.85, size=0.25,color="black",
                             arrow = arrow(type = "closed", length = unit(2, 'pt')))
                }}
-}
-
+  }
+  
 interacting_UMAP("APP_CD74")
 interacting_UMAP("CCL3_CCR5")
 

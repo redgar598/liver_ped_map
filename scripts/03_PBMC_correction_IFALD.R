@@ -28,7 +28,11 @@ source("scripts/00_plot_gene_exp.R")
 ## Integrated
 ###########
 d10x_PBMC_liver<-readRDS(file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_PBMC_integrated.rds"))
+#d10x_PBMC_liver<-readRDS(file = here("/media/redgar/Seagate Portable Drive/processed_data","IFALD_adult_ped_PBMC_integrated.rds"))
 
+d10x_PBMC_liver$Tissue<-as.factor(d10x_PBMC_liver$Tissue)
+levels(d10x_PBMC_liver$Tissue)<-c("Biopsy","Caudate","Right Lobe", "PBMC" )
+d10x_PBMC_liver$Tissue<-as.character(d10x_PBMC_liver$Tissue)
 
 SCT_cluster_umap<-DimPlot(d10x_PBMC_liver, reduction = "umap", pt.size=0.25, label=T)
 save_plts(SCT_cluster_umap, "IFALD_rPCA_cluster_umap_PBMC", w=6,h=4)
@@ -37,7 +41,8 @@ SCT_cluster_tsne<-DimPlot(d10x_PBMC_liver, reduction = "tsne", pt.size=0.25, lab
 save_plts(SCT_cluster_tsne, "IFALD_rPCA_cluster_tsne_PBMC", w=6,h=4)
 
 
-individual_umap_sct<-DimPlot(d10x_PBMC_liver, reduction = "umap", group.by = "Tissue", pt.size=0.5)+scale_color_manual(values=c("cornflowerblue","grey","red"))
+individual_umap_sct<-DimPlot(d10x_PBMC_liver, reduction = "umap", group.by = "Tissue", pt.size=0.5)+scale_color_manual(values=c("cornflowerblue","grey","red","forestgreen"))
+individual_umap_sct
 save_plts(individual_umap_sct, "IFALD_individual_rPCA_UMAP_PBMC", w=6,h=5)
 
 
@@ -45,6 +50,8 @@ save_plts(individual_umap_sct, "IFALD_individual_rPCA_UMAP_PBMC", w=6,h=5)
 ## Add cell type
 ###########
 load(here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+#load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+
 cell_label$index<-rownames(cell_label)
 
 load(here("data","IFALD_B_cell_labels.rds"))
@@ -182,7 +189,7 @@ arr <- list(x = min(plt_myeloid$UMAP_1), y = min(plt_myeloid$UMAP_2), x_len = le
 
 forlegned_plot<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
   geom_point(aes(fill=Tissue),size=2, shape=21)+xlab("UMAP 1")+ylab("UMAP 2")+
-  scale_fill_manual(values=c("cornflowerblue","grey","red"))+theme_bw()+
+  scale_fill_manual(values=c("cornflowerblue","grey","red","forestgreen"))+theme_bw()+
   theme(legend.text = element_text(size=5),
         legend.title = element_text(size=6))
 nice_legend<-get_leg(forlegned_plot)
@@ -191,7 +198,7 @@ nice_legend<-get_leg(forlegned_plot)
 fanciest_UMAP<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
   geom_point(size = 0.06, colour= "black", stroke = 1)+
   geom_point(aes(color=Tissue),size=0.05)+xlab("UMAP 1")+ylab("UMAP 2")+
-  scale_color_manual(values=c("cornflowerblue","grey","red"))+
+  scale_color_manual(values=c("cornflowerblue","grey","red","forestgreen"))+
   annotate("segment",
            x = arr$x, xend = arr$x + c(arr$x_len, 0),
            y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
@@ -220,6 +227,7 @@ len_x_bar<-((range(plt_myeloid$UMAP_1))[2]-(range(plt_myeloid$UMAP_1))[1])/10
 len_y_bar<-((range(plt_myeloid$UMAP_2))[2]-(range(plt_myeloid$UMAP_2))[1])/10
 arr <- list(x = min(plt_myeloid$UMAP_1), y = min(plt_myeloid$UMAP_2), x_len = len_x_bar, y_len = len_y_bar)
 
+plt_myeloid$Tissue<-factor(plt_myeloid$Tissue, levels=c("Biopsy","Caudate","Right Lobe", "PBMC" ))
 
 forlegned_plot<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
   geom_point(aes(fill=CellType_refined),size=2, shape=21)+xlab("UMAP 1")+ylab("UMAP 2")+
@@ -245,10 +253,10 @@ fanciest_UMAP<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
 ## cell count
 cell_num_all<-as.data.frame(table(d10x_PBMC_liver@meta.data$Tissue))
 colnames(cell_num_all)<-c("Tissue","CellCount")
-fanciest_UMAP <- fanciest_UMAP + facet_wrap(~Tissue, ncol=3)+  geom_text(aes(x = min(plt_myeloid$UMAP_1)+(0.95*len_x_bar), y = min(plt_myeloid$UMAP_2)+(0.5*len_y_bar), label=paste0("n = ",comma(CellCount))), cell_num_all, size=2)
+fanciest_UMAP <- fanciest_UMAP + facet_wrap(~Tissue, ncol=4)+  geom_text(aes(x = min(plt_myeloid$UMAP_1)+(0.95*len_x_bar), y = min(plt_myeloid$UMAP_2)+(0.5*len_y_bar), label=paste0("n = ",comma(CellCount))), cell_num_all, size=2)
 
 fancy_type_tissue<-plot_grid(fanciest_UMAP,nice_legend, rel_widths = c(6,2))
-save_plts(fancy_type_tissue, "IFALD_liver_PBMC_tissue_split", w=14,h=4)
+save_plts(fancy_type_tissue, "IFALD_liver_PBMC_tissue_split", w=20,h=4)
 
 
 
@@ -300,14 +308,20 @@ sample_split_UMAP(c("IFALD073_PBMC","IFALD006"))
 sample_split_UMAP(c("IFALD073_PBMC","C104_bx5pr"))
 
 
-
+######
+## Entrophy
+######
+plt_entropy_Tissue<-entropy_d10(d10x_PBMC_liver, "Tissue")
+entropy_Tissue<-entropy_plt(plt_entropy_Tissue, "Tissue", d10x_PBMC_liver)
+entropy_Tissue
+save_plts(entropy_Tissue, "IFALD_entropy_Tissue_PBMC_allclusters", w=15,h=10)
 
 
 ##############
 ## B cells and paried PBMC clusters only
 ##############
 
-d10x.combined_bcell<-subset(d10x_PBMC_liver, subset = CellType_refined %in% c("DC","Naive CD4 T-cells","NK cells","Plasma cells","pDC","Mature B-cells","pre B-cell"))
+d10x.combined_bcell<-subset(d10x_PBMC_liver, subset = CellType_refined %in% c("DC","Plasma cells","pDC","Mature B-cells","pre B-cell","Cycling B-cells"))
 rm(d10x_PBMC_liver)
 gc()
 d10x.combined_bcell <- RunPCA(d10x.combined_bcell, npcs = 30, verbose = FALSE)
@@ -316,7 +330,7 @@ d10x.combined_bcell <- FindNeighbors(d10x.combined_bcell, reduction = "pca", dim
 d10x.combined_bcell <- FindClusters(d10x.combined_bcell, resolution = 0.3)
 
 fancy_PBMC_bcell<-fanciest_UMAP(d10x.combined_bcell, NA,F)
-save_plts(fancy_PBMC_bcell, "IFALD_liver_PBMC_bcell", w=5,h=4)
+save_plts(fancy_PBMC_bcell, "IFALD_liver_PBMC_bcell", w=6,h=4)
 
 
 
@@ -328,13 +342,15 @@ meta_myeloid<-d10x.combined_bcell@meta.data
 meta_myeloid$cell<-rownames(meta_myeloid)
 plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
 
+plt_myeloid$Tissue<-factor(plt_myeloid$Tissue, levels=c("Biopsy","Caudate","Right Lobe", "PBMC" ))
+
 len_x_bar<-((range(plt_myeloid$UMAP_1))[2]-(range(plt_myeloid$UMAP_1))[1])/10
 len_y_bar<-((range(plt_myeloid$UMAP_2))[2]-(range(plt_myeloid$UMAP_2))[1])/10
 arr <- list(x = min(plt_myeloid$UMAP_1), y = min(plt_myeloid$UMAP_2), x_len = len_x_bar, y_len = len_y_bar)
 
 forlegned_plot<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
   geom_point(aes(fill=Tissue),size=2, shape=21)+xlab("UMAP 1")+ylab("UMAP 2")+
-  scale_fill_manual(values=c("grey","cornflowerblue","red"))+theme_bw()+
+  scale_fill_manual(values=c("grey","cornflowerblue","forestgreen","red"))+theme_bw()+
   theme(legend.text = element_text(size=5),
         legend.title = element_text(size=6))
 nice_legend<-get_leg(forlegned_plot)
@@ -343,7 +359,7 @@ nice_legend<-get_leg(forlegned_plot)
 fanciest_UMAP<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
   geom_point(size = 0.06, colour= "black", stroke = 1)+
   geom_point(aes(color=Tissue),size=0.05)+xlab("UMAP 1")+ylab("UMAP 2")+
-  scale_color_manual(values=c("grey","cornflowerblue","red"))+
+  scale_color_manual(values=c("grey","cornflowerblue","forestgreen","red"))+
   annotate("segment",
            x = arr$x, xend = arr$x + c(arr$x_len, 0),
            y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
@@ -357,7 +373,7 @@ fanciest_UMAP <- fanciest_UMAP + annotate("text",x = min(plt_myeloid$UMAP_1)+(0.
 
 
 fancy_type_tissue<-plot_grid(fanciest_UMAP,nice_legend, rel_widths = c(5,2))
-save_plts(fancy_type_tissue, "IFALD_liver_PBMC_bcell_tissue", w=5,h=4)
+save_plts(fancy_type_tissue, "IFALD_liver_PBMC_bcell_tissue", w=6,h=4)
 
 
 #####################################

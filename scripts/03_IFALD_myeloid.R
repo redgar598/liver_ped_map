@@ -397,9 +397,68 @@ de_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Adult Healthy", ident.2 = "Ped Health
 de_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
 de_MHCII<-FindMarkers(d10x_raw_mhcII, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
 
-write.csv(de_RR, file=here("data","differential_age_RR.csv"))
-write.csv(de_KC, file=here("data","differential_age_KC.csv"))
-write.csv(de_MHCII, file=here("data","differential_age_MHCII.csv"))
+sig_de_age_RR<-de_RR[which(de_RR$p_val_adj < 0.005 & abs(de_RR$avg_log2FC) > 1),]
+sig_de_age_KC<-de_KC[which(de_KC$p_val_adj < 0.005 & abs(de_KC$avg_log2FC) > 1),]
+sig_de_age_MHCII<-de_MHCII[which(de_MHCII$p_val_adj < 0.005 & abs(de_MHCII$avg_log2FC) > 1),]
+
+write.csv(sig_de_age_RR, file=here("data","differential_age_RR.csv"))
+write.csv(sig_de_age_KC, file=here("data","differential_age_KC.csv"))
+write.csv(sig_de_age_MHCII, file=here("data","differential_age_MHCII.csv"))
+
+
+## Overlap table
+sig_de_age_KC$cell<-"KC Like"
+sig_de_age_RR$cell<-"RR Myeloid"
+sig_de_age_MHCII$cell<-"Macrophage (MHCII high)"
+
+sig_de_age_KC$gene<-rownames(sig_de_age_KC)
+sig_de_age_RR$gene<-rownames(sig_de_age_RR)
+sig_de_age_MHCII$gene<-rownames(sig_de_age_MHCII)
+
+sig_de_age<-rbind(sig_de_age_KC,sig_de_age_RR, sig_de_age_MHCII)
+
+sig_de_age_pos<-sig_de_age[which(sig_de_age$avg_log2FC>0),]
+sig_de_age_neg<-sig_de_age[which(sig_de_age$avg_log2FC<0),]
+
+summary_tbl_pos<-as.data.frame(sig_de_age_pos %>%
+                             select(gene, cell) %>% 
+                             group_by(gene) %>%
+                             mutate(all_cells = paste(cell, collapse = " | "))%>%
+                             select(gene, all_cells))
+summary_tbl_pos<-summary_tbl_pos[!duplicated(summary_tbl_pos),]
+summary_tbl_pos$all_cells<-gsub("\n"," ", summary_tbl_pos$all_cells)
+summary_tbl_pos$direction<-"Up in adults"
+
+summary_tbl_neg<-as.data.frame(sig_de_age_neg %>%
+                             select(gene, cell) %>% 
+                             group_by(gene) %>%
+                             mutate(all_cells = paste(cell, collapse = " | "))%>%
+                             select(gene, all_cells))
+summary_tbl_neg<-summary_tbl_neg[!duplicated(summary_tbl_neg),]
+summary_tbl_neg$all_cells<-gsub("\n"," ", summary_tbl_neg$all_cells)
+summary_tbl_neg$direction<-"Up in peds"
+
+summary_tbl<-rbind(summary_tbl_neg, summary_tbl_pos)
+
+summary_tbl$all_cells<-factor(summary_tbl$all_cells, levels=c("KC Like | RR Myeloid | Macrophage (MHCII high)",
+                                                              "KC Like | RR Myeloid", "KC Like | Macrophage (MHCII high)", "RR Myeloid | Macrophage (MHCII high)",
+                                                              "KC Like" , "RR Myeloid","Macrophage (MHCII high)"))
+summary_tbl[order(summary_tbl$direction, summary_tbl$all_cells),]
+
+write.csv(file=here("data","Significant_genes_adult_ped_myeloid.csv"),summary_tbl[order(summary_tbl$direction, summary_tbl$all_cells),])
+
+## IFALD differential
+de_IFALD_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Ped IFALD", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+de_IFALD_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Ped IFALD", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+de_IFALD_MHCII<-FindMarkers(d10x_raw_mhcII, ident.1 = "Ped IFALD", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+
+sig_de_IFALD_RR<-de_IFALD_RR[which(de_IFALD_RR$p_val_adj < 0.005 & abs(de_IFALD_RR$avg_log2FC) > 1),]
+sig_de_IFALD_KC<-de_IFALD_KC[which(de_IFALD_KC$p_val_adj < 0.005 & abs(de_IFALD_KC$avg_log2FC) > 1),]
+sig_de_IFALD_MHCII<-de_IFALD_MHCII[which(de_IFALD_MHCII$p_val_adj < 0.005 & abs(de_IFALD_MHCII$avg_log2FC) > 1),]
+
+write.csv(sig_de_IFALD_RR, file=here("data","differential_IFALD_RR.csv"))
+write.csv(sig_de_IFALD_KC, file=here("data","differential_IFALD_KC.csv"))
+write.csv(sig_de_IFALD_MHCII, file=here("data","differential_IFLAD_MHCII.csv"))
 
 
 ## pathway adult/IFALD versus healthy ped
@@ -632,7 +691,7 @@ kc_ifald<-c("CD5L","A2M","LY96")
 # RR age
 rr_age<-c("NFKBIA","JUNB","FOS")
 # RR IFALD
-rr_ifald<-c("AREG","C1QB")
+rr_ifald<-c("HLA-DPA1","HLA-DRA")
 
 # MHCII age
 mhcII_age<-c("HMOX1")

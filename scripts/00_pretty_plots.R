@@ -13,7 +13,7 @@ myColors_celltype <- c("#660cc7","#8642d1","#5612a3","#4b911d","#7a4202",
                        "#b01629","grey","#ce1256","#a6d96a","#750c32",
                        "#d9667f","#1b4003","#e0a8ce","#8a68b0","#3d1b63",
                        "#c9a8ed","#c48db4","#a3588d","#6ca647","#3a7d31",
-                       "#60ba5d","#3d1b63","#2dc918","#F4355B","#cca6f5")
+                       "#60ba5d","#3d1b63","#2dc918","#F4355B","#e4d5f2")
 color_possibilities_celltype<-c("B-cells","Mature B-cells","Plasma cells","CD3+ T-cells","Cholangiocytes",
                                 "gd T-cells","Hepatocytes","HSC","LSEC","Myeloid cells",
                                 "NK-like cells", "NK and T cells","NKT cells\n(Hepatocyte Like)","Cholangiocytes\n(Hepatocyte Like)","HSC\n(Hepatocyte Like)",

@@ -204,3 +204,43 @@ means<-table(cell_label_immune_ped$individual)/table(cell_label_all_ped$individu
 
 means<-table(cell_label_immune$individual)/table(cell_label_qc$individual)
 
+### Bar plot
+max_count<-as.data.frame(cell_label %>% 
+                           group_by(individual, CellType_refined,CellType_rough, Age) %>% 
+                           summarise(n = n()))
+
+max_count$individual_age<-sapply(1:nrow(max_count), function(x) paste(strsplit(max_count$individual[x], "_")[[1]][1],"\n(", max_count$Age[x],")", sep=""))
+
+bar_individual<-ggplot() + 
+  geom_bar(aes(fill=CellType_refined, y=n, x=reorder(individual_age, Age)),max_count, position="stack", stat="identity", color="black")+
+  theme_bw()+th+ylab("Cell Count")+xlab("Individual")+ fillscale_cellType +facet_grid(CellType_rough~., scales="free_y")
+bar_individual
+
+
+
+### Bar plot immune
+max_count<-as.data.frame(cell_label_immune %>% 
+                           group_by(individual, CellType_refined,CellType_rough, Age,age_condition) %>% 
+                           summarise(n = n()))
+
+max_count$individual_age<-sapply(1:nrow(max_count), function(x) paste(strsplit(max_count$individual[x], "_")[[1]][1],"\n(", max_count$Age[x],")", sep=""))
+
+bar_individual<-ggplot() + 
+  geom_bar(aes(fill=CellType_refined, y=n, x=reorder(individual_age, Age)),max_count, position="stack", stat="identity", color="black")+
+  theme_bw()+th+ylab("Cell Count")+xlab("Individual")+ fillscale_cellType 
+bar_individual
+
+
+max_count_percent<-as.data.frame(cell_label_immune %>%  group_by(individual,CellType_refined) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n / sum(n)))
+
+max_count_percent<-merge(max_count_percent, max_count[,c("individual","Age","individual_age","CellType_refined","CellType_rough","age_condition")], by=c("individual","CellType_refined"))
+
+bar_individual<-ggplot() + 
+  geom_bar(aes(fill=CellType_refined, y=freq, x=reorder(individual_age, Age)),max_count_percent, position="stack", stat="identity", color="black")+
+  theme_bw()+th+ylab("Cell Count")+xlab("Individual")+ fillscale_cellType +facet_grid(CellType_rough~., scales="free_y")
+bar_individual
+
+ggplot(max_count_percent, aes(age_condition, freq))+geom_boxplot()+geom_point()+facet_wrap(~CellType_refined, scales="free_y")
+

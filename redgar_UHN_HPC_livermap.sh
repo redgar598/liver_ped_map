@@ -38,17 +38,14 @@ module load R/4.2.1
 # submit job on login node?
 cd liver_ped_map
 git pull
+sbatch IFALD_exploratory_run.sh
+
+
+
 sbatch exploratory_run.sh
-
-
-
 sbatch de_monte_carlo_notparallel.sh
 sbatch metacell.sh
-
-
-sbatch IFALD_exploratory_run.sh
 sbatch Fetal_IFALD_exploratory_run.sh
-
 sbatch test_run.sh
 
 
