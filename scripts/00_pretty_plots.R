@@ -157,3 +157,11 @@ colscale_cellType_fetal_combo <- scale_color_manual(name="Cell Type",
 #                                    "Hepatocytes","Hepatocyte","Fetal Hepatocytes",
 #                                    "Doublet","Fetal NA"),names(combo_colors))]
 
+
+myColors_agecondition_fetal <- c("#D64A56","cornflowerblue","#374eb8","#41ab5d")
+color_possibilities_agecondition_fetal<-c( "Adult Healthy","Ped Healthy","Ped IFALD","Fetal Healthy")
+names(myColors_agecondition_fetal) <- color_possibilities_agecondition_fetal
+fillscale_agecondition_fetal <- scale_fill_manual(name="Age\nGroup",
+                                            values = myColors_agecondition_fetal, drop = T, limits=force)
+colscale_agecondition_fetal <- scale_color_manual(name="Age\nGroup",
+                                            values = myColors_agecondition_fetal, drop = T, limits=force)

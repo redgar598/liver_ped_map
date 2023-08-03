@@ -12,6 +12,7 @@ library(colorspace)
 library(cowplot)
 library(DropletQC)
 library(anndata)
+library(RColorBrewer)
 
 source("scripts/00_pretty_plots.R")
 source("scripts/00_entropy_d10x.R")
@@ -296,7 +297,7 @@ immunoglobins<-c("IGKC","IGHG1")
 ############
 ## subset objects for local plotting
 ############
-load(here("data","Fetal_IFALD_adult_ped_integrated.rds"))
+# load(here("data","Fetal_IFALD_adult_ped_integrated.rds"))
 
 # d10x.fetal_ped_IFALD$CellType_harmonized<-d10x.fetal_ped_IFALD$CellType_refined
 # levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFALD$CellType_harmonized)=="Kupffer Cell")]<-"KC Like"
@@ -304,12 +305,12 @@ load(here("data","Fetal_IFALD_adult_ped_integrated.rds"))
 # levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFALD$CellType_harmonized)%in%c("DC2","DC1" ))]<-"Macrophage\n(MHCII high)"
 # levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFALD$CellType_harmonized)%in%c("NK-like cells","NK" ))]<-"NK cell"
 
-d10x.combined_myeloid<-subset(d10x.fetal_ped_IFALD, subset = CellType_refined %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)","Cycling Myeloid",
-                                                                        "Macrophage\n(CLEC9A high)","VCAM1+ Erythroblastic Island Macrophage",
-                                                                        "pDC precursor","Neutrophil-myeloid progenitor","Mono-NK",
-                                                                        "Myeloid Erythrocytes\n(phagocytosis)","HSC/MPP","Monocyte-DC precursor","Mono-Mac",
-                                                                        "Kupffer Cell","Neutrophil-myeloid progenitor","Mono-NK",
-                                                                        "VCAM1+ Erythroblastic Island Macrophage","Monocyte","Erythroblastic Island Macrophage"))
+# d10x.combined_myeloid<-subset(d10x.fetal_ped_IFALD, subset = CellType_refined %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)","Cycling Myeloid",
+#                                                                         "Macrophage\n(CLEC9A high)","VCAM1+ Erythroblastic Island Macrophage",
+#                                                                         "pDC precursor","Neutrophil-myeloid progenitor","Mono-NK",
+#                                                                         "Myeloid Erythrocytes\n(phagocytosis)","HSC/MPP","Monocyte-DC precursor","Mono-Mac",
+#                                                                         "Kupffer Cell","Neutrophil-myeloid progenitor","Mono-NK",
+#                                                                         "VCAM1+ Erythroblastic Island Macrophage","Monocyte","Erythroblastic Island Macrophage"))
 # d10x.combined_bcell<-subset(d10x.fetal_ped_IFALD, subset = CellType_harmonized %in% c("Mature B-cells","pro B cell","pre pro B cell","B cell",
 #                                                                       "pre B cell","Plasma cells"))
 # d10x.combined_tcell<-subset(d10x.fetal_ped_IFALD, subset = CellType_harmonized %in% c("NK cell","CD3+ T-cells","CLNK T-cells","Cycling T-cells",
@@ -326,53 +327,58 @@ d10x.combined_myeloid<-subset(d10x.fetal_ped_IFALD, subset = CellType_refined %i
 ## Myeloid overlapping
 ########
 
-d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
-d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
-d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
-d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.2)
+# d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+# d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+# d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+# d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.2)
+# 
+# 
+# myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T)
+# myeloid_cluster_umap
+# save_plts(myeloid_cluster_umap, "IFALD_fetal_myeloid_cluster_umap", w=5,h=4)
+# 
+# myeloid_cluster_umap_individual<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T, split.by = "age_condition", ncol=2)
+# myeloid_cluster_umap_individual
+# save_plts(myeloid_cluster_umap_individual, "IFALD_fetal_myeloid_cluster_umap_individual", w=10,h=6)
+# 
+# DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T,
+#         group.by = "CellType_refined",split.by = "age_condition", ncol=2)+colscale_cellType_fetal
+# 
+# DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T,
+#         group.by = "CellType_refined")+colscale_cellType_fetal
+# 
+# 
+# d10x.combined_myeloid$CellType_harmonized<-as.factor(d10x.combined_myeloid$CellType_refined)
+# levels(d10x.combined_myeloid$CellType_harmonized)[which(levels(d10x.combined_myeloid$CellType_harmonized)=="Kupffer Cell")]<-"KC Like"
+# levels(d10x.combined_myeloid$CellType_harmonized)[which(levels(d10x.combined_myeloid$CellType_harmonized)%in%c("Mono-Mac"))]<-"Macrophage\n(MHCII high)"
+# levels(d10x.combined_myeloid$CellType_harmonized)[which(levels(d10x.combined_myeloid$CellType_harmonized)%in%c("Monocyte" ))]<-"RR Myeloid"
+# 
+# 
+# myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=F,
+#                                          group.by = "CellType_harmonized",split.by = "age_condition", ncol=2)+colscale_cellType_fetal_combo
+# myeloid_cluster_umap
+# save_plts(myeloid_cluster_umap, "IFALD_fetal_myeloid_cluster_umap_groups", w=10,h=6)
+# 
+# ######## Subset to just the overlapping cell types
+# d10x.combined_myeloid<-subset(d10x.combined_myeloid, subset = CellType_harmonized %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)",
+#                                                                                         "Macrophage\n(CLEC9A high)"))
+# d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+# d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+# d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+# d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.2)
+# 
+# save(d10x.combined_myeloid, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData"))
+# 
+# 
 
 
-myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T)
-myeloid_cluster_umap
-save_plts(myeloid_cluster_umap, "IFALD_fetal_myeloid_cluster_umap", w=5,h=4)
-
-myeloid_cluster_umap_individual<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T, split.by = "age_condition", ncol=2)
-myeloid_cluster_umap_individual
-save_plts(myeloid_cluster_umap_individual, "IFALD_fetal_myeloid_cluster_umap_individual", w=10,h=6)
-
-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T,
-        group.by = "CellType_refined",split.by = "age_condition", ncol=2)+colscale_cellType_fetal
-
-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T,
-        group.by = "CellType_refined")+colscale_cellType_fetal
-
-
-d10x.combined_myeloid$CellType_harmonized<-as.factor(d10x.combined_myeloid$CellType_refined)
-levels(d10x.combined_myeloid$CellType_harmonized)[which(levels(d10x.combined_myeloid$CellType_harmonized)=="Kupffer Cell")]<-"KC Like"
-levels(d10x.combined_myeloid$CellType_harmonized)[which(levels(d10x.combined_myeloid$CellType_harmonized)%in%c("Mono-Mac"))]<-"Macrophage\n(MHCII high)"
-levels(d10x.combined_myeloid$CellType_harmonized)[which(levels(d10x.combined_myeloid$CellType_harmonized)%in%c("Monocyte" ))]<-"RR Myeloid"
-
-
-myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=F,
-                                         group.by = "CellType_harmonized",split.by = "age_condition", ncol=2)+colscale_cellType_fetal_combo
-myeloid_cluster_umap
-save_plts(myeloid_cluster_umap, "IFALD_fetal_myeloid_cluster_umap_groups", w=10,h=6)
-
-######## Subset to just the overlapping cell types
-d10x.combined_myeloid<-subset(d10x.combined_myeloid, subset = CellType_harmonized %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)",
-                                                                                        "Macrophage\n(CLEC9A high)"))
-d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
-d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
-d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
-d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.2)
-
-save(d10x.combined_myeloid, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData"))
+load(here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData"))
 
 #load(here("/media/redgar/Seagate Portable Drive/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData"))
 
 
 DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=F,
-        group.by = "CellType_harmonized",split.by = "age_condition", ncol=2)+colscale_cellType_fetal
+        group.by = "CellType_harmonized",split.by = "age_condition", ncol=2)+colscale_cellType_fetal_combo
 
 
 ############
@@ -390,33 +396,148 @@ FeaturePlot(d10x.combined_myeloid, features = c("HBB","HBA2","FCGR3A","MARCO"), 
 #https://www.frontiersin.org/articles/10.3389/fimmu.2019.02035/full
 FeaturePlot(d10x.combined_myeloid, features = c("CD14","CD5L","FCGR3A","MARCO"), min.cutoff = "q9", pt.size=0.25)
 FeaturePlot(d10x.combined_myeloid, features = c("LYZ", "S100A8", "CD14", "S100A10", "HLA-DRA", "CD74", "IFI30", "HLA-DPB1", "SECISBP2L"), min.cutoff = "q9", pt.size=0.25)# SLAN: SECISBP2L
+                                
+                                # ## Dot plot of all markers
+                                # DefaultAssay(d10x.combined_myeloid) <- "RNA"
+                                # pdf(file = here("figures/IFALD_dot_plots_myeloid.pdf"), w=10, h=10)
+                                # DotPlot(object = d10x.combined_myeloid, features = B_genes)+xlab("B Cell Marker")
+                                # DotPlot(object = d10x.combined_myeloid, features = T_genes)+xlab("T Cell Marker")
+                                # DotPlot(object = d10x.combined_myeloid, features = NK_genes)+xlab("NK Cell Marker")
+                                # DotPlot(object = d10x.combined_myeloid, features = LEC_genes)+xlab("LSEC Marker")
+                                # DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
+                                # DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
+                                # DotPlot(object = d10x.combined_myeloid, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
+                                # DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[1:14])+xlab("HSC Marker")
+                                # DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[15:27])+xlab("HSC Marker")
+                                # DotPlot(object = d10x.combined_myeloid, features = Macrophage_genes)+xlab("Macrophage Marker")
+                                # dev.off()
+                                # DefaultAssay(d10x.combined_myeloid) <- "integrated"
+                                # 
+                                # ## one unclear cluster
+                                # cluster4.markers <-  FindMarkers(d10x.combined_myeloid, ident.1 = 6,ident.2 = 2, min.pct = 0.25)
+                                # head(cluster4.markers, n = 10)
+                                # head(cluster4.markers[which(cluster4.markers$avg_log2FC>0),], n = 20)
+                                # FeaturePlot(d10x.combined_myeloid, features = c("IDO1","HLA-DOB","C1orf54","CLEC9A"), min.cutoff = "q9", pt.size=1)
+                                # FeaturePlot(d10x.combined_myeloid, features = c("IDO1","CD83","FOXP1","CLEC9A"), min.cutoff = "q9", pt.size=1)
+                                # # https://www.frontiersin.org/articles/10.3389/fimmu.2022.1006501/full
+                                # #https://pesquisa.bvsalud.org/global-literature-on-novel-coronavirus-2019-ncov/resource/fr/covidwho-992926
+                                # 
 
-## Dot plot of all markers
-DefaultAssay(d10x.combined_myeloid) <- "RNA"
-pdf(file = here("figures/IFALD_dot_plots_myeloid.pdf"), w=10, h=10)
-DotPlot(object = d10x.combined_myeloid, features = B_genes)+xlab("B Cell Marker")
-DotPlot(object = d10x.combined_myeloid, features = T_genes)+xlab("T Cell Marker")
-DotPlot(object = d10x.combined_myeloid, features = NK_genes)+xlab("NK Cell Marker")
-DotPlot(object = d10x.combined_myeloid, features = LEC_genes)+xlab("LSEC Marker")
-DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
-DotPlot(object = d10x.combined_myeloid, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
-DotPlot(object = d10x.combined_myeloid, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
-DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[1:14])+xlab("HSC Marker")
-DotPlot(object = d10x.combined_myeloid, features = HSCs_genes[15:27])+xlab("HSC Marker")
-DotPlot(object = d10x.combined_myeloid, features = Macrophage_genes)+xlab("Macrophage Marker")
-dev.off()
-DefaultAssay(d10x.combined_myeloid) <- "integrated"
+source("scripts/00_plot_gene_exp.R")
 
-## one unclear cluster
-cluster4.markers <-  FindMarkers(d10x.combined_myeloid, ident.1 = 6,ident.2 = 2, min.pct = 0.25)
-head(cluster4.markers, n = 10)
-head(cluster4.markers[which(cluster4.markers$avg_log2FC>0),], n = 20)
-FeaturePlot(d10x.combined_myeloid, features = c("IDO1","HLA-DOB","C1orf54","CLEC9A"), min.cutoff = "q9", pt.size=1)
-FeaturePlot(d10x.combined_myeloid, features = c("IDO1","CD83","FOXP1","CLEC9A"), min.cutoff = "q9", pt.size=1)
-# https://www.frontiersin.org/articles/10.3389/fimmu.2022.1006501/full
-#https://pesquisa.bvsalud.org/global-literature-on-novel-coronavirus-2019-ncov/resource/fr/covidwho-992926
+# cluster0 age
+kc_age<-c("ALB","SAA1","CCL3","CCL4","HLA-DRB1","IL1B")
+# cluster0 IFALD
+kc_ifald<-c("CD5L","A2M","LY96")
+
+# RR age
+rr_age<-c("NFKBIA","JUNB","FOS")
+# RR IFALD
+rr_ifald<-c("HLA-DPA1","HLA-DRA")
+
+# MHCII age
+mhcII_age<-c("HMOX1")
+# MHCII IFALD
+mhcII_ifald<-c("VSIG4","CD163","MARCO")       
+
+plot_heat_map_fetal(d10x.combined_myeloid,c(kc_age, mhcII_age,rr_age), 
+              c("RR Myeloid","Macrophage\n(MHCII high)","KC Like" ))
+                                
+plot_grid(plot_gene_violin_fetal(d10x.combined_myeloid,"CCL3"),
+          plot_gene_violin_fetal(d10x.combined_myeloid,"CCL4"),
+          plot_gene_violin_fetal(d10x.combined_myeloid,"IL1B"),
+          plot_gene_violin_fetal(d10x.combined_myeloid,"HLA-DRB1"))
+
+plot_grid(plot_gene_UMAP(d10x.combined_myeloid,"CCL3",0),
+          plot_gene_UMAP(d10x.combined_myeloid,"CCL4",0),
+          plot_gene_UMAP(d10x.combined_myeloid,"IL1B",0),
+          plot_gene_UMAP(d10x.combined_myeloid,"HLA-DRB1",0))
+plot_gene_violin_fetal<-function(d10x, gene){
+
+  
+### plot individual genes split by cell type
+violin_fetal<-function(gene){
+  DefaultAssay(d10x.combined_myeloid) <- "RNA"
+  umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_myeloid, reduction = "umap"))#
+  umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
+  meta_myeloid<-d10x.combined_myeloid@meta.data
+  meta_myeloid$cell<-rownames(meta_myeloid)
+  plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
+  
+  cell_num_all<-as.data.frame(table(plt_myeloid$age_condition))
+  colnames(cell_num_all)<-c("age_condition","CellCount")
+  
+  gene_exp<-FetchData(d10x.combined_myeloid, vars=gene)
+  gene_exp$cell<-rownames(gene_exp)
+  plt_myeloid<-merge(plt_myeloid, gene_exp, by='cell')
+  
+  colnames(plt_myeloid)[which(colnames(plt_myeloid)==gene)]<-"expression"
+
+  plt_myeloid$age_condition<-factor(plt_myeloid$age_condition, levels=c("Fetal Healthy","Ped Healthy","Ped IFALD","Adult Healthy"))
+
+  ggplot(plt_myeloid, aes(age_condition,log(expression), fill=age_condition))+
+    geom_violin(fill="grey80",color="white")+geom_boxplot(aes(fill=age_condition),width=0.1)+fillscale_agecondition_fetal+
+    theme_bw()+th_present+xlab("Age Group")+ylab(paste(gene, "Expression (log)"))+
+    theme(legend.position = "none")+facet_wrap(~CellType_harmonized)
+}
+
+violin_fetal("HMOX1")
+violin_fetal("CCL4")
+violin_fetal("CCL3")
+violin_fetal("IL1B")
+
+violin_fetal("NFKBIA")
+violin_fetal("IL1B")
 
 
+
+################
+## Differential Expression
+################
+
+## age differential KC
+d10x_raw_KC<-subset(d10x.combined_myeloid, subset = CellType_harmonized %in% c("KC Like"))
+
+DefaultAssay(d10x_raw_KC) <- "RNA"
+Idents(d10x_raw_KC)<-d10x_raw_KC$age_condition
+table(d10x_raw_KC$age_condition)
+
+de_fetal_ped_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Fetal Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+de_ped_adult_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+de_fetal_adult_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Fetal Healthy", ident.2 = "Adult Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+
+
+## age differential RR
+d10x_raw_RR<-subset(d10x.combined_myeloid, subset = CellType_harmonized %in% c("RR Myeloid"))
+
+DefaultAssay(d10x_raw_RR) <- "RNA"
+Idents(d10x_raw_RR)<-d10x_raw_RR$age_condition
+table(d10x_raw_RR$age_condition)
+
+de_fetal_ped_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Fetal Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+de_ped_adult_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+de_fetal_adult_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Fetal Healthy", ident.2 = "Adult Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+
+## age differential MHCII
+d10x_raw_MHC<-subset(d10x.combined_myeloid, subset = CellType_harmonized %in% c("Macrophage\n(MHCII high)"))
+
+DefaultAssay(d10x_raw_MHC) <- "RNA"
+Idents(d10x_raw_MHC)<-d10x_raw_MHC$age_condition
+table(d10x_raw_MHC$age_condition)
+
+de_fetal_ped_MHC<-FindMarkers(d10x_raw_MHC, ident.1 = "Fetal Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+de_ped_adult_MHC<-FindMarkers(d10x_raw_MHC, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+de_fetal_adult_MHC<-FindMarkers(d10x_raw_MHC, ident.1 = "Fetal Healthy", ident.2 = "Adult Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+
+save(de_fetal_ped_MHC,de_ped_adult_MHC, de_fetal_adult_MHC, 
+     de_fetal_ped_RR,de_ped_adult_RR, de_fetal_adult_RR,
+     de_fetal_ped_KC,de_ped_adult_KC, de_fetal_adult_KC,
+     file=here("data","Fetal_ped_IFALD_adult_diffexpression_myeloid.RData"))
+
+
+# sig_de_fetal_ped<-de_fetal_ped[which(de_fetal_ped$p_val_adj < 0.005 & abs(de_fetal_ped$avg_log2FC) > 1),]
+# sig_de_fetal_ped[which(sig_de_fetal_ped$avg_log2FC>0),]
+# sig_de_fetal_ped[which(sig_de_fetal_ped$avg_log2FC<0),]
 
 
 

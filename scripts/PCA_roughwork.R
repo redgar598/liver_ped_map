@@ -65,6 +65,10 @@ cor.test(meta_continuous$Age, embed$PC_1)
 scatter_df<-cbind(meta_continuous, embed)
 ggplot(scatter_df, aes(PC_1,PC_2, color=Age))+geom_point()
 
+scatter_df2<-cbind(meta_categorical, embed)
+ggplot(scatter_df2, aes(PC_1,PC_2, color=age_condition))+geom_point()
+
+
 aov(embed[, 1] ~ meta_categorical$age_condition)$coef
 aov(embed[, 1] ~ meta_categorical$CellType_refined)$coef
 aov(embed[, 1] ~ meta_categorical$Phase)$coef
@@ -109,7 +113,7 @@ ggplot(boxplt_df, aes(age_condition,PC_2))+
 ## gene in PC2
 ###########
 Loadings<-as.data.frame(Loadings(d10x.combined_myeloid, reduction = "pca"))
-rownames(Loadings)[order(Loadings$PC_2)][1:10]
+rownames(Loadings)[order(Loadings$PC_2)][1:20]
 rownames(Loadings)[rev(order(Loadings$PC_2))][1:20]
 
 which(rownames(Loadings)[rev(order(Loadings$PC_2))]=="CCL4")
