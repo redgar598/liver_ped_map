@@ -455,40 +455,8 @@ FeaturePlot(d10x.combined_myeloid, features = c("LYZ", "S100A8", "CD14", "S100A1
 # plot_gene_violin_fetal<-function(d10x, gene)
 # 
 #   
-# ### plot individual genes split by cell type
-# violin_fetal<-function(gene){
-#   DefaultAssay(d10x.combined_myeloid) <- "RNA"
-#   umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_myeloid, reduction = "umap"))#
-#   umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
-#   meta_myeloid<-d10x.combined_myeloid@meta.data
-#   meta_myeloid$cell<-rownames(meta_myeloid)
-#   plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
-#   
-#   cell_num_all<-as.data.frame(table(plt_myeloid$age_condition))
-#   colnames(cell_num_all)<-c("age_condition","CellCount")
-#   
-#   gene_exp<-FetchData(d10x.combined_myeloid, vars=gene)
-#   gene_exp$cell<-rownames(gene_exp)
-#   plt_myeloid<-merge(plt_myeloid, gene_exp, by='cell')
-#   
-#   colnames(plt_myeloid)[which(colnames(plt_myeloid)==gene)]<-"expression"
-# 
-#   plt_myeloid$age_condition<-factor(plt_myeloid$age_condition, levels=c("Fetal Healthy","Ped Healthy","Ped IFALD","Adult Healthy"))
-# 
-#   ggplot(plt_myeloid, aes(age_condition,log(expression), fill=age_condition))+
-#     geom_violin(fill="grey80",color="white")+geom_boxplot(aes(fill=age_condition),width=0.1)+fillscale_agecondition_fetal+
-#     theme_bw()+th_present+xlab("Age Group")+ylab(paste(gene, "Expression (log)"))+
-#     theme(legend.position = "none")+facet_wrap(~CellType_harmonized)
-# }
-# 
-# violin_fetal("HMOX1")
-# violin_fetal("CCL4")
-# violin_fetal("CCL3")
-# violin_fetal("IL1B")
-# 
-# violin_fetal("NFKBIA")
-# violin_fetal("IL1B")
-# 
+
+
 
 
 ################
@@ -508,68 +476,144 @@ identical(colnames(d10x_myeloid), cell_label$index)
 
 d10x_myeloid <- AddMetaData(d10x_myeloid, metadata = cell_label)
 
-
-## age differential KC
-d10x_raw_KC<-subset(d10x_myeloid, subset = CellType_harmonized %in% c("KC Like"))
-
-DefaultAssay(d10x_raw_KC) <- "RNA"
-Idents(d10x_raw_KC)<-d10x_raw_KC$age_condition
-table(d10x_raw_KC$age_condition)
-
-de_fetal_ped_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Fetal Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
-de_ped_adult_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
-de_fetal_adult_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Fetal Healthy", ident.2 = "Adult Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
-
-
-## age differential RR
-d10x_raw_RR<-subset(d10x_myeloid, subset = CellType_harmonized %in% c("RR Myeloid"))
-
-DefaultAssay(d10x_raw_RR) <- "RNA"
-Idents(d10x_raw_RR)<-d10x_raw_RR$age_condition
-table(d10x_raw_RR$age_condition)
-
-de_fetal_ped_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Fetal Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
-de_ped_adult_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
-de_fetal_adult_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Fetal Healthy", ident.2 = "Adult Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
-
-## age differential MHCII
-d10x_raw_MHC<-subset(d10x_myeloid, subset = CellType_harmonized %in% c("Macrophage\n(MHCII high)"))
-
-DefaultAssay(d10x_raw_MHC) <- "RNA"
-Idents(d10x_raw_MHC)<-d10x_raw_MHC$age_condition
-table(d10x_raw_MHC$age_condition)
-
-de_fetal_ped_MHC<-FindMarkers(d10x_raw_MHC, ident.1 = "Fetal Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
-de_ped_adult_MHC<-FindMarkers(d10x_raw_MHC, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
-de_fetal_adult_MHC<-FindMarkers(d10x_raw_MHC, ident.1 = "Fetal Healthy", ident.2 = "Adult Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
-
-save(de_fetal_ped_MHC,de_ped_adult_MHC, de_fetal_adult_MHC, 
-     de_fetal_ped_RR,de_ped_adult_RR, de_fetal_adult_RR,
-     de_fetal_ped_KC,de_ped_adult_KC, de_fetal_adult_KC,
-     file=here("data","Fetal_ped_IFALD_adult_diffexpression_myeloid.RData"))
-
-load(here("/media/redgar/Seagate Portable Drive/processed_data/Fetal_ped_IFALD_adult_diffexpression_myeloid.RData"))
-
-
-sig_hits<-function(de, direction){
-  sig_de<-de[which(de$p_val_adj < 0.005 & abs(de$avg_log2FC) > 1),]
-  if(direction=="UP"){
-    sig_de[which(sig_de$avg_log2FC>0),]
-  }else{
-    if(direction=="DOWN"){
-      sig_de[which(sig_de$avg_log2FC<0),]
-    }else{
-      sig_de}}}
+save(d10x_myeloid, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_raw_myeloid_only.RData"))
+# 
+# ## age differential KC
+# d10x_raw_KC<-subset(d10x_myeloid, subset = CellType_harmonized %in% c("KC Like"))
+# 
+# DefaultAssay(d10x_raw_KC) <- "RNA"
+# Idents(d10x_raw_KC)<-d10x_raw_KC$age_condition
+# table(d10x_raw_KC$age_condition)
+# 
+# de_fetal_ped_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Fetal Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+# de_ped_adult_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+# de_fetal_adult_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Fetal Healthy", ident.2 = "Adult Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+# 
+# 
+# ## age differential RR
+# d10x_raw_RR<-subset(d10x_myeloid, subset = CellType_harmonized %in% c("RR Myeloid"))
+# 
+# DefaultAssay(d10x_raw_RR) <- "RNA"
+# Idents(d10x_raw_RR)<-d10x_raw_RR$age_condition
+# table(d10x_raw_RR$age_condition)
+# 
+# de_fetal_ped_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Fetal Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+# de_ped_adult_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+# de_fetal_adult_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Fetal Healthy", ident.2 = "Adult Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+# 
+# ## age differential MHCII
+# d10x_raw_MHC<-subset(d10x_myeloid, subset = CellType_harmonized %in% c("Macrophage\n(MHCII high)"))
+# 
+# DefaultAssay(d10x_raw_MHC) <- "RNA"
+# Idents(d10x_raw_MHC)<-d10x_raw_MHC$age_condition
+# table(d10x_raw_MHC$age_condition)
+# 
+# de_fetal_ped_MHC<-FindMarkers(d10x_raw_MHC, ident.1 = "Fetal Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+# de_ped_adult_MHC<-FindMarkers(d10x_raw_MHC, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+# de_fetal_adult_MHC<-FindMarkers(d10x_raw_MHC, ident.1 = "Fetal Healthy", ident.2 = "Adult Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+# 
+# save(de_fetal_ped_MHC,de_ped_adult_MHC, de_fetal_adult_MHC, 
+#      de_fetal_ped_RR,de_ped_adult_RR, de_fetal_adult_RR,
+#      de_fetal_ped_KC,de_ped_adult_KC, de_fetal_adult_KC,
+#      file=here("data","Fetal_ped_IFALD_adult_diffexpression_myeloid.RData"))
+# 
+# 
+# 
 
 
-sig_hits(de_fetal_ped_KC, "UP")
-sig_hits(de_fetal_ped_KC, "DOWN")
 
-sig_hits(de_ped_adult_KC, "UP")
-sig_hits(de_ped_adult_KC, "DOWN")
+# load(here("/media/redgar/Seagate Portable Drive/processed_data/Fetal_ped_IFALD_adult_diffexpression_myeloid.RData"))
+# 
+# 
+# sig_hits<-function(de, direction){
+#   sig_de<-de[which(de$p_val_adj < 0.005 & abs(de$avg_log2FC) > 1),]
+#   if(direction=="UP"){
+#     sig_de[which(sig_de$avg_log2FC>0),]
+#   }else{
+#     if(direction=="DOWN"){
+#       sig_de[which(sig_de$avg_log2FC<0),]
+#     }else{
+#       sig_de}}}
+# 
+# 
+# sig_hits(de_fetal_ped_KC, "UP")
+# sig_hits(de_fetal_ped_KC, "DOWN")
+# 
+# sig_hits(de_ped_adult_KC, "UP")
+# sig_hits(de_ped_adult_KC, "DOWN")
+# 
+# sig_hits(de_fetal_adult_KC, "UP")
+# sig_hits(de_fetal_adult_KC, "DOWN")
+# 
+# sig_hits(de_fetal_ped_RR, "UP")
+# sig_hits(de_fetal_ped_RR, "DOWN")
+# 
+# sig_hits(de_ped_adult_RR, "UP")
+# sig_hits(de_ped_adult_RR, "DOWN")
+# 
+# sig_hits(de_fetal_adult_RR, "UP")
+# sig_hits(de_fetal_adult_RR, "DOWN")
+# 
+# 
+# sig_hits(de_fetal_ped_MHC, "UP")
+# sig_hits(de_fetal_ped_MHC, "DOWN")
+# 
+# sig_hits(de_ped_adult_MHC, "UP")
+# sig_hits(de_ped_adult_MHC, "DOWN")
+# 
+# sig_hits(de_fetal_adult_MHC, "UP")
+# sig_hits(de_fetal_adult_MHC, "DOWN")
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# ### plot individual genes split by cell type
+# violin_fetal<-function(gene){
+#   DefaultAssay(d10x.combined_myeloid) <- "RNA"
+#   umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_myeloid, reduction = "umap"))#
+#   umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
+#   meta_myeloid<-d10x.combined_myeloid@meta.data
+#   meta_myeloid$cell<-rownames(meta_myeloid)
+#   plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
+#   
+#   cell_num_all<-as.data.frame(table(plt_myeloid$age_condition))
+#   colnames(cell_num_all)<-c("age_condition","CellCount")
+#   
+#   gene_exp<-FetchData(d10x.combined_myeloid, vars=gene)
+#   gene_exp$cell<-rownames(gene_exp)
+#   plt_myeloid<-merge(plt_myeloid, gene_exp, by='cell')
+#   
+#   colnames(plt_myeloid)[which(colnames(plt_myeloid)==gene)]<-"expression"
+#   
+#   plt_myeloid$age_condition<-factor(plt_myeloid$age_condition, levels=c("Fetal Healthy","Ped Healthy","Ped IFALD","Adult Healthy"))
+#   
+#   ggplot(plt_myeloid, aes(age_condition,log(expression), fill=age_condition))+
+#     geom_violin(fill="grey80",color="white")+geom_boxplot(aes(fill=age_condition),width=0.1)+fillscale_agecondition_fetal+
+#     theme_bw()+th_present+xlab("Age Group")+ylab(paste(gene, "Expression (log)"))+
+#     theme(legend.position = "none")+facet_wrap(~CellType_harmonized)
+# }
+# 
+# violin_fetal("HMOX1")
+# violin_fetal("CCL4")
+# violin_fetal("CCL3")
+# violin_fetal("IL1B")
+# 
+# violin_fetal("NFKBIA")
+# violin_fetal("IL1B")
+# 
 
-sig_hits(de_fetal_adult_KC, "UP")
-sig_hits(de_fetal_adult_KC, "DOWN")
+
+
+
+
+
+
+
+
+
 
 # 
 # #############
