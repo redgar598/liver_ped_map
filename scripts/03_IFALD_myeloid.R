@@ -81,6 +81,12 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+
+##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
+# This is log(TP10K+1)
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
+
 d10x_raw_KC<-subset(d10x, subset = CellType_refined %in% c("KC Like"))
 
 Idents(d10x_raw_KC)<-d10x_raw_KC$age_condition
@@ -180,6 +186,10 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
+# This is log(TP10K+1)
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
 d10x_raw_RR<-subset(d10x, subset = CellType_refined %in% c("RR Myeloid"))
 
 Idents(d10x_raw_RR)<-d10x_raw_RR$age_condition
@@ -281,6 +291,10 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
+# This is log(TP10K+1)
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
 d10x_raw_mhcII<-subset(d10x, subset = CellType_refined %in% c("Macrophage\n(MHCII high)"))
 
 Idents(d10x_raw_mhcII)<-d10x_raw_mhcII$age_condition
@@ -358,7 +372,7 @@ levels(plt_path$direction_label)<-c(0.1,-0.1)
 plt_path$direction_label<-as.numeric(as.character(plt_path$direction_label))
 
 # top and bottom 15
-plt_path<-rbind(plt_path[1:15,], plt_path[(nrow(plt_path)-15):(nrow(plt_path)),])
+#plt_path<-rbind(plt_path[1:15,], plt_path[(nrow(plt_path)-15):(nrow(plt_path)),])
 
 myeloid_GSEA<-ggplot(plt_path, aes(NES, reorder(pathway, NES)))+geom_point(aes(size=size, fill=Enrichment_Cell), shape=21)+
   theme_bw()+th_present+ylab("")+xlab("Normalized Enrichment Score")+
@@ -383,6 +397,10 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
+# This is log(TP10K+1)
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
 
 d10x_raw_KC<-subset(d10x, subset = CellType_refined %in% c("KC Like"))
 d10x_raw_RR<-subset(d10x, subset = CellType_refined %in% c("RR Myeloid"))
@@ -544,9 +562,9 @@ GSEA_all_myeloid<-plot_grid(ggplot(myeloid_res_overlap_plt, aes(test,pathway, fi
                               geom_hline(yintercept = 5.5, color="grey")+
                               geom_hline(yintercept = 10.5, color="grey")+
                               geom_hline(yintercept = 15.5, color="grey")+
-                              geom_hline(yintercept = 18.5, color="grey")+
                               geom_hline(yintercept = 26.5, color="grey")+
-                              geom_hline(yintercept = 28.5, color="grey")+
+                              geom_hline(yintercept = 31.5, color="grey")+
+                              geom_hline(yintercept = 34.5, color="grey")+
                               theme(legend.position="top",legend.justification = "left", legend.title.align = 7,
                                     title = element_text(size=9)),
                             ggplot(myeloid_res_overlap_plt_unique, aes(0,pathway))+
@@ -558,9 +576,9 @@ GSEA_all_myeloid<-plot_grid(ggplot(myeloid_res_overlap_plt, aes(test,pathway, fi
                               geom_hline(yintercept = 5.5, color="grey")+
                               geom_hline(yintercept = 10.5, color="grey")+
                               geom_hline(yintercept = 15.5, color="grey")+
-                              geom_hline(yintercept = 18.5, color="grey")+
                               geom_hline(yintercept = 26.5, color="grey")+
-                              geom_hline(yintercept = 28.5, color="grey"),
+                              geom_hline(yintercept = 31.5, color="grey")+
+                              geom_hline(yintercept = 34.5, color="grey"),
                             align="h",axis="tb", rel_widths = c(2,1))
 save_plts(GSEA_all_myeloid, "Myeloid_age_GSEA_heat", w=10.5,h=10)
 

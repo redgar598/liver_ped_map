@@ -452,7 +452,7 @@ FeaturePlot(d10x.combined_myeloid, features = c("LYZ", "S100A8", "CD14", "S100A1
 #           plot_gene_UMAP(d10x.combined_myeloid,"CCL4",0),
 #           plot_gene_UMAP(d10x.combined_myeloid,"IL1B",0),
 #           plot_gene_UMAP(d10x.combined_myeloid,"HLA-DRB1",0))
-# plot_gene_violin_fetal<-function(d10x, gene){
+# plot_gene_violin_fetal<-function(d10x, gene)
 # 
 #   
 # ### plot individual genes split by cell type
@@ -495,8 +495,22 @@ FeaturePlot(d10x.combined_myeloid, features = c("LYZ", "S100A8", "CD14", "S100A1
 ## Differential Expression
 ################
 
+cell_label<-d10x.combined_myeloid@meta.data
+
+d10x <- readRDS(here("data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
+d10x[["CellName"]] <- colnames(d10x)
+d10x_myeloid <- subset(d10x, subset = CellName %in% rownames(cell_label) )
+cell_label$index<-rownames(cell_label)
+cell_label<-cell_label[match(colnames(d10x_myeloid), cell_label$index),]
+identical(colnames(d10x_myeloid), cell_label$index)
+
+d10x_myeloid <- AddMetaData(d10x_myeloid, metadata = cell_label)
+
+
 ## age differential KC
-d10x_raw_KC<-subset(d10x.combined_myeloid, subset = CellType_harmonized %in% c("KC Like"))
+d10x_raw_KC<-subset(d10x_myeloid, subset = CellType_harmonized %in% c("KC Like"))
 
 DefaultAssay(d10x_raw_KC) <- "RNA"
 Idents(d10x_raw_KC)<-d10x_raw_KC$age_condition
@@ -508,7 +522,7 @@ de_fetal_adult_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Fetal Healthy", ident.2 =
 
 
 ## age differential RR
-d10x_raw_RR<-subset(d10x.combined_myeloid, subset = CellType_harmonized %in% c("RR Myeloid"))
+d10x_raw_RR<-subset(d10x_myeloid, subset = CellType_harmonized %in% c("RR Myeloid"))
 
 DefaultAssay(d10x_raw_RR) <- "RNA"
 Idents(d10x_raw_RR)<-d10x_raw_RR$age_condition
@@ -519,7 +533,7 @@ de_ped_adult_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Adult Healthy", ident.2 = "
 de_fetal_adult_RR<-FindMarkers(d10x_raw_RR, ident.1 = "Fetal Healthy", ident.2 = "Adult Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
 
 ## age differential MHCII
-d10x_raw_MHC<-subset(d10x.combined_myeloid, subset = CellType_harmonized %in% c("Macrophage\n(MHCII high)"))
+d10x_raw_MHC<-subset(d10x_myeloid, subset = CellType_harmonized %in% c("Macrophage\n(MHCII high)"))
 
 DefaultAssay(d10x_raw_MHC) <- "RNA"
 Idents(d10x_raw_MHC)<-d10x_raw_MHC$age_condition
@@ -534,12 +548,28 @@ save(de_fetal_ped_MHC,de_ped_adult_MHC, de_fetal_adult_MHC,
      de_fetal_ped_KC,de_ped_adult_KC, de_fetal_adult_KC,
      file=here("data","Fetal_ped_IFALD_adult_diffexpression_myeloid.RData"))
 
-
-# sig_de_fetal_ped<-de_fetal_ped[which(de_fetal_ped$p_val_adj < 0.005 & abs(de_fetal_ped$avg_log2FC) > 1),]
-# sig_de_fetal_ped[which(sig_de_fetal_ped$avg_log2FC>0),]
-# sig_de_fetal_ped[which(sig_de_fetal_ped$avg_log2FC<0),]
+load(here("/media/redgar/Seagate Portable Drive/processed_data/Fetal_ped_IFALD_adult_diffexpression_myeloid.RData"))
 
 
+sig_hits<-function(de, direction){
+  sig_de<-de[which(de$p_val_adj < 0.005 & abs(de$avg_log2FC) > 1),]
+  if(direction=="UP"){
+    sig_de[which(sig_de$avg_log2FC>0),]
+  }else{
+    if(direction=="DOWN"){
+      sig_de[which(sig_de$avg_log2FC<0),]
+    }else{
+      sig_de}}}
+
+
+sig_hits(de_fetal_ped_KC, "UP")
+sig_hits(de_fetal_ped_KC, "DOWN")
+
+sig_hits(de_ped_adult_KC, "UP")
+sig_hits(de_ped_adult_KC, "DOWN")
+
+sig_hits(de_fetal_adult_KC, "UP")
+sig_hits(de_fetal_adult_KC, "DOWN")
 
 # 
 # #############

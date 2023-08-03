@@ -68,6 +68,11 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+
+##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
+# This is log(TP10K+1)
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
 d10x_raw_hsc<-subset(d10x, subset = CellType_rough %in% c("HSC"))
 
 identical(colnames(d10x_raw_hsc), colnames(d10x.combined_hsc))
@@ -144,7 +149,7 @@ de<-de_0
     theme_bw()+th_present+ylab("")+xlab("Normalized Enrichment Score")+
     geom_text(aes(label=label),hjust="inward",  nudge_x = plt_path$direction_label, color="grey50", size=3)+
     geom_hline(yintercept=16.5, color="grey")
-  save_plts(HSC_GSEA, "GSEA_IFALD_HSC", w=15,h=6)
+  save_plts(HSC_GSEA, "GSEA_IFALD_HSC", w=20,h=6)
 
 
 ###########

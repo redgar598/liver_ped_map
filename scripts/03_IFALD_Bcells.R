@@ -62,6 +62,12 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+
+##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
+# This is log(TP10K+1)
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
+
 d10x_raw_bcell<-subset(d10x, subset = CellType_rough %in% c("B-cells"))
 rm(d10x)
 gc()
