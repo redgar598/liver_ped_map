@@ -422,73 +422,73 @@ FeaturePlot(d10x.combined_myeloid, features = c("LYZ", "S100A8", "CD14", "S100A1
                                 # # https://www.frontiersin.org/articles/10.3389/fimmu.2022.1006501/full
                                 # #https://pesquisa.bvsalud.org/global-literature-on-novel-coronavirus-2019-ncov/resource/fr/covidwho-992926
                                 # 
-
-source("scripts/00_plot_gene_exp.R")
-
-# cluster0 age
-kc_age<-c("ALB","SAA1","CCL3","CCL4","HLA-DRB1","IL1B")
-# cluster0 IFALD
-kc_ifald<-c("CD5L","A2M","LY96")
-
-# RR age
-rr_age<-c("NFKBIA","JUNB","FOS")
-# RR IFALD
-rr_ifald<-c("HLA-DPA1","HLA-DRA")
-
-# MHCII age
-mhcII_age<-c("HMOX1")
-# MHCII IFALD
-mhcII_ifald<-c("VSIG4","CD163","MARCO")       
-
-plot_heat_map_fetal(d10x.combined_myeloid,c(kc_age, mhcII_age,rr_age), 
-              c("RR Myeloid","Macrophage\n(MHCII high)","KC Like" ))
-                                
-plot_grid(plot_gene_violin_fetal(d10x.combined_myeloid,"CCL3"),
-          plot_gene_violin_fetal(d10x.combined_myeloid,"CCL4"),
-          plot_gene_violin_fetal(d10x.combined_myeloid,"IL1B"),
-          plot_gene_violin_fetal(d10x.combined_myeloid,"HLA-DRB1"))
-
-plot_grid(plot_gene_UMAP(d10x.combined_myeloid,"CCL3",0),
-          plot_gene_UMAP(d10x.combined_myeloid,"CCL4",0),
-          plot_gene_UMAP(d10x.combined_myeloid,"IL1B",0),
-          plot_gene_UMAP(d10x.combined_myeloid,"HLA-DRB1",0))
-plot_gene_violin_fetal<-function(d10x, gene){
-
-  
-### plot individual genes split by cell type
-violin_fetal<-function(gene){
-  DefaultAssay(d10x.combined_myeloid) <- "RNA"
-  umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_myeloid, reduction = "umap"))#
-  umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
-  meta_myeloid<-d10x.combined_myeloid@meta.data
-  meta_myeloid$cell<-rownames(meta_myeloid)
-  plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
-  
-  cell_num_all<-as.data.frame(table(plt_myeloid$age_condition))
-  colnames(cell_num_all)<-c("age_condition","CellCount")
-  
-  gene_exp<-FetchData(d10x.combined_myeloid, vars=gene)
-  gene_exp$cell<-rownames(gene_exp)
-  plt_myeloid<-merge(plt_myeloid, gene_exp, by='cell')
-  
-  colnames(plt_myeloid)[which(colnames(plt_myeloid)==gene)]<-"expression"
-
-  plt_myeloid$age_condition<-factor(plt_myeloid$age_condition, levels=c("Fetal Healthy","Ped Healthy","Ped IFALD","Adult Healthy"))
-
-  ggplot(plt_myeloid, aes(age_condition,log(expression), fill=age_condition))+
-    geom_violin(fill="grey80",color="white")+geom_boxplot(aes(fill=age_condition),width=0.1)+fillscale_agecondition_fetal+
-    theme_bw()+th_present+xlab("Age Group")+ylab(paste(gene, "Expression (log)"))+
-    theme(legend.position = "none")+facet_wrap(~CellType_harmonized)
-}
-
-violin_fetal("HMOX1")
-violin_fetal("CCL4")
-violin_fetal("CCL3")
-violin_fetal("IL1B")
-
-violin_fetal("NFKBIA")
-violin_fetal("IL1B")
-
+# 
+# source("scripts/00_plot_gene_exp.R")
+# 
+# # cluster0 age
+# kc_age<-c("ALB","SAA1","CCL3","CCL4","HLA-DRB1","IL1B")
+# # cluster0 IFALD
+# kc_ifald<-c("CD5L","A2M","LY96")
+# 
+# # RR age
+# rr_age<-c("NFKBIA","JUNB","FOS")
+# # RR IFALD
+# rr_ifald<-c("HLA-DPA1","HLA-DRA")
+# 
+# # MHCII age
+# mhcII_age<-c("HMOX1")
+# # MHCII IFALD
+# mhcII_ifald<-c("VSIG4","CD163","MARCO")       
+# 
+# plot_heat_map_fetal(d10x.combined_myeloid,c(kc_age, mhcII_age,rr_age), 
+#               c("RR Myeloid","Macrophage\n(MHCII high)","KC Like" ))
+#                                 
+# plot_grid(plot_gene_violin_fetal(d10x.combined_myeloid,"CCL3"),
+#           plot_gene_violin_fetal(d10x.combined_myeloid,"CCL4"),
+#           plot_gene_violin_fetal(d10x.combined_myeloid,"IL1B"),
+#           plot_gene_violin_fetal(d10x.combined_myeloid,"HLA-DRB1"))
+# 
+# plot_grid(plot_gene_UMAP(d10x.combined_myeloid,"CCL3",0),
+#           plot_gene_UMAP(d10x.combined_myeloid,"CCL4",0),
+#           plot_gene_UMAP(d10x.combined_myeloid,"IL1B",0),
+#           plot_gene_UMAP(d10x.combined_myeloid,"HLA-DRB1",0))
+# plot_gene_violin_fetal<-function(d10x, gene){
+# 
+#   
+# ### plot individual genes split by cell type
+# violin_fetal<-function(gene){
+#   DefaultAssay(d10x.combined_myeloid) <- "RNA"
+#   umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_myeloid, reduction = "umap"))#
+#   umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
+#   meta_myeloid<-d10x.combined_myeloid@meta.data
+#   meta_myeloid$cell<-rownames(meta_myeloid)
+#   plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
+#   
+#   cell_num_all<-as.data.frame(table(plt_myeloid$age_condition))
+#   colnames(cell_num_all)<-c("age_condition","CellCount")
+#   
+#   gene_exp<-FetchData(d10x.combined_myeloid, vars=gene)
+#   gene_exp$cell<-rownames(gene_exp)
+#   plt_myeloid<-merge(plt_myeloid, gene_exp, by='cell')
+#   
+#   colnames(plt_myeloid)[which(colnames(plt_myeloid)==gene)]<-"expression"
+# 
+#   plt_myeloid$age_condition<-factor(plt_myeloid$age_condition, levels=c("Fetal Healthy","Ped Healthy","Ped IFALD","Adult Healthy"))
+# 
+#   ggplot(plt_myeloid, aes(age_condition,log(expression), fill=age_condition))+
+#     geom_violin(fill="grey80",color="white")+geom_boxplot(aes(fill=age_condition),width=0.1)+fillscale_agecondition_fetal+
+#     theme_bw()+th_present+xlab("Age Group")+ylab(paste(gene, "Expression (log)"))+
+#     theme(legend.position = "none")+facet_wrap(~CellType_harmonized)
+# }
+# 
+# violin_fetal("HMOX1")
+# violin_fetal("CCL4")
+# violin_fetal("CCL3")
+# violin_fetal("IL1B")
+# 
+# violin_fetal("NFKBIA")
+# violin_fetal("IL1B")
+# 
 
 
 ################
