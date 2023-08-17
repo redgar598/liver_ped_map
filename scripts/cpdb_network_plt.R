@@ -120,7 +120,7 @@ arr <- list(x = min(plt$UMAP_1), y = min(plt$UMAP_2), x_len = len_x_bar, y_len =
 
 
 ##############
-## Differential expression with age and IFALD in RR
+## Differential expression with age
 ##############
 
 ## age differential
@@ -305,4 +305,24 @@ save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("CXCL8","CXCR1"),"CXCL8_C
 save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("APOE","TREM2"),"APOE_TREM2_receptor"), "UMAP_APOE_TREM2_receptor_map_celltype_network", w=9,h=6)
 save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("THBS1","CD36"),"THBS1_CD36"), "UMAP_THBS1_CD36_map_celltype_network", w=9,h=6)
 
+
+
+
+#### with network as well as coloured by expression but not a blend
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CCR5","CCL4"),"CCL4_CCR5",0.9), "UMAP_CCL4_CCR5_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CCR5","CCL3"),"CCL3_CCR5",0.9), "UMAP_CCL3_CCR5_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CCR1","CCL3"),"CCL3_CCR1",0.9), "UMAP_CCL3_CCR1_map_celltype_network", w=9,h=6)
+
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("IL1B","IL1R2"),"IL1B_IL1_receptor_inhibitor",0.9), "UMAP_IL1B_IL1_receptor_inhibitor_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("IL1B","IL1RAP"),"IL1B_IL1_receptor_inhibitor",0.9), "UMAP_IL1B_IL1_receptor_inhibitorAP_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("IL1B","IL1R1"),"IL1B_IL1_receptor",0.9), "UMAP_IL1B_IL1_receptor_map_celltype_network", w=9,h=6)
+
+
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CXCL3","CXCR2"),"CXCL3_CXCR2",0.9), "UMAP_CXCL3_CXCR2_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CXCL2","CXCR2"),"CXCL2_CXCR2",0.9), "UMAP_CXCL2_CXCR2_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CXCL8","CXCR2"),"CXCL8_CXCR2",0.9), "UMAP_CXCL8_CXCR2_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CXCL8","CXCR1"),"CXCL8_CXCR1",0.9), "UMAP_CXCL8_CXCR1_map_celltype_network", w=9,h=6)
+
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("APOE","TREM2"),"APOE_TREM2_receptor",0.9), "UMAP_APOE_TREM2_receptor_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("THBS1","CD36"),"THBS1_CD36",0.9), "UMAP_THBS1_CD36_map_celltype_network", w=9,h=6)
 

@@ -55,8 +55,9 @@ entropy_myeloidage<-entropy_plt(plt_entropy_age_condition, "age_condition", d10x
 entropy_myeloidage
 save_plts(entropy_myeloidage, "entropy_age_myeloid", w=15,h=10)
 
-
+#################
 ### add PC
+#################
 embed_PC12<-as.data.frame(Embeddings(d10x.combined_myeloid, reduction = "pca"))[,1:2]
 identical(rownames(embed_PC12), colnames(d10x.combined_myeloid))
 d10x.combined_myeloid <- AddMetaData(d10x.combined_myeloid, metadata = embed_PC12)
@@ -64,7 +65,44 @@ d10x.combined_myeloid <- AddMetaData(d10x.combined_myeloid, metadata = embed_PC1
 FeaturePlot(d10x.combined_myeloid, reduction="umap", features = c("PC_2","ALB"))
 FeaturePlot(d10x.combined_myeloid, reduction="umap", features = c("PC_1","ALB"))
 
+DimPlot(d10x.combined_myeloid, reduction = "pca", pt.size=0.25, label=F, group.by = "CellType_refined", split.by = "age_condition")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  annotate("text",x=-7, y=-9, label=paste0("n = ",comma(ncol(d10x.combined_myeloid))))
 
+FeaturePlot(d10x.combined_myeloid, reduction="pca", features = c("ALB"))
+
+ggplot(d10x.combined_myeloid@meta.data, aes(age_condition, PC_2))+
+  geom_violin(fill="lightgrey",color="white")+geom_boxplot(aes(fill=age_condition),width=0.25)+facet_wrap(~CellType_refined)+
+  fillscale_agecondition+theme_bw()
+
+
+Loadings<-as.data.frame(Loadings(d10x.combined_myeloid, reduction = "pca"))
+embed<-as.data.frame(Embeddings(d10x.combined_myeloid, reduction = "pca"))
+vars <- Stdev(d10x.combined_myeloid, reduction = "pca")^2
+Importance<-vars/sum(vars)
+print(Importance[1:10])
+
+rownames(Loadings)[order(Loadings$PC_2)][1:20]
+rownames(Loadings)[rev(order(Loadings$PC_2))][1:20]
+
+FeaturePlot(d10x.combined_myeloid, reduction="pca", features = c("CXCL12"))
+
+
+ggplot(d10x.combined_myeloid@meta.data, aes(x=PC_1, y=PC_2)) +
+  geom_point(aes(color=CellType_refined),alpha=0.1, shape=16, size=2) + 
+  geom_density_2d(bins=10, color="grey30")+
+  theme_bw()+colscale_cellType+facet_wrap(~age_condition)
+
+FeaturePlot(d10x.combined_myeloid, reduction="pca", features = c("HLA-DRA"), split.by = "age_condition")
+
+
+plot_gene_PCA(d10x.combined_myeloid, "HLA-DRA",0.7, T, "Macrophage\n(MHCII high)")
+plot_gene_PCA(d10x.combined_myeloid, "MARCO",0.7, T, "Macrophage\n(MHCII high)")
+plot_gene_PCA(d10x.combined_myeloid, "VSIG4",0.6, T, "Macrophage\n(MHCII high)")
+plot_gene_PCA(d10x.combined_myeloid, "S100A8",0.6, T, "Macrophage\n(MHCII high)")
+plot_gene_PCA(d10x.combined_myeloid, "S100A9",0.6, T, "Macrophage\n(MHCII high)")
+plot_gene_PCA(d10x.combined_myeloid, "CD163",0.6, T, "Macrophage\n(MHCII high)")
+plot_gene_PCA(d10x.combined_myeloid, "MRC1",0.6, T, "Macrophage\n(MHCII high)")
+plot_gene_PCA(d10x.combined_myeloid, "LYVE1",0.6, T, "Macrophage\n(MHCII high)")
 
 
 ##############
@@ -694,35 +732,59 @@ save_plts(myeloid_differential_violin, "IFALD_myeloid_diff_genes_withIFALD_myelo
 
 
 
+myeloid_differential<-plot_grid(plot_gene_UMAP(d10x.combined_myeloid,"LYVE1", 0.8),
+                                plot_gene_UMAP(d10x.combined_myeloid,"CD9", 0.8),
+                                plot_gene_UMAP(d10x.combined_myeloid,"CLEC10A", 0.8),
+                                plot_gene_UMAP(d10x.combined_myeloid,"HLA-DRB1", 0.8))
+myeloid_differential
+save_plts(myeloid_differential, "IFALD_myeloid_diff_genes_myeloidonly_tidy_MHCII_identity", w=7,h=5)
+
+
 
 #############
 ## Heat Map of differential genes
 #############
+d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+
+load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+
+cell_label$index<-rownames(cell_label)
+cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
+identical(colnames(d10x), cell_label$index)
+
+d10x <- AddMetaData(d10x, metadata = cell_label)
+##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
+# This is log(TP10K+1)
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
+d10x.combined_myeloid<-subset(d10x, subset = CellType_refined %in% c("RR Myeloid","Macrophage\n(MHCII high)","KC Like","Macrophage\n(CLEC9A high)","Cycling Myeloid","Myeloid Erythrocytes\n(phagocytosis)"))
+
+
 plot_heat_map(d10x.combined_myeloid,c("LY96","CETP","CCL4","IL1B","ALB"),NA )
 
 
 # cluster0 age
-kc_age<-c("ALB","SAA1","CCL3","CCL4","HLA-DRB1","IL1B")
+kc_age<-c("ALB","SAA1","CCL3","CCL4","IL1B")
 # cluster0 IFALD
 kc_ifald<-c("CD5L","A2M","LY96")
 
 # RR age
-rr_age<-c("NFKBIA","JUNB","FOS")
+rr_age<-c("AREG","FOS")
 # RR IFALD
-rr_ifald<-c("HLA-DPA1","HLA-DRA")
+rr_ifald<-c("S100A8","S100A9")
 
 # MHCII age
-mhcII_age<-c("HMOX1")
+mhcII_age<-c("HMOX1", "APOE")
 # MHCII IFALD
-mhcII_ifald<-c("VSIG4","CD163","MARCO")
+mhcII_ifald<-c("VSIG4","CD163","HLA-DPA1","HLA-DRA")
 
 myeloid_age_heat<-plot_heat_map(d10x.combined_myeloid,c(kc_age, mhcII_age,rr_age), 
-                                c("RR Myeloid","Macrophage\n(MHCII high)","KC Like" ))
-save_plts(myeloid_age_heat, "Myeloid_age_heat", w=10,h=4)
+                                c("KC Like","Macrophage\n(MHCII high)","RR Myeloid"),T)
+save_plts(myeloid_age_heat, "Myeloid_age_heat", w=7,h=5)
 
 myeloid_IFALD_heat<-plot_heat_map(d10x.combined_myeloid,c(kc_ifald,mhcII_ifald,rr_ifald ), 
-                                  c("RR Myeloid","Macrophage\n(MHCII high)","KC Like" ))
-save_plts(myeloid_IFALD_heat, "Myeloid_IFALD_heat", w=10,h=4)
+                                  c("KC Like","Macrophage\n(MHCII high)","RR Myeloid"),T)
+save_plts(myeloid_IFALD_heat, "Myeloid_IFALD_heat", w=7,h=4)
 
 
 

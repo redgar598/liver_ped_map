@@ -105,25 +105,21 @@ plot_gene_violin_fetal<-function(d10x, gene){
   
 }
 
-
-plot_heat_map<-function(d10x, gene, cellsubset){ 
+plot_heat_map<-function(d10x, gene, cellsubset, sig_label){ 
   DefaultAssay(d10x) <- "RNA"
-  umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x, reduction = "umap"))#
-  umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
   meta_myeloid<-d10x@meta.data
   meta_myeloid$cell<-rownames(meta_myeloid)
-  plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
   
-  if(is.character(cellsubset)){plt_myeloid<-plt_myeloid[which(plt_myeloid$CellType_refined%in%cellsubset),]}
+  if(is.character(cellsubset)){meta_myeloid<-meta_myeloid[which(meta_myeloid$CellType_refined%in%cellsubset),]}
   
-  cell_num_all<-as.data.frame(table(plt_myeloid$age_condition, plt_myeloid$CellType_refined))
+  cell_num_all<-as.data.frame(table(meta_myeloid$age_condition, meta_myeloid$CellType_refined))
   colnames(cell_num_all)<-c("age_condition","CellType_refined","CellCount")
   
   gene_exp<-FetchData(d10x, vars=gene)
   gene_exp$cell<-rownames(gene_exp)
   
-  plt_myeloid<-plt_myeloid[,c("age_condition","CellType_refined","cell")]
-  plt_myeloid<-merge(plt_myeloid, gene_exp, by='cell')
+  meta_myeloid<-meta_myeloid[,c("age_condition","CellType_refined","cell")]
+  plt_myeloid<-merge(meta_myeloid, gene_exp, by='cell')
   
   melt_exp<-melt(plt_myeloid)
   
@@ -144,12 +140,24 @@ plot_heat_map<-function(d10x, gene, cellsubset){
   
   plt_exp_summary$variable<-factor(plt_exp_scaled$variable, levels=rev(gene))
   
-  ggplot(plt_exp_summary, aes( age_condition,variable, fill=scaled))+
-    geom_tile()+facet_grid(.~CellType_refined, scales = "free_y", space = "free_y")+
-    th+theme_classic()+scale_fill_gradientn(colours = colorRampPalette(rev(brewer.pal(8, 'RdBu')), space='Lab')(100), name="Scaled\nMean\nExpression")+
-    ylab("")+xlab("")
+  plt_exp_summary$age_condition<-as.factor(plt_exp_summary$age_condition)
+  levels(plt_exp_summary$age_condition)<-c("Ped\nHealthy","Ped\nIFALD","Adult\nHealthy")
+  
+  plt_exp_summary$CellType_refined<-factor(plt_exp_scaled$CellType_refined, levels=cellsubset)
+  
+  if(sig_label==T){
+    sig<-de[which(de$variable%in%gene),]
+    ggplot()+
+      geom_tile(aes( age_condition,variable, fill=scaled), plt_exp_summary)+facet_grid(.~CellType_refined, scales = "free_y", space = "free_y")+
+      th+theme_classic()+scale_fill_gradientn(colours = colorRampPalette(rev(brewer.pal(8, 'RdBu')), space='Lab')(100), name="Scaled\nMean\nExpression")+
+      ylab("")+xlab("")+geom_text(data=sig, aes(age_condition,variable, label=label))
+  }else{  
+    ggplot(plt_exp_summary, aes( age_condition,variable, fill=scaled))+
+      geom_tile()+facet_grid(.~CellType_refined, scales = "free_y", space = "free_y")+
+      th+theme_classic()+scale_fill_gradientn(colours = colorRampPalette(rev(brewer.pal(8, 'RdBu')), space='Lab')(100), name="Scaled\nMean\nExpression")+
+      ylab("")+xlab("")
+  }
 }
-
 
 
 plot_heat_map_fetal<-function(d10x, gene, cellsubset){ 
@@ -197,6 +205,86 @@ plot_heat_map_fetal<-function(d10x, gene, cellsubset){
     th+theme_classic()+scale_fill_gradientn(colours = colorRampPalette(rev(brewer.pal(8, 'RdBu')), space='Lab')(100), name="Scaled\nMean\nExpression")+
     ylab("")+xlab("")
 }
+
+## expression PCA highlight cell type
+plot_gene_PCA<-function(d10x, gene, percentile, split, highlight){
+  ### plot individual genes
+  if(length(grep("PC_1", colnames(d10x)))>0){
+    plt_myeloid<-d10x@meta.data
+  }else{
+    DefaultAssay(d10x) <- "RNA"
+    umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x, reduction = "pca"))#
+    umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
+    meta_myeloid<-d10x@meta.data
+    meta_myeloid$cell<-rownames(meta_myeloid)
+    plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")}
+  
+  cell_num_all<-as.data.frame(table(plt_myeloid$age_condition))
+  colnames(cell_num_all)<-c("age_condition","CellCount")
+  
+  len_x_bar<-((range(plt_myeloid$PC_1))[2]-(range(plt_myeloid$PC_1))[1])/10
+  len_y_bar<-((range(plt_myeloid$PC_2))[2]-(range(plt_myeloid$PC_2))[1])/10
+  arr <- list(x = min(plt_myeloid$PC_1), y = min(plt_myeloid$PC_2), x_len = len_x_bar, y_len = len_y_bar)
+  
+  
+  gene_exp<-FetchData(d10x, vars=gene)
+  gene_exp$cell<-rownames(gene_exp)
+  plt_myeloid<-merge(plt_myeloid, gene_exp, by='cell')
+  
+  exp_limit<-quantile(plt_myeloid[, which(colnames(plt_myeloid)==gene)], percentile)
+  plt_myeloid$gene_exp_limited<-NA
+  over_limit<-which(plt_myeloid[, which(colnames(plt_myeloid)==gene)]>exp_limit)
+  plt_myeloid$gene_exp_limited[over_limit]<-plt_myeloid[over_limit, which(colnames(plt_myeloid)==gene)]
+  plt_myeloid<-plt_myeloid[rev(order(plt_myeloid$gene_exp_limited)),]
+  
+  plt_myeloid<-rbind(plt_myeloid[which(is.na(plt_myeloid$gene_exp_limited)),],
+                     plt_myeloid[which(!(is.na(plt_myeloid$gene_exp_limited))),][(order(plt_myeloid[which(!(is.na(plt_myeloid$gene_exp_limited))),]$gene_exp_limited)),])
+  
+  
+  if(is.na(highlight)){
+    exp_umap<-ggplot(plt_myeloid, aes(PC_1,PC_2))+
+      geom_point(aes(color=log(gene_exp_limited)),size=0.75)+xlab("PC1")+ylab("PC2")+
+      scale_color_continuous_sequential(palette = "Blues 3", rev=T, 
+                                        name=paste(gene, "\nExpression\n(log)"),na.value = "grey80")+
+      annotate("segment", 
+               x = arr$x, xend = arr$x + c(arr$x_len, 0), 
+               y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
+               arrow = arrow(type = "closed", length = unit(4, 'pt'))) +
+      theme_void()+theme(legend.text=element_text(size=6),
+                         legend.title=element_text(size=8), 
+                         plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
+                         axis.title.x = element_text(size=5,hjust = 0.05),
+                         axis.title.y = element_text(size=5,hjust = 0.05,angle = 90))
+  }else{
+    plt_myeloid$highlight<-"0"
+    plt_myeloid$highlight[which(plt_myeloid$CellType_refined==highlight)]<-"1"
+    
+    exp_umap<-ggplot(plt_myeloid, aes(PC_1,PC_2))+
+      geom_point(aes(color=log(gene_exp_limited)),size=0.75)+
+      geom_point(data=plt_myeloid[which(plt_myeloid$highlight==1),], size = 0.9, colour= "black", stroke = 1)+
+      geom_point(aes(color=log(gene_exp_limited)),data=plt_myeloid[which(plt_myeloid$highlight==1),], size=0.75)+
+      xlab("PC1")+ylab("PC2")+
+      scale_color_continuous_sequential(palette = "Blues 3", rev=T, 
+                                        name=paste(gene, "\nExpression\n(log)"),na.value = "grey80")+
+      annotate("segment", 
+               x = arr$x, xend = arr$x + c(arr$x_len, 0), 
+               y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
+               arrow = arrow(type = "closed", length = unit(4, 'pt'))) +
+      theme_void()+theme(legend.text=element_text(size=6),
+                         legend.title=element_text(size=8), 
+                         plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
+                         axis.title.x = element_text(size=5,hjust = 0.05),
+                         axis.title.y = element_text(size=5,hjust = 0.05,angle = 90))
+  }
+  
+  
+  if(split==T){ exp_umap + facet_wrap(~age_condition, ncol=3)}else{exp_umap}
+}
+
+
+
+
+
 
 
 ################
@@ -447,6 +535,156 @@ plot_gene_UMAP_2gene_network<-function(d10x, gene,interaction_pair){
   
   plot_grid(umap_network,
             plot_grid(interaction_legend,nice_legend, plot_grid(NULL,exp_legend,NULL, ncol=3, rel_widths = c(0.3,1,0.3)) ,ncol=1,rel_heights = c(0.25,1,0.6)),
+            rel_widths = c(2,1))
+  
+}
+
+
+
+
+
+plot_gene_UMAP_2gene_network_notblend<-function(d10x, gene,interaction_pair, percentile){
+  differentialexp_plt_notself_pair<-differentialexp_plt_notself[which(differentialexp_plt_notself$interacting_pair==interaction_pair),]
+  
+  ### plot individual genes
+  DefaultAssay(d10x) <- "RNA"
+  umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x, reduction = "umap"))#
+  umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
+  meta_myeloid<-d10x@meta.data
+  meta_myeloid$cell<-rownames(meta_myeloid)
+  plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
+  
+  cell_num_all<-as.data.frame(table(plt_myeloid$age_condition))
+  colnames(cell_num_all)<-c("age_condition","CellCount")
+  
+  len_x_bar<-((range(plt_myeloid$UMAP_1))[2]-(range(plt_myeloid$UMAP_1))[1])/10
+  len_y_bar<-((range(plt_myeloid$UMAP_2))[2]-(range(plt_myeloid$UMAP_2))[1])/10
+  arr <- list(x = min(plt_myeloid$UMAP_1), y = min(plt_myeloid$UMAP_2), x_len = len_x_bar, y_len = len_y_bar)
+  
+  
+  gene_exp<-FetchData(d10x, vars=gene)
+  gene_exp$cell<-rownames(gene_exp)
+  plt_myeloid<-merge(plt_myeloid, gene_exp, by='cell')
+  
+  
+  ### non zero expression over the 90th percentile
+  exp_limit1<-quantile(plt_myeloid[, which(colnames(plt_myeloid)==gene[1])], percentile)
+  exp_limit2<-quantile(plt_myeloid[, which(colnames(plt_myeloid)==gene[2])], percentile)
+  
+  both_gene_over<-plt_myeloid[which(plt_myeloid[, which(colnames(plt_myeloid)==gene[1])]>=exp_limit1 &
+                                      plt_myeloid[, which(colnames(plt_myeloid)==gene[1])]>0 &
+                                      plt_myeloid[, which(colnames(plt_myeloid)==gene[2])]>=exp_limit2 &
+                                      plt_myeloid[, which(colnames(plt_myeloid)==gene[2])]>0),]
+  both_gene_over$color<-"Both Highly Expressed"
+  
+  gene1_over<-plt_myeloid[which(plt_myeloid[, which(colnames(plt_myeloid)==gene[1])]>=exp_limit1 &
+                                  plt_myeloid[, which(colnames(plt_myeloid)==gene[1])]>0),]
+  gene1_over<-gene1_over[which(!(gene1_over$cell%in%both_gene_over$cell)),]
+  gene1_over$color<-paste(gene[1],"Highly Expressed")
+  
+  gene2_over<-plt_myeloid[which(plt_myeloid[, which(colnames(plt_myeloid)==gene[2])]>=exp_limit2 &
+                                  plt_myeloid[, which(colnames(plt_myeloid)==gene[2])]>0),]
+  gene2_over<-gene2_over[which(!(gene2_over$cell%in%both_gene_over$cell)),]
+  gene2_over$color<-paste(gene[2],"Highly Expressed")
+  
+  plt_point_color<-rbind(both_gene_over, gene1_over, gene2_over)
+  plt_point_color<-plt_point_color[order(plt_point_color$cell),]
+  
+  
+  ## Network UMAP overlay
+  umap_network<-ggplot()+
+    geom_point(aes(UMAP_1,UMAP_2),plt_myeloid, size = 1, colour= "black", stroke = 1)+
+    geom_point(aes(UMAP_1,UMAP_2),plt_myeloid, color="grey",size=0.75)+
+    geom_point(aes(UMAP_1,UMAP_2, color=color),plt_point_color, size=0.5)+
+    geom_rect(data=plt_median, mapping=aes(xmin=min(mean_umap1)*1.1, xmax=max(mean_umap1)*1.21, ymin=min(mean_umap2)*1.25, ymax=max(mean_umap2)*1.5), fill = "white", alpha=0.05)+
+    xlab("UMAP 1")+ylab("UMAP 2")+
+    scale_color_manual(values=c("#88a000","#b80783","#03008e"))+
+    geom_point(aes(mean_umap1,mean_umap2, fill=CellType_refined), data=plt_median,size=4, shape=21, color="white")+
+    geom_curve(
+      data = differentialexp_plt_notself_pair,
+      aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y, alpha=as.factor(differential)), 
+      arrow = arrow(length = unit(0.01, "npc"),type = "closed"),
+      color = "white",curvature = -0.3,
+      lineend = "round", size=1.15) + 
+    geom_curve(
+      data = differentialexp_plt_notself_pair,
+      aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y, alpha=as.factor(differential)), 
+      arrow = arrow(length = unit(0.01, "npc"),type = "closed"),
+      color = "grey10",curvature = -0.3,
+      lineend = "round") +  scale_alpha_manual(values=c(1,0.5)) +
+    fillscale_cellType+
+    annotate("segment", 
+             x = arr$x, xend = arr$x + c(arr$x_len, 0), 
+             y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
+             arrow = arrow(type = "closed", length = unit(4, 'pt'))) +
+    theme_void()+theme(legend.text=element_text(size=6),
+                       legend.title=element_text(size=8), 
+                       plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
+                       axis.title.x = element_text(size=7,hjust = 0.05, vjust = 10),
+                       axis.title.y = element_text(size=7,hjust = 0.05, vjust=-9,angle = 90),
+                       legend.position = "none")
+  
+  
+  ## Cell type node legend
+  nice_legend<-get_leg(ggplot()+ 
+                         geom_point(aes(mean_umap1,mean_umap2, fill=CellType_refined), 
+                                    data=plt_median,size=3, shape=21, color="white")+
+                         fillscale_cellType+theme_void()+
+                         theme(legend.text=element_text(size=8),legend.title=element_text(size=10),
+                               plot.margin = margin(0.1,0.1,0.1,0.1, "cm")))
+  
+  ## gene expression legend
+  exp_legend<-get_leg(ggplot()+
+                        geom_point(aes(UMAP_1,UMAP_2, color=color),plt_point_color, size=2, alpha=0.5)+
+                        scale_color_manual(values=c("#88a000","#b80783","#03008e"), 
+                                           name=paste("Gene Expression\n(Higher than ", percentile*100, "th\npercentile for gene",sep=""))+
+                        theme(legend.text=element_text(size=8),legend.title=element_text(size=10),
+                              plot.margin = margin(0.1,0.1,0.1,0.1, "cm")))
+  
+  
+  ## Interaction Legend
+  ligand<-strsplit(interaction_pair,"_")[[1]][1]
+  receptor<-strsplit(interaction_pair,"_")[[1]][2]
+  
+  if(sum(strsplit(interaction_pair,"_")[[1]]%in%de_KC$X)==2){
+    interaction_legend<- ggplot()+
+      annotate("text", label="Ligand", x = 1, y = 1.01, color="black",  fontface =2)+
+      annotate("text", label="Receptor", x = 2, y = 1.01,color="black", fontface =2)+
+      annotate("text", label=ligand, x = 1, y = 1, color=myColors_celltype[which(names(myColors_celltype)=="KC Like")])+
+      annotate("text", label=receptor, x = 2, y = 1,color=myColors_celltype[which(names(myColors_celltype)=="KC Like")])+
+      annotate("segment", 
+               x = 1.3, xend = 1.7 , 
+               y = 1, yend = 1, size=0.25,color="black",
+               arrow = arrow(type = "closed", length = unit(2, 'pt')))+theme_void()+ylim(0.99,1.02)+xlim(0.3,3)
+    
+  }else{if(which(strsplit(interaction_pair,"_")[[1]]%in%de_KC$X)==1){
+    
+    interaction_legend<-ggplot()+
+      annotate("text", label="Ligand", x = 1, y = 1.01, color="black",  fontface =2)+
+      annotate("text", label="Receptor", x = 2, y = 1.01,color="black", fontface =2)+
+      annotate("text", label=ligand, x = 1, y = 1, color=myColors_celltype[which(names(myColors_celltype)=="KC Like")])+
+      annotate("text", label=receptor, x = 2, y = 1,color="black")+
+      annotate("segment", 
+               x = 1.3, xend = 1.7 , 
+               y = 1, yend = 1, size=0.6,color="black",
+               arrow = arrow(type = "closed", length = unit(5, 'pt')))+theme_void()+ylim(0.99,1.02)+xlim(0.3,3)
+  } else {
+    
+    if(sum(strsplit(interaction_pair,"_")[[1]]%in%de_KC$X)==2){
+      interaction_legend<- ggplot()+
+        annotate("text", label="Ligand", x = 1, y = 1.01, color="black",  fontface =2)+
+        annotate("text", label="Receptor", x = 2, y = 1.01,color="black", fontface =2)+
+        annotate("text", label=ligand, x = 1, y = 1, color="black")+
+        annotate("text", label=receptor, x = 2, y = 1,color=myColors_celltype[which(names(myColors_celltype)=="KC Like")])+
+        annotate("segment", 
+                 x = 1.3, xend = 1.7 , 
+                 y = 1, yend = 1, size=0.25,color="black",
+                 arrow = arrow(type = "closed", length = unit(2, 'pt')))+theme_void()+ylim(0.99,1.02)+xlim(0.3,3)
+    }}}
+  
+  
+  plot_grid(umap_network,
+            plot_grid(interaction_legend,nice_legend, exp_legend,ncol=1,rel_heights = c(0.2,1,0.5)),
             rel_widths = c(2,1))
   
 }
