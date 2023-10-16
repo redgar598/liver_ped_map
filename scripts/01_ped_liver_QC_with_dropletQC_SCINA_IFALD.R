@@ -641,7 +641,7 @@ save_plts(nFeature_cluster_umap, "IFALD_rPCA_nFeature_cluster_umap", w=6,h=4)
 # 
 # d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
 # 
-# signatures<-read.csv(here("data/Liver_Markers - Human_for_SCINA.csv"))
+# signatures<-read.csv(here("data/Liver_Markers_with_citations - Human_for_SCINA.csv"))
 # 
 # d10x_exp <- GetAssayData(d10x)
 # results = SCINA(d10x_exp, signatures, max_iter = 100, convergence_n = 10,
@@ -653,11 +653,13 @@ save_plts(nFeature_cluster_umap, "IFALD_rPCA_nFeature_cluster_umap", w=6,h=4)
 # 
 # 
 # ### Cell subsets
-# RBCsignatures<-read.csv(here("data/Liver_Markers - Erythrocytes.csv"))
-# Neutrosignatures<-read.csv(here("data/Liver_Markers - Neurtophil.csv"))
-# Tsignatures<-read.csv(here("data/Liver_Markers - Tcell.csv"))
-# Bsignatures<-read.csv(here("data/Liver_Markers - Bcell.csv"))
-# myeloidsignatures<-read.csv(here("data/Liver_Markers - Myeloid.csv"))
+### Cell subsets
+# RBCsignatures<-read.csv(here("data/Liver_Markers_with_citations - Erythrocytes.csv"))
+# Neutrosignatures<-read.csv(here("data/Liver_Markers_with_citations - Neutrophil.csv"))
+# Tsignatures<-read.csv(here("data/Liver_Markers_with_citations - Tcell.csv"))
+# Bsignatures<-read.csv(here("data/Liver_Markers_with_citations - Bcell.csv"))
+# myeloidsignatures<-read.csv(here("data/Liver_Markers_with_citations - Myeloid.csv"))
+#
 # 
 # # d10x.combined_RBC<-subset(d10x, subset = SCINA_broad == "Erythrocytes")
 # # d10x_exp <- GetAssayData(d10x.combined_RBC)
@@ -1303,7 +1305,7 @@ plt_entropy_age<-entropy_d10(d10x.combined, "AgeGroup")
 plt_entropy_chem<-entropy_d10(d10x.combined, "chemistry")
 plt_entropy_treatment<-entropy_d10(d10x.combined, "age_condition")
 
-entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined)
+48<-entropy_plt(plt_entropy_individual, "individual", d10x.combined)
 save_plts(entropy_individual, "IFALD_entropy_individual_allclusters", w=15,h=10)
 
 entropy_age<-entropy_plt(plt_entropy_age, "AgeGroup", d10x.combined)
@@ -1315,6 +1317,28 @@ save_plts(entropy_chem, "IFALD_entropy_chemistry_allclusters", w=15,h=10)
 entropy_Treatment<-entropy_plt(plt_entropy_treatment, "age_condition", d10x.combined)
 save_plts(entropy_Treatment, "IFALD_entropy_Treatment_allclusters", w=15,h=10)
 
+#############
+## Cell type count table
+#############
+table(d10x.combined$CellType_refined, d10x.combined$CellType_rough)
+
+d10x.combined$CellType_rough[which(d10x.combined$CellType_refined=="Cycling T-cells")]<-"NK and T cells"
+d10x.combined$CellType_rough[which(d10x.combined$CellType_refined=="Cycling Myeloid")]<-"Myeloid cells"
+d10x.combined$CellType_rough[which(d10x.combined$CellType_refined=="Doublet")]<-"Doublet"
+
+count_plt<-as.data.frame(d10x.combined@meta.data %>% dplyr::select(CellType_rough,CellType_refined,age_condition) %>% group_by(age_condition) %>% count(CellType_refined,CellType_rough))
+
+count_plt$CellType_rough<-factor(count_plt$CellType_rough, levels=c( 
+  "Hepatocytes","LSEC","HSC","Cholangiocytes",
+  "Myeloid cells","NK and T cells",  "B-cells",
+  "Erythrocytes" , "Doublet"))
+
+cell_count<-ggplot(count_plt, aes(CellType_rough,n,  fill=CellType_refined))+
+  geom_bar(stat="identity", color="black")+
+  facet_wrap(~age_condition)+fillscale_cellType+th_present+theme_bw()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  theme(legend.position="bottom")+ylab("Cell Count")+xlab("Broad Cell Category")
+save_plts(cell_count, "cell_count_age_condiditon_bar", w=9,h=7)
 
 
 ##############

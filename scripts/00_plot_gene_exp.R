@@ -50,7 +50,7 @@ plot_gene_UMAP<-function(d10x, gene, percentile){
 
 
 
-plot_gene_violin<-function(d10x, gene){
+plot_gene_violin<-function(d10x, gene, log_exp=F){
   ### plot individual genes
   
   DefaultAssay(d10x) <- "RNA"
@@ -69,10 +69,15 @@ plot_gene_violin<-function(d10x, gene){
   
   colnames(plt_myeloid)[which(colnames(plt_myeloid)==gene)]<-"expression"
   
+  if(log_exp==T){
   ggplot(plt_myeloid, aes(age_condition,log(expression)))+
     geom_violin(fill="grey80",color="white")+geom_boxplot(aes(fill=age_condition),width=0.1)+fillscale_agecondition+
     theme_bw()+th_present+xlab("Age Group")+ylab(paste(gene, "Expression (log)"))+
-    theme(legend.position = "none")
+    theme(legend.position = "none")}else{
+  ggplot(plt_myeloid, aes(age_condition,expression))+
+    geom_violin(fill="grey80",color="white")+geom_boxplot(aes(fill=age_condition),width=0.1)+fillscale_agecondition+
+    theme_bw()+th_present+xlab("Age Group")+ylab(paste(gene, "Expression (log)"))+
+    theme(legend.position = "none")}
     
 }
 

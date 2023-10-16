@@ -14,10 +14,18 @@ entropy <- function(target) {
 
 ## entropy on a seurat object
 entropy_d10<-function(d10x, covariate){
+  
+  ## 95% from one age group
+  level_num<-length(unique(d10x@meta.data[,covariate]))
+  print(paste("Entrophy theshold if 95% of samples in a cluster from 1 covariate level (and the other 5% a random mix of the",level_num-1,"other factor levels):",
+              round(entropy(c(sample(as.character(unique(d10x@meta.data[,covariate])[1:(level_num-1)]), 100, replace=T), 
+                              rep(as.character(unique(d10x@meta.data[,covariate])[level_num]),1900))),2)))
+  
   entrophy_cluster_df<-do.call(rbind, lapply(as.character(unique(d10x$seurat_clusters)), function(cluster){
     data.frame(seurat_clusters=cluster, entropy=entropy(d10x@meta.data[,covariate][which(d10x$seurat_clusters==cluster)]))
   }))
   
+
   individual_UMAP<-DimPlot(d10x, group.by = covariate) + theme(legend.position = "none") + ggtitle("")
   
   cell_cluster_count<-d10x@meta.data %>%  group_by(seurat_clusters,rlang::parse_expr(covariate) %>% eval) %>%

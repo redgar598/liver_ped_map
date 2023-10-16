@@ -80,6 +80,26 @@ sbatch de_monte_carlo_sex.sh $cellType_index
 done
 
 
+
+
+
+#################
+## Realign some samples
+#################
+salloc -c 1 -t 1:0:0 --mem 1G
+cd /cluster/projects/macparland/RE/PediatricAdult/realign_samples
+
+scp /media/redgar/Seagate\ Portable\ Drive/IFALD/191218_A00827_0099_AHMW73DMXX_MacParland_Sonya/MacParland_Sonya__HSC-FI_006/possorted_genome_bam.bam t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples
+
+sbatch scripts/realign_some_samples.sh
+
+
+
+
+
+
+
+
 ### downlaod fetal liver data
 scp /media/redgar/Seagate\ Portable\ Drive/fetal_liver/E-MTAB-7407-unix-ftp_liver.txt  t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/fetal_liver
 cat ./E-MTAB-7407-unix-ftp_liver.txt | sh
@@ -146,19 +166,26 @@ scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/d10x_fetal_raw.rds /media/redgar/Seagate\ Portable\ Drive/fetal_liver 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/fetal_celllabels.rds /media/redgar/Seagate\ Portable\ Drive/fetal_liver 
 
+
+
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/QC_Fetal_adult_ped_IFALD.out /home/redgar/Documents/liver_ped_map 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/Fetal_IFALD_adult_ped_integrated.rds /media/redgar/Seagate\ Portable\ Drive/fetal_liver 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/Fetal_IFALD_adult_ped_cellRough.rds /media/redgar/Seagate\ Portable\ Drive/fetal_liver 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/Fetal_IFALD_adult_ped_pltData.RData /media/redgar/Seagate\ Portable\ Drive/fetal_liver 
 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/Fetal_ped_IFALD_adult_PCA_myeloid.RData /home/redgar/Documents/liver_ped_map/data
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/Fetal_ped_IFALD_adult_diffexpression_myeloid.RData /media/redgar/Seagate\ Portable\ Drive/fetal_liver 
 
 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_*_only.RData /media/redgar/Seagate\ Portable\ Drive/processed_data
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData /media/redgar/Seagate\ Portable\ Drive/processed_data
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_raw_myeloid_only.RData /media/redgar/Seagate\ Portable\ Drive/processed_data
 
 
 scp /home/redgar/Documents/liver_ped_map/data/Liver_Markers*.csv t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data
+
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_SCINA_markers_withcitations_cell_labels.RData /media/redgar/Seagate\ Portable\ Drive/processed_data 
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_SCINA_cell_labels.RData /media/redgar/Seagate\ Portable\ Drive/processed_data 
 
 
 
@@ -260,5 +287,15 @@ mv /cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_integrated.rds /c
 mv /cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_cellRough.rds /cluster/projects/macparland/RE/PediatricAdult/processed_data
 mv /cluster/home/t117652uhn/liver_ped_map/data/IFALD_d10x_adult_ped_raw.rds /cluster/projects/macparland/RE/PediatricAdult/processed_data
 
+mv /cluster/home/t117652uhn/liver_ped_map/data/d10x_fetal_raw.rds /cluster/projects/macparland/RE/PediatricAdult/processed_data
+
 
 scp /home/redgar/Documents/liver_ped_map/data/IFALD_B_cell_labels.rds t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data
+
+
+
+scp -r t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/TA/Caudate_vs_Flush/Flush /media/redgar/Seagate\ Portable\ Drive/Caudate_Flush 
+scp -r t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/TA/Caudate_vs_Flush/Caudate /media/redgar/Seagate\ Portable\ Drive/Caudate_Flush 
+
+
+

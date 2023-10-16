@@ -17,6 +17,9 @@ source("scripts/00_fanciest_UMAP.R")
 
 load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
+fancyUMAP_all<-fanciest_UMAP(d10x.combined,"HSC",F)
+save_plts(fancyUMAP_all, "IFALD_HSC_highlight_umap_fancy", w=6,h=4)
+
 d10x.combined_hsc<-subset(d10x.combined, subset = CellType_rough %in% c("HSC"))
 rm(d10x.combined)
 gc()
@@ -42,6 +45,8 @@ d10x.combined_hsc@meta.data$CellType_rough<-as.character(d10x.combined_hsc@meta.
 d10x.combined_hsc@meta.data$CellType_rough[which(d10x.combined_hsc@meta.data$seurat_clusters%in%c("0"))]<-"healthy_ped_HSC"
 d10x.combined_hsc@meta.data$CellType_rough[which(d10x.combined_hsc@meta.data$seurat_clusters%in%c("1","2"))]<-"adult_IFALD_HSC"
 d10x.combined_hsc@meta.data$CellType_rough[which(d10x.combined_hsc@meta.data$seurat_clusters%in%c("3"))]<-"Outlier HSC"
+
+table(d10x.combined_hsc@meta.data$CellType_rough, d10x.combined_hsc$age_condition)
 
 fancy_HSC<-fanciest_UMAP(d10x.combined_hsc, NA,F)
 fancy_HSC
@@ -114,6 +119,8 @@ HSC_markers<-plot_grid(plot_gene_UMAP(d10x.combined_hsc,"PDGFRA", 0),
                      plot_gene_UMAP(d10x.combined_hsc,"IGFBP3", 0), ncol=4)
 HSC_markers
 save_plts(HSC_markers, "IFALD_HSC_diff_genes_fancy", w=14,h=2.5)
+
+save_plts(plot_gene_UMAP(d10x.combined_hsc,"PDGFRA", 0), "IFALD_HSC_diff_PDGFRA_fancy", w=3,h=2.5)
 
 
 #########
@@ -190,4 +197,158 @@ HSC_composistion<-ggplot(cell_counts, aes(label, per))+geom_bar(aes(fill=CellTyp
 HSC_composistion
 save_plts(HSC_composistion, "HSC_composistion", w=16,h=8)
 
-  
+
+#########################
+## healthy age HSC
+#########################
+## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
+# but not normalized or scaled
+d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+
+######
+## add cell type labels
+######
+load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+
+cell_label$index<-rownames(cell_label)
+cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
+identical(colnames(d10x), cell_label$index)
+
+d10x <- AddMetaData(d10x, metadata = cell_label)
+
+##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
+# This is log(TP10K+1)
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
+d10x_raw_hsc<-subset(d10x, subset = CellType_rough %in% c("HSC"))
+
+
+Idents(d10x_raw_hsc)<-d10x_raw_hsc$age_condition
+table(d10x_raw_hsc$age_condition)
+
+
+## age differential
+de<-FindMarkers(d10x_raw_hsc, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+sig_de<-de[which(de$p_val_adj < 0.005 & abs(de$avg_log2FC) > 1),]
+sig_de[which(sig_de$avg_log2FC>0),]
+sig_de[which(sig_de$avg_log2FC<0),]
+
+write.csv(sig_de, file=here("data","differential_ageHSC.csv"))
+
+### IFALD differential
+de_IFALD<-FindMarkers(d10x_raw_hsc, ident.1 = "Ped IFALD", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+sig_de_IFALD<-de_IFALD[which(de_IFALD$p_val_adj < 0.005 & abs(de_IFALD$avg_log2FC) > 1),]
+sig_de_IFALD[which(sig_de_IFALD$avg_log2FC>0),]
+sig_de_IFALD[which(sig_de_IFALD$avg_log2FC<0),]
+
+write.csv(de_IFALD, file=here("data","differential_IFALDHSC.csv"))
+
+
+
+
+#### CHECK claim that fibrosis would have been missed with only IFALD and adults
+load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+
+d10x.combined_hsc<-subset(d10x.combined, subset = CellType_rough %in% c("HSC"))
+d10x.combined_hsc_adult_IFALD<-subset(d10x.combined_hsc, subset = age_condition %in% c("Ped IFALD","Adult Healthy"))
+
+rm(d10x.combined)
+gc()
+d10x.combined_hsc_adult_IFALD <- RunPCA(d10x.combined_hsc_adult_IFALD, npcs = 30, verbose = FALSE)
+d10x.combined_hsc_adult_IFALD <- RunUMAP(d10x.combined_hsc_adult_IFALD, reduction = "pca", dims = 1:30)
+d10x.combined_hsc_adult_IFALD <- FindNeighbors(d10x.combined_hsc_adult_IFALD, reduction = "pca", dims = 1:30)
+d10x.combined_hsc_adult_IFALD <- FindClusters(d10x.combined_hsc_adult_IFALD, resolution = 0.1)
+
+
+
+DimPlot(d10x.combined_hsc_adult_IFALD, label=T)
+DimPlot(d10x.combined_hsc_adult_IFALD, label=T, group.by="age_condition")
+
+
+table(d10x.combined_hsc_adult_IFALD@meta.data$seurat_clusters, d10x.combined_hsc_adult_IFALD$age_condition)
+
+## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
+# but not normalized or scaled
+d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+
+######
+## add cell type labels
+######
+load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+
+cell_label$index<-rownames(cell_label)
+cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
+identical(colnames(d10x), cell_label$index)
+
+d10x <- AddMetaData(d10x, metadata = cell_label)
+
+##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
+# This is log(TP10K+1)
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
+d10x_raw_hsc<-subset(d10x, subset = CellType_rough %in% c("HSC"))
+
+identical(colnames(d10x_raw_hsc), colnames(d10x.combined_hsc))
+d10x_raw_hsc <- AddMetaData(d10x_raw_hsc, metadata = d10x.combined_hsc@meta.data)
+
+
+Idents(d10x_raw_hsc)<-d10x_raw_hsc$age_condition
+
+de_0<-FindMarkers(d10x_raw_hsc, ident.1 = "Ped IFALD", ident.2="Adult Healthy", test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
+de_0sig<-de_0[which(de_0$p_val_adj < 0.005 & abs(de_0$avg_log2FC) > 1),]
+head(de_0sig[which(de_0sig$avg_log2FC>0),], n=10)
+head(de_0sig[which(de_0sig$avg_log2FC<0),])
+
+de_0sig[which(rownames(de_0sig) %in% c("PDGFRA","CXCL12","COL1A1","IGFBP3")),]
+
+
+Fib_markers<-FeaturePlot(d10x.combined_hsc, features = c("PDGFRA","CXCL12","COL1A1","IGFBP3"), min.cutoff = "q9", pt.size=0.25)
+VlnPlot(d10x_raw_hsc, features = c("PDGFRA","CXCL12","COL1A1","IGFBP3"))
+
+
+
+
+
+################
+# Check Identity of outlier HSC
+################
+Idents(d10x_raw_hsc)<-d10x_raw_hsc$CellType_rough
+
+de_outlier<-FindMarkers(d10x_raw_hsc, ident.1 = "Outlier HSC", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
+de_outlier_sig<-de_outlier[which(de_outlier$p_val_adj < 0.005 & abs(de_outlier$avg_log2FC) > 1),]
+head(de_outlier_sig[which(de_outlier_sig$avg_log2FC>0),], n=10)
+head(de_outlier_sig[which(de_outlier_sig$avg_log2FC<0),])
+
+FeaturePlot(d10x.combined_hsc, features = c("LGI4","CDH19","GPM6B","SOX10"), min.cutoff = "q9", pt.size=0.25)
+
+
+source("scripts/00_GSEA_function.R")
+GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
+
+de_outlier$gene<-rownames(de_outlier)
+de<-de_outlier
+gene_list = de$avg_log2FC
+names(gene_list) = de$gene
+gene_list = sort(gene_list, decreasing = TRUE)
+gene_list = gene_list[!duplicated(names(gene_list))]
+
+res = GSEA(gene_list, GO_file, pval = 0.05)
+
+plt_path<-res$Results
+plt_path$pathway<-sapply(1:nrow(plt_path), function(x) strsplit(plt_path$pathway[x], "%")[[1]][1])
+plt_path$Enrichment_Cell<-"Up-regulated in \nAdult and IFALD"
+plt_path$Enrichment_Cell[which(plt_path$Enrichment=="Down-regulated")]<-"Up-regulated in \n Healthy Pediatric"
+
+plt_path$label<-lapply(1:nrow(plt_path), function(x) paste0(plt_path$leadingEdge[x][[1]][1:4], collapse = ", "))
+
+plt_path$direction_label<-as.factor(plt_path$Enrichment)
+levels(plt_path$direction_label)<-c(0.1,-0.1)
+plt_path$direction_label<-as.numeric(as.character(plt_path$direction_label))
+
+# top and bottom 15
+plt_path<-rbind(plt_path[1:15,], plt_path[(nrow(plt_path)-15):(nrow(plt_path)),])
+
+ggplot(plt_path, aes(NES, reorder(pathway, NES)))+geom_point(aes(size=size, fill=Enrichment_Cell), shape=21)+
+  theme_bw()+th_present+ylab("")+xlab("Normalized Enrichment Score")+
+  geom_text(aes(label=label),hjust="inward",  nudge_x = plt_path$direction_label, color="grey50", size=3)+
+  geom_hline(yintercept=16.5, color="grey")

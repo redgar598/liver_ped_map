@@ -88,3 +88,14 @@ SCINA_cell_labels$cell<-rownames(SCINA_cell_labels)
 SCINA_cell_labels<-rbind(SCINA_cell_labels, no_refined[which(!(no_refined$cell%in%SCINA_cell_labels$cell)),])
 save(SCINA_cell_labels, file=here("data","IFALD_adult_ped_SCINA_markers_withcitations_cell_labels.RData"))
 
+
+
+load(here("../../../../media/redgar/Seagate Portable Drive/processed_data","IFALD_adult_ped_SCINA_markers_withcitations_cell_labels.RData"))
+SCINA_cell_labels_withCites<-SCINA_cell_labels
+colnames(SCINA_cell_labels_withCites)<-c("cell", "SCINA_broad_cites", "SCINA_refined_cites")
+load(here("../../../../media/redgar/Seagate Portable Drive/processed_data","IFALD_adult_ped_SCINA_cell_labels.RData"))
+
+
+combine_labels<-merge(SCINA_cell_labels, SCINA_cell_labels_withCites, by="cell")
+
+table(combine_labels$SCINA_broad, combine_labels$SCINA_broad_cites)

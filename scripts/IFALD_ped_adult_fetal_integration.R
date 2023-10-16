@@ -564,9 +564,11 @@ sig_hits(de_ped_adult_MHC, "DOWN")
 sig_hits(de_fetal_adult_MHC, "UP")
 sig_hits(de_fetal_adult_MHC, "DOWN")
 
-
-
-
+## check on gene stats
+gene<-"HMOX1"
+de_fetal_ped_KC[grep(gene, rownames(de_fetal_ped_KC)),]
+de_fetal_ped_RR[grep(gene, rownames(de_fetal_ped_RR)),]
+de_ped_adult_MHC[grep(gene, rownames(de_ped_adult_MHC)),]
 
 
 load(here("/media/redgar/Seagate Portable Drive/processed_data/Fetal_IFALD_adult_ped_raw_myeloid_only.RData"))

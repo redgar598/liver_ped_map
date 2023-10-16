@@ -60,10 +60,10 @@ source("scripts/00_entropy_d10x.R")
 #'   #   d10x    <- FindNeighbors(d10x, dims = 1:30, verbose = F)
 #'   #   d10x    <- FindClusters(d10x, verbose = T)
 #'   #   meta_clusters    <- d10x@meta.data
-#'   # 
+#'   #
 #'   #   sc = load10X(file.path(dataset_loc,paste(samples[y],"/outs", sep="")))
 #'   #   sc = setClusters(sc, setNames(meta_clusters$seurat_clusters, rownames(meta_clusters)))
-#'   # 
+#'   #
 #'   #   ######
 #'   #   ## Load data and estimate soup profile
 #'   #   ######
@@ -74,7 +74,7 @@ source("scripts/00_entropy_d10x.R")
 #'   #   print(unique(sc$metaData$rho))
 #'   #   # Clean the data
 #'   #   out = adjustCounts(sc)
-#'   # 
+#'   #
 #'   #   ## Save a metric of soupness (ALB change after soupX)
 #'   #   DR = sc$metaData[,sc$DR]
 #'   #   df = DR
@@ -85,10 +85,10 @@ source("scripts/00_entropy_d10x.R")
 #'   #   df$new = new
 #'   #   df$relALBChange=relChange
 #'   #   df$cell<-rownames(df)
-#'   # 
+#'   #
 #'   #   ## make seurat object of adjusted counts
 #'   #   d10x = CreateSeuratObject(out)
-#'   # 
+#'   #
 #'   #   #add meta data to each seurat object
 #'   #   meta_cell<-data.frame(cell=colnames(d10x), Extract.Name=caud)
 #'   #   meta_cell_add<-merge(meta_cell, meta, by.x="Extract.Name", by.y="Sample_ID")
@@ -103,11 +103,11 @@ source("scripts/00_entropy_d10x.R")
 #'     meta_cell_add<-merge(meta_cell, meta_liver[,c("Characteristics.age.","Characteristics.sex.","Characteristics.individual.","Characteristics.clinical.information.","Characteristics.facs.sorting.","Extract.Name")],
 #'                                                by="Extract.Name")
 #'     meta_cell_add$Barcodes<-sapply(1:nrow(meta_cell_add), function(x) strsplit(meta_cell_add$cell[x],"-")[[1]][1])
-#'     
-#'     
-#'     ## Cell annotation 
+#' 
+#' 
+#'     ## Cell annotation
 #'     cell_labels<-read.csv(file.path(dataset_loc,paste(samples[y],"/",samples[y],".csv", sep="")))
-#'     
+#' 
 #'     meta_cell_add<-merge(meta_cell_add, cell_labels, by="Barcodes")
 #'     meta_cell_add<-meta_cell_add[match(colnames(d10x), meta_cell_add$cell),]
 #'     print(identical(meta_cell_add$cell, colnames(d10x)))
@@ -123,22 +123,22 @@ source("scripts/00_entropy_d10x.R")
 #'   #     outs = file.path(dataset_loc,paste(samples[y],"/outs", sep="")),
 #'   #     tiles = 1, cores = 1, verbose = FALSE)
 #'   #   head(nf1)
-#'   # 
+#'   #
 #'   #   print(identical(rownames(nf1), colnames(d10x)))
 #'   #   d10x<- AddMetaData(d10x, nf1)
 #'   #   d10x
-#'   # 
+#'   #
 #'   #   nf.umi <- data.frame(nf=d10x$nuclear_fraction,
 #'   #                        umi=d10x$nCount_RNA)
-#'   # 
+#'   #
 #'   #   # Run identify_empty_drops
 #'   #   empty_drop <- identify_empty_drops(nf_umi=nf.umi)
 #'   #   empty_drop$Extract.Name<-d10x$Extract.Name
 #'   #   empty_drop_damagedcell <- identify_damaged_cells(empty_drop, verbose = FALSE, output_plots = F)
-#'   # 
+#'   #
 #'   #   head(empty_drop_damagedcell[[1]])
 #'   #   table(empty_drop_damagedcell[[1]]$cell_status)
-#'   # 
+#'   #
 #'   #   print(identical(rownames(empty_drop_damagedcell[[1]]), colnames(d10x)))
 #'   #   d10x<- AddMetaData(d10x, empty_drop_damagedcell[[1]])
 #'   #   d10x$nf<-NULL

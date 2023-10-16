@@ -21,6 +21,9 @@ source("scripts/00_entropy_d10x.R")
 
 load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
+fancyUMAP_all<-fanciest_UMAP(d10x.combined,"KC Like",F)
+save_plts(fancyUMAP_all, "IFALD_KC_highlight_umap_fancy", w=6,h=4)
+
 d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_refined %in% c("RR Myeloid","Macrophage\n(MHCII high)","KC Like","Macrophage\n(CLEC9A high)","Cycling Myeloid","Myeloid Erythrocytes\n(phagocytosis)"))
 rm(d10x.combined)
 gc()
@@ -461,6 +464,9 @@ write.csv(sig_de_age_RR, file=here("data","differential_age_RR.csv"))
 write.csv(sig_de_age_KC, file=here("data","differential_age_KC.csv"))
 write.csv(sig_de_age_MHCII, file=here("data","differential_age_MHCII.csv"))
 
+write.csv(de_RR, file=here("data","all_gene_stats_age_RR.csv"))
+write.csv(de_KC, file=here("data","all_gene_stats_age_KC.csv"))
+write.csv(de_MHCII, file=here("data","all_gene_stats_age_MHCII.csv"))
 
 ## Overlap table
 sig_de_age_KC$cell<-"KC Like"
@@ -760,7 +766,6 @@ d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNorm
 d10x.combined_myeloid<-subset(d10x, subset = CellType_refined %in% c("RR Myeloid","Macrophage\n(MHCII high)","KC Like","Macrophage\n(CLEC9A high)","Cycling Myeloid","Myeloid Erythrocytes\n(phagocytosis)"))
 
 
-plot_heat_map(d10x.combined_myeloid,c("LY96","CETP","CCL4","IL1B","ALB"),NA )
 
 
 # cluster0 age
@@ -778,6 +783,36 @@ mhcII_age<-c("HMOX1", "APOE")
 # MHCII IFALD
 mhcII_ifald<-c("VSIG4","CD163","HLA-DPA1","HLA-DRA")
 
+### for adding *
+sig_de_IFALD_RR<-read.csv(file=here("data","differential_IFALD_RR.csv"))
+sig_de_IFALD_RR$age_condition<-"Ped\nIFALD"
+sig_de_IFALD_RR$CellType_refined<-"RR Myeloid"
+
+sig_de_IFALD_KC<-read.csv(file=here("data","differential_IFALD_KC.csv"))
+sig_de_IFALD_KC$age_condition<-"Ped\nIFALD"
+sig_de_IFALD_KC$CellType_refined<-"KC Like"
+
+sig_de_IFALD_MHCII<-read.csv(file=here("data","differential_IFLAD_MHCII.csv"))
+sig_de_IFALD_MHCII$age_condition<-"Ped\nIFALD"
+sig_de_IFALD_MHCII$CellType_refined<-"Macrophage\n(MHCII high)"
+
+sig_de_age_RR<-read.csv(file=here("data","differential_age_RR.csv"))
+sig_de_age_RR$age_condition<-"Adult\nHealthy"
+sig_de_age_RR$CellType_refined<-"RR Myeloid"
+
+sig_de_age_KC<-read.csv(file=here("data","differential_age_KC.csv"))
+sig_de_age_KC$age_condition<-"Adult\nHealthy"
+sig_de_age_KC$CellType_refined<-"KC Like"
+
+sig_de_age_MHCII<-read.csv(file=here("data","differential_age_MHCII.csv"))
+sig_de_age_MHCII$age_condition<-"Adult\nHealthy"
+sig_de_age_MHCII$CellType_refined<-"Macrophage\n(MHCII high)"
+
+de<-rbind(sig_de_IFALD_RR, sig_de_IFALD_KC, sig_de_IFALD_MHCII, sig_de_age_RR, sig_de_age_KC, sig_de_age_MHCII)
+colnames(de)[1]<-"variable"
+de$label<-"*"
+
+
 myeloid_age_heat<-plot_heat_map(d10x.combined_myeloid,c(kc_age, mhcII_age,rr_age), 
                                 c("KC Like","Macrophage\n(MHCII high)","RR Myeloid"),T)
 save_plts(myeloid_age_heat, "Myeloid_age_heat", w=7,h=5)
@@ -785,10 +820,6 @@ save_plts(myeloid_age_heat, "Myeloid_age_heat", w=7,h=5)
 myeloid_IFALD_heat<-plot_heat_map(d10x.combined_myeloid,c(kc_ifald,mhcII_ifald,rr_ifald ), 
                                   c("KC Like","Macrophage\n(MHCII high)","RR Myeloid"),T)
 save_plts(myeloid_IFALD_heat, "Myeloid_IFALD_heat", w=7,h=4)
-
-
-
-
 
 
 
