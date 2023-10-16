@@ -13,8 +13,8 @@ module load cellranger/3.1.0
 
 
 cellranger count --id=IFALD006_realign \
-   --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/IFALD006/MacParland_Sonya__HSC-FI_006_0_1_HMW73DMXX \
-   --sample=IFALD006_realign \
+   --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/IFALD006 \
+   --sample=MacParland_Sonya__HSC-FI_006_0_1_HMW73DMXX \
    --transcriptome=/cluster/tools/software/centos7/cellranger/3.1.0/cellranger-tiny-ref/3.0.0 
 
 
