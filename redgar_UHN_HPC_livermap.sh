@@ -35,7 +35,7 @@ cd liver_ped_map
 module load R/4.2.1
 
 
-# submit job on login node?
+# submit job on login node
 cd liver_ped_map
 git pull
 sbatch IFALD_exploratory_run.sh
@@ -91,6 +91,10 @@ cd /cluster/projects/macparland/RE/PediatricAdult/realign_samples
 
 scp /media/redgar/Seagate\ Portable\ Drive/IFALD/191218_A00827_0099_AHMW73DMXX_MacParland_Sonya/MacParland_Sonya__HSC-FI_006/possorted_genome_bam.bam t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples
 
+
+# submit job on login node
+cd liver_ped_map
+git pull
 sbatch scripts/realign_some_samples.sh
 
 
