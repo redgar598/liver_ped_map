@@ -2,6 +2,7 @@
 #SBATCH --mem=150G
 #SBATCH -J realign_from_bam
 #SBATCH -p veryhimem
+#SBATCH --time=4:00:00
 #SBATCH -c 32 
 #SBATCH -N 1 
 #SBATCH --output=%x.out
@@ -19,4 +20,5 @@ cellranger count --id=IFALD006_realign \
    --transcriptome=/cluster/tools/software/centos7/cellranger/3.1.0/cellranger-tiny-ref/3.0.0 
 
 
-
+# mv output to projects
+#mv /cluster/home/t117652uhn/liver_ped_map/IFALD006_realign target /cluster/projects/macparland/RE/PediatricAdult/realign_samples
