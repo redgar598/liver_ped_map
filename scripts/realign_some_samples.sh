@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --mem=150G
+#SBATCH --mem=50G
 #SBATCH -J realign_from_bam
-#SBATCH -p all
+#SBATCH -p himem
 #SBATCH --time=10:00:00
 #SBATCH -c 32 
 #SBATCH -N 1 
