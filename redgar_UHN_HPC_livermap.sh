@@ -97,6 +97,7 @@ cd liver_ped_map
 git pull
 sbatch scripts/realign_some_samples.sh
 
+scp -r t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples/IFALD006_realign/outs /media/redgar/Seagate\ Portable\ Drive/realign_samples/IFALD006_realign
 
 
 
