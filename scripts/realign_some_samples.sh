@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --mem=150G
 #SBATCH -J realign_from_bam
-#SBATCH -p veryhimem
-#SBATCH --time=4:00:00
+#SBATCH -p long
+#SBATCH --time=10:00:00
 #SBATCH -c 32 
 #SBATCH -N 1 
 #SBATCH --output=%x.out
@@ -21,4 +21,5 @@ cellranger count --id=IFALD006_realign \
 
 
 # mv output to projects
-#mv /cluster/home/t117652uhn/liver_ped_map/IFALD006_realign target /cluster/projects/macparland/RE/PediatricAdult/realign_samples
+#mv /cluster/home/t117652uhn/liver_ped_map/IFALD006_realign /cluster/projects/macparland/RE/PediatricAdult/realign_samples
+

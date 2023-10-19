@@ -150,6 +150,7 @@ sig_de_IFALD[which(sig_de_IFALD$avg_log2FC<0),]
 ## pathway adult/IFALD versus healthy ped
 ###
 source("scripts/00_GSEA_function.R")
+#http://download.baderlab.org/EM_Genesets/current_release/Human/symbol/
 GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
 
 ### Age
@@ -211,6 +212,23 @@ myeloid_GSEA<-ggplot(plt_path, aes(NES, reorder(pathway, NES)))+geom_point(aes(s
   geom_hline(yintercept=16.5, color="grey")+scale_fill_manual(values=c("cornflowerblue","#374eb8"))
 myeloid_GSEA
 save_plts(myeloid_GSEA, "GSEA_IFALD_KC_myeloid", w=15,h=7)
+
+###############
+## This works with enrichment map as the generic file
+##############
+plt_path<-res$Results
+plt_path$Description<-sapply(1:nrow(plt_path), function(x) strsplit(plt_path$pathway[x], "%")[[1]][1])
+plt_path$Phenotype<-"+1"
+plt_path$Phenotype[which(plt_path$Enrichment=="Down-regulated")]<-"-1"
+plt_path$leadingEdge<-NULL
+
+plt_path$GO.ID<-plt_path$pathway
+plt_path$FDR<-plt_path$padj
+plt_path$p.Val<-plt_path$pval
+
+plt_path<-plt_path[,c("GO.ID","Description","p.Val","FDR")]
+
+write.table(plt_path, file=here("data/KC_age.txt"), sep="\t", row.names = F, quote = F)
 
 
 ##############
