@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --mem=50G
 #SBATCH -J realign_from_bam
-#SBATCH -p himem
+#SBATCH -p veryhimem
 #SBATCH --time=10:00:00
 #SBATCH -c 32 
 #SBATCH -N 1 
@@ -63,6 +63,7 @@ cellranger count --id=IFALD006_realign \
    --sample=bamtofastq \
    --chemistry=SC3Pv3 \
    --transcriptome=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/reference/GRCh38
+
 
 #   --transcriptome=/cluster/tools/software/centos7/cellranger/3.1.0/cellranger-tiny-ref/3.0.0 
 
