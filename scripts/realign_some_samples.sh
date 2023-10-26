@@ -55,20 +55,25 @@ module load cellranger/3.1.0
 
 
 
-#cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/realign_samples/possorted_genome_bam.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/IFALD006
+# cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/realign_samples/possorted_genome_bam.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/IFALD006
 
 
-cellranger count --id=IFALD006_realign \
-   --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/IFALD006/MacParland_Sonya__HSC-FI_006_0_1_HMW73DMXX \
+# cellranger count --id=IFALD006_realign \
+#    --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/IFALD006/MacParland_Sonya__HSC-FI_006_0_1_HMW73DMXX \
+#    --sample=bamtofastq \
+#    --chemistry=SC3Pv3 \
+#    --transcriptome=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/reference/GRCh38
+
+
+
+
+
+cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/realign_samples/possorted_genome_bam.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/C102
+
+
+cellranger count --id=102_realign \
+   --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C102/MacParland_Diana__C102_5pr_V2 \
    --sample=bamtofastq \
-   --chemistry=SC3Pv3 \
+   --chemistry=SC5P-R2 \
    --transcriptome=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/reference/GRCh38
-
-#   --transcriptome=/cluster/tools/software/centos7/cellranger/3.1.0/cellranger-tiny-ref/3.0.0 
-
-
-# mv output to projects
-#mv /cluster/home/t117652uhn/liver_ped_map/IFALD006_realign /cluster/projects/macparland/RE/PediatricAdult/realign_samples
-
-
 
