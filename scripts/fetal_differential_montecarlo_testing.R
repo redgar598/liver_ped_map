@@ -152,6 +152,44 @@ de_fetal_ped_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Fetal Healthy", ident.2 = "
 de_ped_adult_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Adult Healthy", ident.2 = "Ped Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
 de_fetal_adult_KC<-FindMarkers(d10x_raw_KC, ident.1 = "Fetal Healthy", ident.2 = "Adult Healthy", test.use = "MAST",latent.vars=c("nFeature_RNA","Sex"), verbose=F)
 
+d10x_raw_KC$HBA1<-FetchData(d10x_raw_KC, vars = "HBA1")
+d10x_raw_KC$CCL4<-FetchData(d10x_raw_KC, vars = "CCL4")
+d10x_raw_KC$IL1B<-FetchData(d10x_raw_KC, vars = "IL1B")
+
+
+d10x_raw_KC@meta.data$age_condition<-factor(d10x_raw_KC@meta.data$age_condition, levels=c("Fetal Healthy","Ped Healthy","Ped IFALD","Adult Healthy"))
+HBA<-ggplot(d10x_raw_KC@meta.data, aes(age_condition, HBA1, fill=age_condition))+geom_violin(scale = "width")+fillscale_agecondition_fetal+theme_bw()+
+  theme(legend.position = "none")
+save_plts(HBA, "fetal_HBA_KC", w=4, h=3)
+
+CCL4<-ggplot(d10x_raw_KC@meta.data, aes(age_condition, CCL4, fill=age_condition))+geom_violin(scale = "width")+fillscale_agecondition_fetal+theme_bw()+
+  theme(legend.position = "none")
+save_plts(CCL4, "fetal_CCL4_KC", w=4, h=3)
+
+
+d10x_raw_KC$Age_continious<-as.factor(d10x_raw_KC$Age)
+# 40 weeks gestation I am calling term so -(40-x)*(1/52)
+levels(d10x_raw_KC$Age_continious)<-c("11","-0.56", "12","-0.54",
+                               "13","-0.52", "-0.5", 
+                               "-0.46","17","-0.44", 
+                               "2","26" , "3","48","57",
+                               "65","67","69",
+                               "-0.64", "-0.62" , "-0.60" )
+d10x_raw_KC$Age_continious<-as.numeric(as.character(d10x_raw_KC$Age_continious))
+
+d10x_raw_KC$AgeGroup_two<-as.factor(d10x_raw_KC$AgeGroup)
+# 40 weeks gestation I am calling term so -(40-x)*(1/52)
+levels(d10x_raw_KC$AgeGroup_two)<-c("Ped_Adult","Fetal","Ped_Adult")
+d10x_raw_KC$AgeGroup_two<-factor(d10x_raw_KC$AgeGroup_two, levels=c("Fetal","Ped_Adult"))
+
+ggplot(d10x_raw_KC@meta.data, aes(as.factor(Age_continious), CCL4))+geom_violin(scale = "width")+theme_bw()+
+  theme(legend.position = "none")+facet_grid(.~age_condition, scale="free_x")
+
+CCL4_linear<-ggplot(d10x_raw_KC@meta.data, aes(Age_continious, CCL4))+geom_point()+theme_bw()+
+  theme(legend.position = "none")+facet_grid(.~AgeGroup_two, scale="free_x")+stat_smooth(method="lm")
+save_plts(CCL4_linear, "fetal_CCL4linear_KC", w=8, h=3)
+
+
 
 ## age differential RR
 d10x_raw_RR<-subset(d10x_myeloid, subset = CellType_harmonized %in% c("RR Myeloid"))
