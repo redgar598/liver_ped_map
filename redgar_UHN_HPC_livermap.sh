@@ -92,6 +92,7 @@ sbatch realign_some_samples.sh
 
 
 scp /media/redgar/Seagate\ Portable\ Drive/IFALD/191218_A00827_0099_AHMW73DMXX_MacParland_Sonya/MacParland_Sonya__HSC-FI_006/possorted_genome_bam.bam t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples
+scp /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Diana__C102_5pr_V2/outs/possorted_genome_bam.bam t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples
 
 
 # submit job on login node
