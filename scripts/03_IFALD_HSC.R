@@ -352,3 +352,51 @@ ggplot(plt_path, aes(NES, reorder(pathway, NES)))+geom_point(aes(size=size, fill
   theme_bw()+th_present+ylab("")+xlab("Normalized Enrichment Score")+
   geom_text(aes(label=label),hjust="inward",  nudge_x = plt_path$direction_label, color="grey50", size=3)+
   geom_hline(yintercept=16.5, color="grey")
+
+
+
+
+
+#############
+## Heat Map of differential genes
+#############
+gene<-c("PDGFRA","CXCL12","COL1A1","IGFBP3")
+
+meta_HSC<-d10x.combined_hsc@meta.data
+meta_HSC$cell<-rownames(meta_HSC)
+
+gene_exp<-FetchData(d10x_raw_hsc, vars=gene)
+gene_exp$cell<-rownames(gene_exp)
+
+meta_HSC<-meta_HSC[,c("age_condition","CellType_rough","cell")]
+plt_hsc<-merge(meta_HSC, gene_exp, by='cell')
+
+melt_exp<-melt(plt_hsc)
+
+
+### scale each genen across cells then take mean for gene in each cell type
+scale_this <- function(x){(x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)}
+
+plt_exp_summary <- melt_exp %>% 
+  group_by(variable, CellType_rough) %>%
+  dplyr::summarize(Mean = mean(value, na.rm=TRUE))
+
+plt_exp_scaled <- plt_exp_summary %>% group_by(variable) %>%
+  dplyr::mutate(scaled = scale_this(Mean))
+plt_exp_summary<-as.data.frame(plt_exp_scaled)
+
+plt_exp_summary$variable<-factor(plt_exp_scaled$variable, levels=rev(gene))
+
+plt_exp_summary$CellType_rough<-as.factor(plt_exp_summary$CellType_rough)
+levels(plt_exp_summary$CellType_rough)<-c("Adult \nand\nIFALD\nHSC","Healthy\nPed\nHSC","Outlier\nHSC")
+
+de_0sig$variable<-rownames(de_0sig)
+sig<-de_0sig[which(de_0sig$variable%in%gene),]
+sig$label<-"*"
+sig$CellType_rough<-"Adult \nand\nIFALD\nHSC"
+HSC_fibrosis<-ggplot()+
+  geom_tile(aes( CellType_rough,variable, fill=scaled), plt_exp_summary)+
+  th+theme_classic()+scale_fill_gradientn(colours = colorRampPalette(rev(brewer.pal(8, 'RdBu')), space='Lab')(100), name="Scaled\nMean\nExpression")+
+  ylab("")+xlab("")+geom_text(data=sig, aes(CellType_rough,variable, label=label))
+save_plts(HSC_fibrosis, "HSC_Fibrosis_heat", w=4.5,h=4)
+
