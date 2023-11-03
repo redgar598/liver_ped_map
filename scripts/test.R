@@ -1,101 +1,62 @@
+library(caTools)
+library(randomForest)
 
-### Load libraries
-library(here)
-library(Seurat)
-library(ggplot2)
-library(dplyr)
-library(scales)
-library(gridExtra)
-library(reshape2)
-library(gtools)
-library(SoupX)
-library(colorspace)
-library(cowplot)
-library(DropletQC)
-library(SCINA)
+colnames(plt_varimax) <- paste0('varPC_', 1:ncol(plt_varimax))
+identical(rownames(d10x.combined_myeloid@meta.data), rownames(plt_varimax))
+plt_varimax$age_group <-as.factor(d10x.combined_myeloid@meta.data$AgeGroup)
+table(plt_varimax$age_group)
 
+### splitting the train and test data
+sample = sample.split(plt_varimax$age_group, SplitRatio = .75)
+train = subset(plt_varimax, sample == TRUE) 
+test = subset(plt_varimax, sample == FALSE)
 
+### training the RF model
+age_group_pred_RF <- randomForest(age_group ~ . , data = train, importance = TRUE)
 
 
-source("scripts/00_pretty_plots.R")
-source("scripts/00_entropy_d10x.R")
-source("scripts/00_fanciest_UMAP.R")
+pred = predict(age_group_pred_RF, newdata=test[,-ncol(test)])
+### generating a confusion matrix
+cm = table(label=test[,ncol(test)], prediction=pred)
+cm
+gridExtra::grid.table(cm)
+#### evaluating feature importance 
+imp.df = data.frame(importance(age_group_pred_RF))        
+imp.df[order(imp.df$MeanDecreaseAccuracy, decreasing = T),]
+dev.off()
+varImpPlot(age_group_pred_RF,main = 'age_group Prediction Based on Varimax-PCs')   
 
-#################
-## SCINA
-#################
-#d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
-d10x<-readRDS(file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_d10x_adult_ped_raw.rds"))
+ggplot(plt_varimax_meta, aes(X1, X4, color=age_condition))+geom_point()+colscale_agecondition
+ggplot(plt_varimax_meta, aes(age_condition, X4))+geom_violin(fill="grey", color="grey")+geom_boxplot(aes(fill=age_condition))+fillscale_agecondition+theme_bw()
 
-d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
-
-signatures<-read.csv(here("data/Liver_Markers_with_citations - Human_for_SCINA.csv"))
-
-d10x_exp <- GetAssayData(d10x)
-results = SCINA(d10x_exp, signatures, max_iter = 100, convergence_n = 10,
-                convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-d10x$SCINA_broad<-results$cell_labels
-gc()
-
-no_refined<-data.frame(cell=colnames(d10x), SCINA_broad=results$cell_labels, SCINA_refined=NA)
-
-
-### Cell subsets
-RBCsignatures<-read.csv(here("data/Liver_Markers_with_citations - Erythrocytes.csv"))
-Neutrosignatures<-read.csv(here("data/Liver_Markers_with_citations - Neutrophil.csv"))
-Tsignatures<-read.csv(here("data/Liver_Markers_with_citations - Tcell.csv"))
-Bsignatures<-read.csv(here("data/Liver_Markers_with_citations - Bcell.csv"))
-myeloidsignatures<-read.csv(here("data/Liver_Markers_with_citations - Myeloid.csv"))
-
-# d10x.combined_RBC<-subset(d10x, subset = SCINA_broad == "Erythrocytes")
-# d10x_exp <- GetAssayData(d10x.combined_RBC)
-# results = SCINA(d10x_exp, RBCsignatures, max_iter = 100, convergence_n = 10,
-#                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-# d10x.combined_RBC$SCINA_refined<-results$cell_labels
-
-d10x.combined_myeloid<-subset(d10x, subset = SCINA_broad == "Myeloid")
-d10x_exp <- GetAssayData(d10x.combined_myeloid)
-results = SCINA(d10x_exp, myeloidsignatures, max_iter = 100, convergence_n = 10,
-                convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-d10x.combined_myeloid$SCINA_refined<-results$cell_labels
-
-d10x.combined_bcell<-subset(d10x, subset = SCINA_broad == "B_cell")
-d10x_exp <- GetAssayData(d10x.combined_bcell)
-results = SCINA(d10x_exp, Bsignatures, max_iter = 100, convergence_n = 10,
-                convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-d10x.combined_bcell$SCINA_refined<-results$cell_labels
-
-d10x.combined_tcell<-subset(d10x, subset = SCINA_broad == "T_cell")
-d10x_exp <- GetAssayData(d10x.combined_tcell)
-results = SCINA(d10x_exp, Tsignatures, max_iter = 100, convergence_n = 10,
-                convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-d10x.combined_tcell$SCINA_refined<-results$cell_labels
-
-# d10x.combined_neutro<-subset(d10x, subset = SCINA_broad == "Neutrophil")
-# d10x_exp <- GetAssayData(d10x.combined_neutro)
-# results = SCINA(d10x_exp, Neutrosignatures, max_iter = 100, convergence_n = 10,
-#                 convergence_rate = 0.999, sensitivity_cutoff = 0.9, rm_overlap=TRUE, allow_unknown=TRUE, log_file='SCINA.log')
-# d10x.combined_neutro$SCINA_refined<-results$cell_labels
+ggplot(plt_varimax_meta, aes(X1, X4, color=age_condition))+geom_point()+colscale_agecondition
+ggplot(plt_varimax_meta, aes(age_condition, X4))+geom_violin(fill="grey", color="grey")+geom_boxplot(aes(fill=age_condition))+fillscale_agecondition+theme_bw()
 
 
 
-SCINA_cell_labels<-rbind(#d10x.combined_RBC@meta.data[,c("cell","SCINA_broad","SCINA_refined")],d10x.combined_neutro@meta.data[,c("cell","SCINA_broad","SCINA_refined")]
-                         d10x.combined_myeloid@meta.data[,c("cell","SCINA_broad","SCINA_refined")],
-                         d10x.combined_bcell@meta.data[,c("cell","SCINA_broad","SCINA_refined")],
-                         d10x.combined_tcell@meta.data[,c("cell","SCINA_broad","SCINA_refined")])
-SCINA_cell_labels$cell<-rownames(SCINA_cell_labels)
+### PC4 loadings
+gene_list = as.data.frame(unclass(df$rotLoadings))$PC_4
+names(gene_list) = rownames(as.data.frame(unclass(df$rotLoadings)))
+gene_list = sort(gene_list, decreasing = TRUE)
+gene_list = gene_list[!duplicated(names(gene_list))]
 
-SCINA_cell_labels<-rbind(SCINA_cell_labels, no_refined[which(!(no_refined$cell%in%SCINA_cell_labels$cell)),])
-save(SCINA_cell_labels, file=here("data","IFALD_adult_ped_SCINA_markers_withcitations_cell_labels.RData"))
+res = GSEA(gene_list, GO_file, pval = 0.05)
 
+plt_path<-res$Results
+plt_path$pathway<-sapply(1:nrow(plt_path), function(x) strsplit(plt_path$pathway[x], "%")[[1]][1])
+plt_path$Enrichment_Cell<-"Down in PC5"
+plt_path$Enrichment_Cell[which(plt_path$Enrichment=="Down-regulated")]<-"Up in PC5"
 
+plt_path$label<-lapply(1:nrow(plt_path), function(x) paste0(plt_path$leadingEdge[x][[1]][1:4], collapse = ", "))
 
-load(here("../../../../media/redgar/Seagate Portable Drive/processed_data","IFALD_adult_ped_SCINA_markers_withcitations_cell_labels.RData"))
-SCINA_cell_labels_withCites<-SCINA_cell_labels
-colnames(SCINA_cell_labels_withCites)<-c("cell", "SCINA_broad_cites", "SCINA_refined_cites")
-load(here("../../../../media/redgar/Seagate Portable Drive/processed_data","IFALD_adult_ped_SCINA_cell_labels.RData"))
+plt_path$direction_label<-as.factor(plt_path$Enrichment)
+levels(plt_path$direction_label)<-c(0.1,-0.1)
+plt_path$direction_label<-as.numeric(as.character(plt_path$direction_label))
 
+# top and bottom 15
+plt_path<-rbind(plt_path[1:15,], plt_path[(nrow(plt_path)-15):(nrow(plt_path)),])
 
-combine_labels<-merge(SCINA_cell_labels, SCINA_cell_labels_withCites, by="cell")
-
-table(combine_labels$SCINA_broad, combine_labels$SCINA_broad_cites)
+ggplot(plt_path, aes(NES, reorder(pathway, NES)))+geom_point(aes(size=size, fill=Enrichment_Cell), shape=21)+
+  theme_bw()+th_present+ylab("")+xlab("Normalized Enrichment Score")+
+  geom_text(aes(label=label),hjust="inward",  nudge_x = plt_path$direction_label, color="grey50", size=3)+
+  geom_hline(yintercept=30.5, color="grey")+scale_fill_manual(values=c("#D64A56","cornflowerblue"))

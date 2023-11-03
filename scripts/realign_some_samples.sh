@@ -68,12 +68,23 @@ module load cellranger/3.1.0
 
 
 
-cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/realign_samples/possorted_genome_bam.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/C64
+#cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/realign_samples/possorted_genome_bam.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/C64
 
 
 # cellranger count --id=C64_realign \
-#    --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C64/MacParland_Diana__C102_5pr_V2_somthing \
-#    --sample=bamtofastq \
-#    --chemistry=SC5P-R2 \
-#    --transcriptome=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/reference/GRCh38
+#     --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C64/McGilvray_Sonya__C64_Enriched_5pr_0_1_CDPFDANXX \
+#     --sample=bamtofastq \
+#     --chemistry=SC5P-R2 \
+#     --transcriptome=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/reference/GRCh38
+
+
+
+cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/realign_samples/possorted_genome_bam.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/C39_NPC
+
+
+# cellranger count --id=C39_NPC_realign \
+#     --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C39_NPC/McGilvray_Sonya__C64_Enriched_5pr_0_1_CDPFDANXX \
+#     --sample=bamtofastq \
+#     --chemistry=SC5P-R2 \
+#     --transcriptome=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/reference/GRCh38
 

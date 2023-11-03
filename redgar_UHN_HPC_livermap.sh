@@ -93,6 +93,17 @@ sbatch realign_some_samples.sh
 
 scp /media/redgar/Seagate\ Portable\ Drive/IFALD/191218_A00827_0099_AHMW73DMXX_MacParland_Sonya/MacParland_Sonya__HSC-FI_006/possorted_genome_bam.bam t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples
 scp /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/McGilvray_Sonya__C64_Enriched_5pr/outs/possorted_genome_bam.bam t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples
+scp /media/redgar/Seagate\ Portable\ Drive/Bams\ 5\ liver\ map/BAM\ for\ 5\ liver\ map/USB\ Copy_2018-05-25_101435/170712_D00355_0169_ACB8R9ANXX_McGilvery_Sonya/McGilvery_Sonya__NPC/possorted_genome_bam.bam t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples
+
+
+cp /cluster/home/t117652uhn/liver_ped_map/scripts/realign_some_samples.sh . 
+
+
+
+scp -r t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples/IFALD006_realign/outs /media/redgar/Seagate\ Portable\ Drive/realign_samples/IFALD006_realign
+scp -r t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C64_realign/outs /media/redgar/Seagate\ Portable\ Drive/realign_samples/C64_realign
+
+
 
 
 # submit job on login node
@@ -100,7 +111,6 @@ cd liver_ped_map
 git pull
 sbatch scripts/realign_some_samples.sh
 
-scp -r t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples/IFALD006_realign/outs /media/redgar/Seagate\ Portable\ Drive/realign_samples/IFALD006_realign
 
 
 
