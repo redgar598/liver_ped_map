@@ -1,14 +1,14 @@
 #!/bin/bash
 #SBATCH --mem=50G
-#SBATCH -J realign_from_bam
+#SBATCH -J realign_compare
 #SBATCH -p himem
-#SBATCH --time=10:00:00
+#SBATCH --time=20:00:00
 #SBATCH -c 32 
 #SBATCH -N 1 
 #SBATCH --output=%x.out
 
 
-module load cellranger/3.1.0
+#module load cellranger/3.1.0
 
 
 
@@ -90,10 +90,24 @@ module load cellranger/3.1.0
 
 
 
-cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/realign_samples/possorted_genome_bam.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/C39_TLH
+# cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/realign_samples/possorted_genome_bam.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/C39_TLH
 
 # cellranger count --id=C39_TLH_realign \
-#     --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C39_TLH/McGilvery_Sonya__TLH_CDPFDANXX \
+#     --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C39_TLH/McGilvery_Sonya__TLH_MissingLibrary_1_CB8R9ANXX \
 #     --sample=bamtofastq \
 #     --chemistry=SC3Pv2 \
 #     --transcriptome=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/reference/GRCh38
+
+
+# cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/realign_samples/possorted_genome_bam.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/C54
+
+# cellranger count --id=C54_realign \
+#     --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C54/McGilvery_Sonya__TLH_april_12_MissingLibrary_1_CCJ7PANXX \
+#     --sample=bamtofastq \
+#     --chemistry=SC3Pv2 \
+#     --transcriptome=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/reference/GRCh38
+
+
+module load R/4.2.1
+
+Rscript scripts/compare_after_realign.R
