@@ -19,13 +19,29 @@ source("scripts/00_plot_gene_exp.R")
 source("scripts/00_fanciest_UMAP.R")
 
 
+############################################################################################################################
+smple<-"C64"
+path_realigned<-"/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C64_realign/outs"
+path_og<-"/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/McGilvray_Sonya__C64_Enriched_5pr/outs"
+# 
+# smple<-"C39_NPC"
+# path_realigned<-"/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C39_NPC_realign/outs"
+# path_og<-"/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/C39_NPC_june6_2017/outs"
+# 
+# smple<-"C39_TLH"
+# path_realigned<-"/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C39_TLH_realign/outs"
+# path_og<-"/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/C39_TLH_june6_2017/outs"
+# 
+# smple<-"C54"
+# path_realigned<-"/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C54_realign/outs"
+# path_og<-"/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/C54_3prV2_12Apr18/outs"
+# 
+# smple<-"IFALD006"
+# path_realigned<-"/media/redgar/Seagate Portable Drive/realign_samples/IFALD006_realign/outs"
+# path_og<-"/media/redgar/Seagate Portable Drive/ped_liver_map_raw/MacParland_Sonya__HSC-FI_006/outs"
+############################################################################################################################
 
-
-/media/redgar/Seagate Portable Drive/realign_samples/realign006_realign
-/media/redgar/Seagate Portable Drive/ped_liver_map_raw/MacParland_Sonya__HSC-FI_006
-
-
-d10x <- Read10X("/media/redgar/Seagate Portable Drive/realign_samples/realign006_realign/outs/filtered_feature_bc_matrix")
+d10x <- Read10X(paste(path_realigned,"/filtered_feature_bc_matrix",sep=""))
 colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),"realigned",sep="-")
 # print(dim(d10x))
 #' Initialize the Seurat object with the raw (non-normalized data).
@@ -39,7 +55,7 @@ d10x    <- FindNeighbors(d10x, dims = 1:30, verbose = F)
 d10x    <- FindClusters(d10x, verbose = T)
 meta_clusters    <- d10x@meta.data
 
-sc = load10X("/media/redgar/Seagate Portable Drive/realign_samples/realign006_realign/outs")
+sc = load10X(path_realigned)
 sc = setClusters(sc, setNames(meta_clusters$seurat_clusters, rownames(meta_clusters)))
 
 ## Load data and estimate soup profile
@@ -56,7 +72,7 @@ d10x = CreateSeuratObject(out)
 
 ## dropletQC
 nf1 <- nuclear_fraction_tags(
-  outs = file.path("/media/redgar/Seagate Portable Drive/realign_samples/realign006_realign/outs"),
+  outs = file.path(path_realigned),
   tiles = 1, cores = 1, verbose = FALSE)
 head(nf1)
 
@@ -85,7 +101,7 @@ d10x_realigned<-d10x
 #####
 ## original
 #####
-d10x <- Read10X("/media/redgar/Seagate Portable Drive/ped_liver_map_raw/MacParland_Sonya__HSC-FI_006/outs/filtered_feature_bc_matrix")
+d10x <- Read10X(paste(path_og,"/filtered_feature_bc_matrix",sep=""))
 colnames(d10x) <- paste(sapply(strsplit(colnames(d10x),split="-"),'[[',1L),"original",sep="-")
 # print(dim(d10x))
 #' Initialize the Seurat object with the raw (non-normalized data).
@@ -99,7 +115,7 @@ d10x    <- FindNeighbors(d10x, dims = 1:30, verbose = F)
 d10x    <- FindClusters(d10x, verbose = T)
 meta_clusters    <- d10x@meta.data
 
-sc = load10X("/media/redgar/Seagate Portable Drive/ped_liver_map_raw/MacParland_Sonya__HSC-FI_006/outs")
+sc = load10X(path_og)
 sc = setClusters(sc, setNames(meta_clusters$seurat_clusters, rownames(meta_clusters)))
 
 ## Load data and estimate soup profile
@@ -116,7 +132,7 @@ d10x = CreateSeuratObject(out)
 
 ## dropletQC
 nf1 <- nuclear_fraction_tags(
-  outs = file.path("/media/redgar/Seagate Portable Drive/ped_liver_map_raw/MacParland_Sonya__HSC-FI_006/outs"),
+  outs = file.path(path_og),
   tiles = 1, cores = 1, verbose = FALSE)
 head(nf1)
 
@@ -186,11 +202,11 @@ qc_plts_version<-ggplot(plt_QC_data, aes(nCount_RNA,nFeature_RNA,colour=percent.
   scale_color_gradientn(colors=c("black","blue","green2","red","yellow"),name="Percent\nMitochondrial") +
   geom_hline(yintercept = 500) + xlab("Number of Total Molecules\n(nCount) ")+ylab("Number of Unique Genes\n(nFeature)")+
   geom_hline(yintercept = 6000) +theme_bw()+th
-save_plts(qc_plts_version, "realign_intital_QC_plts_version", w=8,h=4)
+save_plts(qc_plts_version, paste("realign_intital_QC_plts_version", smple, sep=""), w=8,h=4)
 
 MT_plt<-ggplot(plt_QC_data,aes(percent.mt)) + geom_histogram(binwidth = 0.5) +
   geom_vline(xintercept = 25)+ theme_bw()+xlab("Percent Mitochondrial")+th+facet_wrap(~version)
-save_plts(MT_plt, "realign_percentMT_plt", w=6,h=4)
+save_plts(MT_plt, paste("realign_percentMT_plt", smple, sep=""), w=6,h=4)
 
 
 
@@ -264,12 +280,13 @@ pca_cellcycle<-DimPlot(d10x, reduction="pca",  group.by = "Phase", split.by = "v
 ######################
 load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 
-cell_label<-cell_label[grep("IFALD006",cell_label$individual),]
+cell_label<-cell_label[grep(smple,cell_label$individual),]
 
 cell_label1<-cell_label
-rownames(cell_label1)<-gsub("_14","_1",rownames(cell_label1))
+rownames(cell_label1)<-sapply(1:nrow(cell_label1), function(x) paste(strsplit(rownames(cell_label1)[x],"_")[[1]][1],"_1", sep=""))
+
 cell_label2<-cell_label
-rownames(cell_label2)<-gsub("_14","_2",rownames(cell_label2))
+rownames(cell_label2)<-sapply(1:nrow(cell_label2), function(x) paste(strsplit(rownames(cell_label2)[x],"_")[[1]][1],"_2", sep=""))
 
 cell_label<-rbind(cell_label2, cell_label1)
 
@@ -285,7 +302,8 @@ identical(colnames(d10x), cell_label$index)
 d10x <- AddMetaData(d10x, metadata = cell_label)
 
 fanciest_UMAP(d10x,NA,F)
-save_plts(fanciest_UMAP(d10x,NA,F), "realigned_IFALD006", w=6,h=5)
+save_plts(fanciest_UMAP(d10x,NA,F), paste("realign_", smple, sep=""), w=6,h=5)
+
 
   umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x, reduction = "umap"))#
   umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
@@ -309,34 +327,7 @@ save_plts(fanciest_UMAP(d10x,NA,F), "realigned_IFALD006", w=6,h=5)
                          axis.title.x = element_text(size=5,hjust = 0.05),
                          axis.title.y = element_text(size=5,hjust = 0.05,angle = 90))+ guides(colour = guide_legend(override.aes = list(size=3)))
   save_plts(type, "realigned_IFALD006_version", w=6,h=5)
-  
+  save_plts(type, paste("realign_", smple,"_version", sep=""), w=6,h=5)
 
-## lost in realign
-  plt_myeloid$index_repeat<-gsub("_1|_2","",plt_myeloid$index)
-  plt_myeloid_original<-plt_myeloid[which(plt_myeloid$version=="original"),]
-  plt_myeloid_realigned<-plt_myeloid[which(plt_myeloid$version=="realigned"),]
-  missing<-plt_myeloid_original[which(!(plt_myeloid_original$index_repeat%in%plt_myeloid_realigned$index_repeat)),]
-  
-  plt_myeloid$lost_in_realign<-"kept"
-  plt_myeloid$lost_in_realign[(plt_myeloid$index%in%missing$index)]<-"lost"
 
- ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
-    geom_point(aes(color=CellType_refined),size=0.05)+
-    geom_point(data=plt_myeloid[which(plt_myeloid$lost_in_realign=="lost"),], size = 0.06, colour= "black", stroke = 1)+
-    geom_point(aes(color=CellType_refined),data=plt_myeloid[which(plt_myeloid$lost_in_realign=="lost"),], size=0.05)+
-    xlab("UMAP 1")+ylab("UMAP 2")+
-    colscale_cellType+
-    annotate("segment", 
-             x = arr$x, xend = arr$x + c(arr$x_len, 0), 
-             y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
-             arrow = arrow(type = "closed", length = unit(2, 'pt'))) +
-    theme_void()+theme(plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
-                       axis.title.x = element_text(size=5,hjust = 0.05),
-                       axis.title.y = element_text(size=5,hjust = 0.05,angle = 90),
-                       legend.position = "none")
- 
-ggplot(plt_myeloid, aes(lost_in_realign, nCount_RNA))  + geom_violin()
-ggplot(plt_myeloid, aes(lost_in_realign, nFeature_RNA))  + geom_violin()
-ggplot(plt_myeloid, aes(lost_in_realign, nuclear_fraction))  + geom_violin()
-table(plt_myeloid$lost_in_realign, plt_myeloid$cell_status)
-ggplot(plt_myeloid, aes(lost_in_realign, relALBChange))  + geom_violin()
+

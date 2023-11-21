@@ -4,10 +4,11 @@ library(cowplot)
 
 
 
-myColors_pval <- c("#084594","#4292c6","#9ecae1","#deebf7")
-color_possibilities_pval<-c( "<=0.00001","<=0.0001","<=0.0005",">0.0005")
-names(myColors_pval) <- color_possibilities_pval
-fillscale_pval <- scale_fill_manual(name="P Value",values = myColors_pval, drop = F)
+myColors_f <- c("#084594","#166da6","#4292c6","#68b3e3","#9ecae1","#deebf7")
+color_possibilities_f<-c( ">10,000",">1,000",">500",">250",">100",">10")
+names(myColors_f) <- color_possibilities_f
+fillscale_f <- scale_fill_manual(name="F Statistic",values = myColors_f, drop = F)
+
 
 
 heat_scree_plot<-function(Loadings, Importance, right_marg, left_marg){
@@ -75,10 +76,15 @@ heat_scree_plot<-function(Loadings, Importance, right_marg, left_marg){
   
   
   # # color if sig
-  # avo_heat_melt$Pvalue<-sapply(1:nrow(avo_heat_melt), function(x) if(avo_heat_melt$value[x]<=0.00001){"<=0.00001"}else{
-  #   if(avo_heat_melt$value[x]<=0.0001){"<=0.0001"}else{
-  #     if(avo_heat_melt$value[x]<=0.0005){"<=0.0005"}else{">0.0005"}}})
-  
+  # avo_heat_melt$value<-sapply(1:nrow(avo_heat_melt), function(x) 
+  #   if(avo_heat_melt$value[x]>=10000){">10,000"}else{
+  #     if(avo_heat_melt$value[x]>=1000){">1,000"}else{
+  #       if(avo_heat_melt$value[x]>=500){">500"}else{
+  #         if(avo_heat_melt$value[x]>=250){">250"}else{
+  #           if(avo_heat_melt$value[x]>=100){">100"}else{
+  #             if(avo_heat_melt$value[x]>=10){">10"}else{
+  #         "<10"}}}}}})
+  # 
   # levels(avo_heat_melt$variable)<-sapply(1:PCs_to_view, function(x) paste("PC",x, sep="" ))
   # levels(corplt_heat_melt$variable)<-sapply(1:PCs_to_view, function(x) paste("PC",x, sep="" ))
   # 
@@ -90,9 +96,9 @@ heat_scree_plot<-function(Loadings, Importance, right_marg, left_marg){
   # names(myColors_pval) <- color_possibilities_pval
   # fillscale_pval <- scale_fill_manual(name="P Value",values = myColors_pval, drop = F)
 
-  heat_avo<-ggplot(avo_heat_melt, aes(variable,meta, fill = value)) +
+  heat_avo<-ggplot(avo_heat_melt, aes(variable,meta, fill = log(value))) +
     geom_tile(color = "black",size=0.5) +
-    theme_gray(8)+  scale_fill_continuous_sequential(palette = "Blues 3", rev=T, name="F")+
+    theme_gray(8)+  scale_fill_continuous_sequential(palette = "Blues 3", rev=T, name="log(F)")+
     theme(axis.text.y = element_text(size =9, color="black"),
           axis.text.x=element_blank(),
           axis.title.y = element_text(size =11),

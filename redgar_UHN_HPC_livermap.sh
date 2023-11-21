@@ -96,6 +96,9 @@ scp /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/McGilvray_Sonya__C6
 scp /media/redgar/Seagate\ Portable\ Drive/Bams\ 5\ liver\ map/BAM\ for\ 5\ liver\ map/USB\ Copy_2018-05-25_101435/170712_D00355_0169_ACB8R9ANXX_McGilvery_Sonya/McGilvery_Sonya__NPC/possorted_genome_bam.bam t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples
 scp /media/redgar/Seagate\ Portable\ Drive/Bams\ 5\ liver\ map/BAM\ for\ 5\ liver\ map/USB\ Copy_2018-05-25_101435/170712_D00355_0169_ACB8R9ANXX_McGilvery_Sonya/McGilvery_Sonya__TLH/possorted_genome_bam.bam t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples
 
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples/possorted_genome_bam.bam /media/redgar/Seagate\ Portable\ Drive/realign_samples/CD54_from_diana
+
+
 cp /cluster/home/t117652uhn/liver_ped_map/scripts/realign_some_samples.sh . 
 
 
