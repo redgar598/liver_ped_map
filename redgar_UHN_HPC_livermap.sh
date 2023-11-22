@@ -106,16 +106,16 @@ cp /cluster/home/t117652uhn/liver_ped_map/scripts/realign_some_samples.sh .
 scp -r t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples/IFALD006_realign/outs /media/redgar/Seagate\ Portable\ Drive/realign_samples/IFALD006_realign
 scp -r t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C64_realign/outs /media/redgar/Seagate\ Portable\ Drive/realign_samples/C64_realign
 scp -r t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C39_NPC_realign/outs /media/redgar/Seagate\ Portable\ Drive/realign_samples/C39_NPC_realign
-
-
-
+scp -r t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C39_TLH_realign/outs /media/redgar/Seagate\ Portable\ Drive/realign_samples/C39_TLH_realign
+scp -r t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C54_realign/outs /media/redgar/Seagate\ Portable\ Drive/realign_samples/C54_realign
 
 # submit job on login node
 cd liver_ped_map
 git pull
 sbatch scripts/realign_some_samples.sh
+nano realign_compare.out
 
-
+nano scripts/compare_after_realign.R
 
 
 
