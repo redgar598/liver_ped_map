@@ -169,7 +169,7 @@ source("scripts/00_GSEA_function.R")
 GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
 
 
-### PC5 loadings
+### PC2 loadings
 gene_list = as.data.frame(unclass(df$rotLoadings))$PC_2
 names(gene_list) = rownames(as.data.frame(unclass(df$rotLoadings)))
 gene_list = sort(gene_list, decreasing = TRUE)
@@ -220,6 +220,26 @@ plot_grid(
   gsea_PC2+theme(legend.position = "none"),rel_heights = c(3,1), nrow=2)
   
   
+###################
+## RBC PC
+###################
+sapply(1:30, function(x) which(rownames(df[[1]])[rev(order(df[[1]][,x]))]=="HBA1"))
+sapply(1:30, function(x) which(rownames(df[[1]])[(order(df[[1]][,x]))]=="HBA1"))
+
+lapply(20, function(x) rownames(df[[1]])[order(df[[1]][,x])][1:10])
+lapply(20, function(x) rownames(df[[1]])[rev(order(df[[1]][,x]))][1:10])
+
+### PC20 loadings
+gene_list = as.data.frame(unclass(df$rotLoadings))$PC_20
+names(gene_list) = rownames(as.data.frame(unclass(df$rotLoadings)))
+gene_list = sort(gene_list, decreasing = FALSE)
+gene_list = gene_list[!duplicated(names(gene_list))]
+
+res = GSEA(gene_list, GO_file, pval = 0.05)
+
+res$Results
+
+
 
 
 # 
@@ -363,3 +383,33 @@ lapply(16, function(x) rownames(df[[1]])[(order(df[[1]][,x]))][1:10])
 lapply(16, function(x) rownames(df[[1]])[rev(order(df[[1]][,x]))][1:10])
 
 
+#################
+## plot gene varimax
+#################
+gene="HBA1"
+percentile=0.9
+
+varimax_gene_plot<-function(gene, percentile){
+  plt_varimax_meta$cell<-rownames(plt_varimax_meta)
+  DefaultAssay(d10x.combined_KC)<-"RNA"
+  gene_exp<-FetchData(d10x.combined_KC, vars=gene)
+  gene_exp$cell<-rownames(gene_exp)
+  plt_varimax_meta<-merge(plt_varimax_meta, gene_exp, by='cell')
+  
+  exp_limit<-quantile(plt_varimax_meta[, which(colnames(plt_varimax_meta)==gene)], percentile)
+  plt_varimax_meta$gene_exp_limited<-NA
+  over_limit<-which(plt_varimax_meta[, which(colnames(plt_varimax_meta)==gene)]>exp_limit)
+  plt_varimax_meta$gene_exp_limited[over_limit]<-plt_varimax_meta[over_limit, which(colnames(plt_varimax_meta)==gene)]
+  plt_varimax_meta<-plt_varimax_meta[rev(order(plt_varimax_meta$gene_exp_limited)),]
+  
+  plt_varimax_meta<-rbind(plt_varimax_meta[which(is.na(plt_varimax_meta$gene_exp_limited)),],
+                          plt_varimax_meta[which(!(is.na(plt_varimax_meta$gene_exp_limited))),][(order(plt_varimax_meta[which(!(is.na(plt_varimax_meta$gene_exp_limited))),]$gene_exp_limited)),])
+  
+  ggplot(plt_varimax_meta, aes(varPC_2,varPC_20))+
+    geom_point(aes(color=log(gene_exp_limited)),size=0.75)+xlab("Varimax PC2")+ylab("Varimax PC20")+
+    scale_color_continuous_sequential(palette = "Blues 3", rev=T, 
+                                      name=paste(gene, "\nExpression\n(log)"),na.value = "grey80")+
+    theme_bw()}
+
+varimax_gene_plot("HBA1", 0.8)
+varimax_gene_plot("IL1B", 0.8)

@@ -504,7 +504,7 @@ identical(colnames(d10x), cell_label$index)
 
 rownames(cell_label)<-cell_label$index
 
-
+head(cell_label)
 head(d10x@meta.data)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
