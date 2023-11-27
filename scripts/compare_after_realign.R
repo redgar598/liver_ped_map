@@ -486,14 +486,13 @@ load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 cell_label<-cell_label[grep("C39_caud3prNPC",cell_label$individual),]
 
 cell_label1<-cell_label
-rownames(cell_label1)<-sapply(1:nrow(cell_label1), function(x) paste(strsplit(rownames(cell_label1)[x],"_")[[1]][1],"-original", sep=""))
+rownames(cell_label1)<-sapply(1:nrow(cell_label1), function(x) paste(strsplit(rownames(cell_label1)[x],"-|_")[[1]][1],"-original", sep=""))
 
 cell_label2<-cell_label
-rownames(cell_label2)<-sapply(1:nrow(cell_label2), function(x) paste(strsplit(rownames(cell_label2)[x],"_")[[1]][1],"-realigned", sep=""))
+rownames(cell_label2)<-sapply(1:nrow(cell_label2), function(x) paste(strsplit(rownames(cell_label2)[x],"-|_")[[1]][1],"-realigned", sep=""))
 
 cell_label<-rbind(cell_label2, cell_label1)
 
-cell_label$index<-rownames(cell_label)
 head(cell_label)
 head(colnames(d10x))
 head(cell_label$index)
@@ -662,10 +661,10 @@ load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 cell_label<-cell_label[grep("C39_caud3prTLH",cell_label$individual),]
 
 cell_label1<-cell_label
-rownames(cell_label1)<-sapply(1:nrow(cell_label1), function(x) paste(strsplit(rownames(cell_label1)[x],"_")[[1]][1],"_1", sep=""))
+rownames(cell_label1)<-sapply(1:nrow(cell_label1), function(x) paste(strsplit(rownames(cell_label1)[x],"-|_")[[1]][1],"-original", sep=""))
 
 cell_label2<-cell_label
-rownames(cell_label2)<-sapply(1:nrow(cell_label2), function(x) paste(strsplit(rownames(cell_label2)[x],"_")[[1]][1],"_2", sep=""))
+rownames(cell_label2)<-sapply(1:nrow(cell_label2), function(x) paste(strsplit(rownames(cell_label2)[x],"-|_")[[1]][1],"-realigned", sep=""))
 
 cell_label<-rbind(cell_label2, cell_label1)
 
