@@ -486,15 +486,17 @@ load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 cell_label<-cell_label[grep("C39_caud3prNPC",cell_label$individual),]
 
 cell_label1<-cell_label
-rownames(cell_label1)<-sapply(1:nrow(cell_label1), function(x) paste(strsplit(rownames(cell_label1)[x],"_")[[1]][1],"_1", sep=""))
+rownames(cell_label1)<-sapply(1:nrow(cell_label1), function(x) paste(strsplit(rownames(cell_label1)[x],"_")[[1]][1],"-original", sep=""))
 
 cell_label2<-cell_label
-rownames(cell_label2)<-sapply(1:nrow(cell_label2), function(x) paste(strsplit(rownames(cell_label2)[x],"_")[[1]][1],"_2", sep=""))
+rownames(cell_label2)<-sapply(1:nrow(cell_label2), function(x) paste(strsplit(rownames(cell_label2)[x],"_")[[1]][1],"-realigned", sep=""))
 
 cell_label<-rbind(cell_label2, cell_label1)
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
+head(cell_label)
+
 missing_in_old<-cell_label[which(is.na(cell_label$index)),]
 missing_in_old$index<-colnames(d10x)[which(!(colnames(d10x)%in%cell_label$index))]
 cell_label<-rbind(cell_label, missing_in_old)
