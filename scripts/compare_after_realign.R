@@ -502,6 +502,9 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 
 identical(colnames(d10x), cell_label$index)
 
+rownames(cell_label)<-cell_label$index
+
+
 head(d10x@meta.data)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
@@ -666,6 +669,7 @@ cell_label<-rbind(cell_label, missing_in_old)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 
 identical(colnames(d10x), cell_label$index)
+rownames(cell_label)<-cell_label$index
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
 
