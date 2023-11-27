@@ -511,6 +511,8 @@ d10x <- AddMetaData(d10x, metadata = cell_label)
 
 head(d10x@meta.data)
 
+table(d10x@meta.data$CellType_refined)
+
 fanciest_UMAP(d10x,NA,F)
 save_plts(fanciest_UMAP(d10x,NA,F), paste("realign_", smple, sep=""), w=6,h=5)
 

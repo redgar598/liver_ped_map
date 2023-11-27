@@ -68,7 +68,8 @@ th_present <- theme(axis.text=element_text(size=12),
 #################
 save_fetal_plts<-function(plt, name, w,h){
   ggsave(plt, file=paste(here("figures/fetal/"),name,".pdf", sep=""), w=w, h=h)
-  ggsave(plt, file=paste(here("figures/fetal/jpeg/"),name,".jpeg", sep=""), w=w, h=h)}
+  ggsave(plt, file=paste(here("figures/fetal/jpeg/"),name,".jpeg", sep=""), w=w, h=h)
+  ggsave(plt, file=paste(here("figures/fetal/png/"),name,".png", sep=""), w=w, h=h)}
 
 
 myColors_celltype_fetal <- c("#660cc7","#8642d1","#5612a3","#4b911d","#7a4202","#006d2c","#6bbce8","#3469ad","#d17906","#b01e87","#60ba5d","#207537",
@@ -158,7 +159,7 @@ colscale_cellType_fetal_combo <- scale_color_manual(name="Cell Type",
 #                                    "Doublet","Fetal NA"),names(combo_colors))]
 
 
-myColors_agecondition_fetal <- c("#D64A56","cornflowerblue","#374eb8","grey")
+myColors_agecondition_fetal <- c("#D64A56","cornflowerblue","#374eb8","#cedcfb")
 color_possibilities_agecondition_fetal<-c( "Adult Healthy","Ped Healthy","Ped IFALD","Fetal Healthy")
 names(myColors_agecondition_fetal) <- color_possibilities_agecondition_fetal
 fillscale_agecondition_fetal <- scale_fill_manual(name="Age\nGroup",
