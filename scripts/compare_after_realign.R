@@ -483,7 +483,7 @@ pca_cellcycle<-DimPlot(d10x, reduction="pca",  group.by = "Phase", split.by = "v
 ######################
 load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 
-cell_label<-cell_label[grep(smple,cell_label$individual),]
+cell_label<-cell_label[grep("C39_caud3prNPC",cell_label$individual),]
 
 cell_label1<-cell_label
 rownames(cell_label1)<-sapply(1:nrow(cell_label1), function(x) paste(strsplit(rownames(cell_label1)[x],"_")[[1]][1],"_1", sep=""))
@@ -644,7 +644,7 @@ d10x <- CellCycleScoring(d10x, s.features = s.genes, g2m.features = g2m.genes, s
 ### add cell type
 load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 
-cell_label<-cell_label[grep(smple,cell_label$individual),]
+cell_label<-cell_label[grep("C39_caud3prTLH",cell_label$individual),]
 
 cell_label1<-cell_label
 rownames(cell_label1)<-sapply(1:nrow(cell_label1), function(x) paste(strsplit(rownames(cell_label1)[x],"_")[[1]][1],"_1", sep=""))
