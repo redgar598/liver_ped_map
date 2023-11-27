@@ -493,12 +493,12 @@ rownames(cell_label2)<-sapply(1:nrow(cell_label2), function(x) paste(strsplit(ro
 
 cell_label<-rbind(cell_label2, cell_label1)
 
+cell_label$index<-rownames(cell_label)
+cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
+
 head(cell_label)
 head(colnames(d10x))
 head(cell_label$index)
-
-cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
-
 
 missing_in_old<-cell_label[which(is.na(cell_label$index)),]
 missing_in_old$index<-colnames(d10x)[which(!(colnames(d10x)%in%cell_label$index))]
