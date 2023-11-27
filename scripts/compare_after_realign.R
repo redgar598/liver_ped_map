@@ -502,6 +502,8 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 
 identical(colnames(d10x), cell_label$index)
 
+head(d10x@meta.data)
+
 d10x <- AddMetaData(d10x, metadata = cell_label)
 
 head(d10x@meta.data)
