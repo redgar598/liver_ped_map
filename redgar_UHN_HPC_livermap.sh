@@ -118,6 +118,8 @@ nano realign_compare.out
 nano scripts/compare_after_realign.R
 
 
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/realign_*pdf /home/redgar/Documents/liver_ped_map/figures
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/jpeg/realign_*jpeg /home/redgar/Documents/liver_ped_map/figures/jpeg
 
 
 
