@@ -776,7 +776,7 @@ saveRDS(cell_label, file = here("../../../projects/macparland/RE/PediatricAdult/
 # DotPlot(object = d10x.combined, features = T_genes)+xlab("T Cell Marker")
 # DotPlot(object = d10x.combined, features = NK_genes)+xlab("NK Cell Marker")
 # DotPlot(object = d10x.combined, features = LEC_genes)+xlab("LSEC Marker")
-# DotPlot(object = d10x.combined, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker")
+# DotPlot(object = d10x.combined, features = Hepatocyte_genes[1:15])+xlab("Hepatocyte Marker") 
 # DotPlot(object = d10x.combined, features = Hepatocyte_genes[16:29])+xlab("Hepatocyte Marker")
 # DotPlot(object = d10x.combined, features = Cholangiocytes_genes)+xlab("Cholangiocyte Marker")
 # DotPlot(object = d10x.combined, features = HSCs_genes[1:14])+xlab("HSC Marker")

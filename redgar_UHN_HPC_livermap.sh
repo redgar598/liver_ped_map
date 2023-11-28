@@ -153,6 +153,8 @@ scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_mar20_2023_I
 scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_may15_2023_IFALD_PBMC.csv t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw
 scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_june21_2023_IFALD_PBMC.csv t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw
 
+scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_Nov28_2023_IFALD_PBMC.csv t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data
+
 
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/C39_NPC_june6_2017 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/C39_TLH_june6_2017 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
