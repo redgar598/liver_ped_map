@@ -325,3 +325,4 @@ scp -r t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/TA/Cau
 
 
 
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/QC_adult_ped_IFALD.out /home/redgar/Documents/liver_ped_map

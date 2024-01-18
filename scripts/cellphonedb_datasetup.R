@@ -21,7 +21,9 @@ load(here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD
 
 
 
-
+################################
+## Healthy Ped
+################################
 ## Counts
 DefaultAssay(d10x.combined)<-"RNA"
 d10x.combined.subset<-subset(d10x.combined, subset = age_condition == "Ped Healthy")
@@ -63,3 +65,57 @@ micro_env<-data.frame(cell_type = unique(meta_data$CellType_refined), microenvir
 write.csv(micro_env, 
           file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"Ped_healthy_microenv.csv", sep=""),  
           row.names = F,  quote = F)
+
+
+
+
+
+
+
+
+
+################################
+## IFALD
+################################
+## Counts
+DefaultAssay(d10x.combined)<-"RNA"
+d10x.combined.subset<-subset(d10x.combined, subset = age_condition == "Ped IFALD")
+rm(d10x.combined)
+gc()
+
+levels(d10x.combined.subset$CellType_refined)<-gsub(" |[+]|-|[\n(]","_", levels(d10x.combined.subset$CellType_refined))
+levels(d10x.combined.subset$CellType_refined)<-gsub("[)]","", levels(d10x.combined.subset$CellType_refined))
+
+#levels(d10x.combined.subset$CellType_refined)[c(6,12)]<-c("CLNK_T_cell","KC_like")
+
+##just two cell types
+# d10x.combined.subset<-subset(d10x.combined.subset, subset = CellType_refined %in% c("KC_like","CLNK_T_cell"))
+# d10x.combined.subset <- d10x.combined.subset[, sample(colnames(d10x.combined.subset), size = 200, replace=F)]
+
+
+d10x.combined.subset <- NormalizeData(d10x.combined.subset, scale.factor = 10000, normalization.method = "LogNormalize")
+
+SaveH5Seurat(d10x.combined.subset, filename = here("../../../projects/macparland/RE/PediatricAdult/processed_data","ped_IFALD.h5Seurat"), overwrite = T)
+Convert(here("../../../projects/macparland/RE/PediatricAdult/processed_data","ped_IFALD.h5Seurat"), dest = "h5ad", overwrite = T)
+
+
+
+## meta data
+meta_data<-d10x.combined.subset@meta.data[,c("age_condition","CellType_refined")]
+meta_data$age_condition<-as.character(meta_data$age_condition)
+meta_data$Cell<-rownames(meta_data)
+
+meta_data$CellType_refined<-gsub("\n"," ", meta_data$CellType_refined)
+
+write.csv(meta_data[,c("Cell","CellType_refined")], 
+          file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"Ped_IFALD_meta.csv", sep=""),  
+          row.names = F,  quote = F)
+
+
+## microenvironment
+micro_env<-data.frame(cell_type = unique(meta_data$CellType_refined), microenvironment = c("Env1"))
+
+write.csv(micro_env, 
+          file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"Ped_IFALD_microenv.csv", sep=""),  
+          row.names = F,  quote = F)
+
