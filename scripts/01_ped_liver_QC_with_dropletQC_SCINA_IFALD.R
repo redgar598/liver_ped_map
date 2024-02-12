@@ -29,7 +29,7 @@ cellranger_out_realigned <- here("../../../projects/macparland/RE/PediatricAdult
 samples<-c(list.files(cellranger_out_loc),list.files(cellranger_out_realigned))
 print(samples)
 
-meta<-read.table(here("data/data_transfer_updated_Nov28_2023_IFALD_PBMC.csv"), header=T, sep=",")
+meta<-read.table(here("data/data_transfer_updated_feb12_2024_IFALD_PBMC.csv"), header=T, sep=",")
 
 samples<-samples[which(samples%in%meta$file)]
 samples<-samples[-grep("PBMC",samples)]

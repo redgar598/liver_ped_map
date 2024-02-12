@@ -23,3 +23,4 @@ nano cpdb_ped_healthy.out
 
 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/statistical_analysis_*.txt /home/redgar/Documents/liver_ped_map/data/cellphonedb
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/statistical_analysis_*01_18_2024_13:46:43.txt /home/redgar/Documents/liver_ped_map/data/cellphonedb
