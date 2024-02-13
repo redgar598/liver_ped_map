@@ -154,6 +154,7 @@ scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_may15_2023_I
 scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_june21_2023_IFALD_PBMC.csv t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw
 
 scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_Nov28_2023_IFALD_PBMC.csv t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data
+scp /home/redgar/Documents/liver_ped_map/data/data_transfer_updated_feb12_2024_IFALD_PBMC.csv t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data
 
 
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/C39_NPC_june6_2017 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
@@ -171,6 +172,9 @@ scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Sonya
 
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Diana__C105_Frozen_5pr_V2 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 scp -r /media/redgar/Seagate\ Portable\ Drive/ped_liver_map_raw/MacParland_Diana__C102_5pr_V2 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+
+scp -r /media/redgar/Seagate\ Portable\ Drive/MacParland_Jawairia__C115_biopsy_5pr_V2 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
+scp -r /media/redgar/Seagate\ Portable\ Drive/MacParland_Jawairia__C113_5pr_V2 t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/
 
 
 
