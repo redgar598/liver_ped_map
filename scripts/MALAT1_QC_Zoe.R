@@ -87,7 +87,7 @@ d10x.list<-lapply(1:length(d10x.list), function(x){
   # Change lwd to change thickness of red line
   # Change breaks to change bins of histogram
   define_malat1_threshold <- function(counts, max_counts, min_counts = 0, bw = 0.1, lwd = 2, breaks = 100) {
-    pdf(here("figures",paste(unique(sobj$Sample_ID),"MALAT1.pdf", sep="")))
+    pdf(here("figures",paste(unique(sobj$individual),"MALAT1.pdf", sep="")))
     # Visualise MALAT1 histogram
     hist(counts, breaks = breaks, freq = FALSE)
     # Calculate the density values
