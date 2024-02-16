@@ -39,6 +39,7 @@ module load R/4.2.1
 cd liver_ped_map
 git pull
 sbatch IFALD_exploratory_run.sh
+sbatch MATAL1_exploratory_run.sh
 
 
 
