@@ -185,6 +185,12 @@ scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_ma
 scp /media/redgar/Seagate\ Portable\ Drive/processed_data/IFALD_d10x_adult_ped_raw_PBMC.rds t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data
 
 
+### feb 2024 update
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_integrated.rds /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_d10x_adult_ped_raw.rds /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_cellRough.rds /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
+
+
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_PBMC_integrated.rds /home/redgar/Documents/liver_ped_map/data
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_PBMC_integrated.rds /media/redgar/Seagate\ Portable\ Drive/processed_data 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_PBMC_merged.rds /media/redgar/Seagate\ Portable\ Drive/processed_data 
