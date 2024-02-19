@@ -123,6 +123,7 @@ scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_ma
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/jpeg/realign_*jpeg /home/redgar/Documents/liver_ped_map/figures/jpeg
 
 
+scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/*MALAT1.pdf /home/redgar/Documents/liver_ped_map/figures
 
 
 ### downlaod fetal liver data

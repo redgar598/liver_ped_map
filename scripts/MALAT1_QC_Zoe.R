@@ -89,7 +89,7 @@ d10x.list<-lapply(1:length(d10x.list), function(x){
   define_malat1_threshold <- function(counts, max_counts, min_counts = 0, bw = 0.1, lwd = 2, breaks = 100) {
     pdf(here("figures",paste(unique(sobj$individual),"MALAT1.pdf", sep="")))
     # Visualise MALAT1 histogram
-    hist(counts, breaks = breaks, freq = FALSE)
+    hist(counts, breaks = breaks, freq = FALSE, main=unique(sobj$individual))
     # Calculate the density values
     density_data <- density(counts, bw = bw)
     # Isolate x value at minimum
@@ -106,13 +106,22 @@ d10x.list<-lapply(1:length(d10x.list), function(x){
   # Run this function on MALAT1 reads, eg:
   threshold <- define_malat1_threshold(sobj@assays$RNA@counts["MALAT1",], max_counts = 100)
   
-  # Use this value to subset your cells
-  cells_subset <- WhichCells(sobj, expression = MALAT1 > threshold, slot = "counts")
-  sobj_subset <- subset(sobj, cells = cells_subset)
+  ######## Manually decided which samples had a peak and a dip
+  MALAT1_filter<-c("C85_caud3pr","C96_caud3pr","C39_caud3prNPC","IFALD073","IFALD030" ,"C105_caud5pr","C115")
   
-  print(paste(ncol(sobj), "cell originally", ncol(sobj_subset), "after MALAT1 filter"))
+  if(unique(sobj$individual)%in%MALAT1_filter){
+    # Use this value to subset your cells
+    cells_subset <- WhichCells(sobj, expression = MALAT1 > threshold, slot = "counts")
+    sobj_subset <- subset(sobj, cells = cells_subset)
+    
+    print(paste(ncol(sobj), "cell originally", ncol(sobj_subset), "after MALAT1 filter"))
+    
+    sobj_subset
+  }else{
+    sobj
+  }
   
-  sobj_subset
+
 })
 
 
