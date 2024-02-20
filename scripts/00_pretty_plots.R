@@ -17,12 +17,12 @@ myColors_celltype <- c("#660cc7","#8642d1","#5612a3","#4b911d","#7a4202",
 color_possibilities_celltype<-c("B-cells","Mature B-cells","Plasma cells","CD3+ T-cells","Cholangiocytes",
                                 "gd T-cells","Hepatocytes","HSC","LSEC","Myeloid cells",
                                 "NK-like cells", "NK and T cells","NKT cells\n(Hepatocyte Like)","Cholangiocytes\n(Hepatocyte Like)","HSC\n(Hepatocyte Like)",
-                                "LSEC\n(Hepatocyte Like)","Myeloid cells\n(Hepatocyte Like)","B-cells\n(Hepatocyte Like)","NKT cells","RR Myeloid",
+                                "LSEC\n(Hepatocyte Like)","Myeloid cells\n(Hepatocyte Like)","B-cells\n(Hepatocyte Like)","NKT cells","Mono-Mac",
                                 "KC Like","Neutrophil","Neutrophil\n(DEFA+)","Erythrocytes","Mast cell",
                                 "Myeloid Erythrocytes\n(phagocytosis)","Doublet","Macrophage\n(MHCII high)","Cycling T-cells","Macrophage\n(CLEC9A high)",
                                 "Platelets","CLNK T-cells","Cycling Myeloid","Mature B-cells (104)","pDC",
                                 "pre B-cell","KC Like\n(Hepatocyte Like)","KC Like (C97)","Naive CD4 T-cells","Memory CD4 T-cells",
-                                "NK cells","DC","CD8 T-cells","CD14+ Mono","Cycling B-cells")
+                                "NK cells","DC","CD8 T-cells","CD14+ Mono","Cycling Plasma")
 names(myColors_celltype) <- color_possibilities_celltype
 fillscale_cellType <- scale_fill_manual(name="Cell Type",
                                         values = myColors_celltype, drop = T, limits=force)
