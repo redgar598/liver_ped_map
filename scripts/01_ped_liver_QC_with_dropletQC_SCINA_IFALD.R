@@ -597,8 +597,8 @@ genes<-unique(c(Macrophage_genes, NK_T_genes, B_genes,LEC_genes,Hepatocyte_genes
 # 
 
 
-d10x.combined<-readRDS(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024","IFALD_adult_ped_integrated.rds"))
-#d10x.combined<-readRDS(file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_integrated.rds"))
+#d10x.combined<-readRDS(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024","IFALD_adult_ped_integrated.rds"))
+d10x.combined<-readRDS(file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_integrated.rds"))
 
 #####
 ## plot cell types
@@ -715,8 +715,8 @@ save_plts(nFeature_cluster_umap, "IFALD_rPCA_nFeature_cluster_umap", w=6,h=4)
 # 
 
 ######################
-#load(here("data","IFALD_adult_ped_SCINA_cell_labels.RData"))
-load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/IFALD_adult_ped_SCINA_cell_labels.RData"))
+load(here("../../../projects/macparland/RE/PediatricAdult/processed_data","IFALD_adult_ped_SCINA_cell_labels.RData"))
+#load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/IFALD_adult_ped_SCINA_cell_labels.RData"))
 
 length(which(SCINA_cell_labels$cell%in%colnames(d10x.combined)))
 
