@@ -59,6 +59,8 @@ d10x.list <- sapply(1:length(samples), function(y){
   print(identical(meta_cell_add$cell, colnames(d10x)))
   rownames(meta_cell_add)<-meta_cell_add$cell
   d10x<- AddMetaData(d10x, meta_cell_add)
+  
+  d10x <- NormalizeData(d10x)
 
 })
 
@@ -76,7 +78,7 @@ d10x.list<-lapply(1:length(d10x.list), function(x){
   # should be able to be applied to any single-cell object
   
   # Look at histogram of MALAT1 counts
-  hist(sobj@assays$RNA@counts["MALAT1",], freq = FALSE, breaks=100)
+  hist(sobj@assays$RNA@data["MALAT1",], freq = FALSE, breaks=100)
   
   # If there is a peak (even a small peak) at zero, followed by a dip, then a more
   # normal distribution, run the following code.
@@ -104,7 +106,7 @@ d10x.list<-lapply(1:length(d10x.list), function(x){
   }
   
   # Run this function on MALAT1 reads, eg:
-  threshold <- define_malat1_threshold(sobj@assays$RNA@counts["MALAT1",], max_counts = 100)
+  threshold <- define_malat1_threshold(sobj@assays$RNA@data["MALAT1",], max_counts = 100)
   
   ######## Manually decided which samples had a peak and a dip
   MALAT1_filter<-c("C85_caud3pr","C96_caud3pr","C39_caud3prNPC","IFALD073","IFALD030" ,"C105_caud5pr","C115")
