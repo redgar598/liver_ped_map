@@ -97,7 +97,7 @@ d10x.list<-lapply(1:length(d10x.list), function(x){
     # Isolate x value at minimum
     
     ######## Updated this line as in one sample the first values in counts was negative so threw off the indexing
-    threshold <- round(density_data$x[density_data$x >= min_counts & density_data$x <= max_counts][which(density_data$y[density_data$x >= min_counts & density_data$x <= max_counts] == min(density_data$y[density_data$x >= min_counts & density_data$x <= max_counts]))])
+    threshold <- density_data$x[density_data$x >= min_counts & density_data$x <= max_counts][which(density_data$y[density_data$x >= min_counts & density_data$x <= max_counts] == min(density_data$y[density_data$x >= min_counts & density_data$x <= max_counts]))]
    
     # Visualise on histogram
     abline(v = threshold, col = "red", lwd = lwd)
