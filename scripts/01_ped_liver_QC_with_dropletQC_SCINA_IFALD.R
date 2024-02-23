@@ -1247,54 +1247,54 @@ d10x.combined@meta.data$CellType_refined<-sapply(1:nrow(d10x.combined@meta.data)
 d10x.combined@meta.data$CellType_refined<-as.factor(d10x.combined@meta.data$CellType_refined)
 print(levels(d10x.combined@meta.data$CellType_refined))
 
-# levels(d10x.combined@meta.data$CellType_refined)<-c("CD3+ T-cells","Cholangiocytes",
-#                                                     "CLNK T-cells","Cycling B-cells",
-#                                                     "Cycling Myeloid", "Cycling T-cells",
-#                                                     "Doublet","Erythrocytes",
-#                                                     "gd T-cells","Hepatocytes",
-#                                                     "HSC","KC Like",
-#                                                     "LSEC","Macrophage\n(CLEC9A high)",
-#                                                     "Macrophage\n(MHCII high)", "Mature B-cells",
-#                                                     "Myeloid Erythrocytes\n(phagocytosis)", "Neutrophil",
-#                                                     "NK-like cells","Plasma cells",
-#                                                     "Platelets","RR Myeloid")
-# 
-# d10x.combined@meta.data$CellType_refined<-factor(d10x.combined@meta.data$CellType_refined, levels = c("Mature B-cells","Plasma cells","Cycling B-cells",
-#                                                                                                       "CD3+ T-cells","gd T-cells","NK-like cells","CLNK T-cells","Cycling T-cells",
-#                                                                                                       "Cholangiocytes","LSEC",
-#                                                                                                       "RR Myeloid","Macrophage\n(MHCII high)","KC Like","Macrophage\n(CLEC9A high)","Cycling Myeloid",
-#                                                                                                       "Neutrophil",#"Mast cell",
-#                                                                                                       "Myeloid Erythrocytes\n(phagocytosis)","Erythrocytes","Platelets",
-#                                                                                                       "HSC","Hepatocytes","Doublet"))
-# 
-# all_refined_cluster_umap<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, label=T,label.size = 3, group.by = "CellType_refined")+
-#   colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
-#   annotate("text",x=-13, y=-13, label=paste0("n = ",comma(ncol(d10x.combined))))
-# all_refined_cluster_umap
-# save_plts(all_refined_cluster_umap, "IFALD_refined_cellType_map", w=12,h=8)
-# 
-# 
-# all_refined_cluster_umap_nolab<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
-#   annotate("text",x=-13, y=-13, label=paste0("n = ",comma(ncol(d10x.combined))))
-# all_refined_cluster_umap_nolab
-# save_plts(all_refined_cluster_umap_nolab, "IFALD_refined_cellType_map_nolabel", w=12,h=8)
-# 
-# individual_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_refined", split.by="age_id",pt.size=0.25, ncol=4)+colscale_cellType+ggtitle("")
-# save_plts(individual_split, "IFALD_individual_roughCell_facet_rPCA_UMAP_refined", w=22,h=14)
-# 
-# cell_num_all<-as.data.frame(table(d10x.combined@meta.data$AgeGroup))
-# colnames(cell_num_all)<-c("AgeGroup","CellCount")
-# age_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_refined", split.by="AgeGroup",pt.size=0.25)+colscale_cellType+ggtitle("")+
-#   geom_text(aes(x=-13, y=-13, label=paste0("n = ",comma(CellCount))), cell_num_all)
-# save_plts(age_split, "IFALD_age_roughCell_facet_rPCA_UMAP_refined", w=15,h=7)
-# 
-# 
-# d10x.combined$age_condition<-paste(d10x.combined$AgeGroup, d10x.combined$Treatment, sep=" ")
-# cell_num_all<-as.data.frame(table(d10x.combined@meta.data$age_condition))
-# colnames(cell_num_all)<-c("age_condition","CellCount")
-# 
-# d10x.combined$age_condition<-factor(d10x.combined$age_condition, levels=c( "Ped Healthy","Ped IFALD", "Adult Healthy"))
-# 
+
+levels(d10x.combined@meta.data$CellType_refined)<-c("CD3+ T-cells","CDC1",
+                                                    "Cholangiocytes", "Cycling Myeloid", 
+                                                    "Cycling Plasma","Doublet",
+                                                    "Erythrocytes","gd T-cells",
+                                                    "Hepatocytes", "HSC",
+                                                    "KC Like","LSEC",
+                                                    "Macrophage\n(MHCII high)", "Mature B-cells",
+                                                    "Mono-Mac","Myeloid Erythrocytes\n(phagocytosis)", 
+                                                    "Neutrophil", "NK-like cells",
+                                                    "Plasma cells")
+
+d10x.combined@meta.data$CellType_refined<-factor(d10x.combined@meta.data$CellType_refined, levels = c("Mature B-cells","Plasma cells","Cycling Plasma",
+                                                                                                      "CD3+ T-cells","gd T-cells","NK-like cells",
+                                                                                                      "Cholangiocytes","LSEC","HSC","Hepatocytes",
+                                                                                                      "Mono-Mac", "KC Like", "Macrophage\n(MHCII high)",
+                                                                                                      "CDC1","Cycling Myeloid", 
+                                                                                                      "Myeloid Erythrocytes\n(phagocytosis)",
+                                                                                                      "Erythrocytes","Neutrophil", "Doublet"))
+
+all_refined_cluster_umap<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, label=T,label.size = 3, group.by = "CellType_refined")+
+  colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  annotate("text",x=-13, y=-13, label=paste0("n = ",comma(ncol(d10x.combined))))
+all_refined_cluster_umap
+save_plts(all_refined_cluster_umap, "IFALD_refined_cellType_map", w=12,h=8)
+
+
+all_refined_cluster_umap_nolab<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  annotate("text",x=-13, y=-13, label=paste0("n = ",comma(ncol(d10x.combined))))
+all_refined_cluster_umap_nolab
+save_plts(all_refined_cluster_umap_nolab, "IFALD_refined_cellType_map_nolabel", w=12,h=8)
+
+individual_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_refined", split.by="age_id",pt.size=0.25, ncol=4)+colscale_cellType+ggtitle("")
+save_plts(individual_split, "IFALD_individual_roughCell_facet_rPCA_UMAP_refined", w=22,h=14)
+
+cell_num_all<-as.data.frame(table(d10x.combined@meta.data$AgeGroup))
+colnames(cell_num_all)<-c("AgeGroup","CellCount")
+age_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_refined", split.by="AgeGroup",pt.size=0.25)+colscale_cellType+ggtitle("")+
+  geom_text(aes(x=-13, y=-13, label=paste0("n = ",comma(CellCount))), cell_num_all)
+save_plts(age_split, "IFALD_age_roughCell_facet_rPCA_UMAP_refined", w=15,h=7)
+
+
+d10x.combined$age_condition<-paste(d10x.combined$AgeGroup, d10x.combined$Treatment, sep=" ")
+cell_num_all<-as.data.frame(table(d10x.combined@meta.data$age_condition))
+colnames(cell_num_all)<-c("age_condition","CellCount")
+
+d10x.combined$age_condition<-factor(d10x.combined$age_condition, levels=c( "Ped Healthy","Ped IFALD", "Adult Healthy"))
+
 # age_condition_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_refined", split.by="age_condition", pt.size=0.05, ncol=2)+colscale_cellType+ggtitle("")+
 #   geom_text(aes(x=-13, y=-13, label=paste0("n = ",comma(CellCount))), cell_num_all)+xlab("UMAP 1")+ylab("UMAP 2")
 # save_plts(age_condition_split, "IFALD_age_condition_roughCell_facet_rPCA_UMAP_refined", w=15,h=10)
@@ -1364,16 +1364,16 @@ print(levels(d10x.combined@meta.data$CellType_refined))
 #   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
 #   theme(legend.position="bottom")+ylab("Cell Count")+xlab("Broad Cell Category")
 # save_plts(cell_count, "cell_count_age_condiditon_bar", w=9,h=7)
-# 
-# 
-# ##############
-# ## Save integrated with refined cluster labels
-# ##############
-# save(d10x.combined, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds", sep=""))
-# cell_label<-d10x.combined@meta.data
-# save(cell_label, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"IFALD_adult_ped_cellRefined_withDropletQC.rds", sep=""))
-# 
-# 
+
+
+##############
+## Save integrated with refined cluster labels
+##############
+save(d10x.combined, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds", sep=""))
+cell_label<-d10x.combined@meta.data
+save(cell_label, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"IFALD_adult_ped_cellRefined_withDropletQC.rds", sep=""))
+
+
 
 
 

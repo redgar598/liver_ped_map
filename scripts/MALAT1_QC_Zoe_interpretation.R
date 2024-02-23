@@ -140,7 +140,7 @@ MALAT1_filtered<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
   guides(colour = guide_legend(override.aes = list(size=3)))
 
 
-save_plts(plot_grid(cell_type, MALAT1_filtered), "MALAT1_UMAP", w=20,h=8)
+save_plts(plot_grid(cell_type_umap, MALAT1_filtered), "MALAT1_UMAP", w=20,h=8)
 
 
 ggplot(plt_myeloid[which(plt_myeloid$Both_filtering=="Filtered by\nMALAT1 only"),], aes(UMAP_1,UMAP_2))+
