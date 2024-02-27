@@ -1372,6 +1372,8 @@ table(d10x.combined$CellType_refined, d10x.combined$CellType_rough)
 d10x.combined$CellType_rough[which(d10x.combined$CellType_refined=="Cycling T-cells")]<-"NK and T cells"
 d10x.combined$CellType_rough[which(d10x.combined$CellType_refined=="Cycling Myeloid")]<-"Myeloid cells"
 d10x.combined$CellType_rough[which(d10x.combined$CellType_refined=="Doublet")]<-"Doublet"
+d10x.combined$CellType_rough[which(d10x.combined$CellType_refined=="Platelets")]<-"Myeloid cells"
+
 
 count_plt<-as.data.frame(d10x.combined@meta.data %>% dplyr::select(CellType_rough,CellType_refined,age_condition) %>% group_by(age_condition) %>% count(CellType_refined,CellType_rough))
 
