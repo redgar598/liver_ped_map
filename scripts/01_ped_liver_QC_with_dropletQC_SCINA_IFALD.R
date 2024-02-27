@@ -1034,6 +1034,12 @@ head(cluster8.markers, n = 10)
 head(cluster8.markers[which(cluster8.markers$avg_log2FC>0),], n = 20)
 FeaturePlot(d10x.combined_myeloid, features = c("JCHAIN","IGHA1","SAA2","IGKC"), min.cutoff = "q9", pt.size=1)
 
+# platlets
+#https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7049341/
+cluster5.markers <-  FindMarkers(d10x.combined_myeloid, ident.1 = 5, min.pct = 0.25)
+head(cluster5.markers[which(cluster5.markers$avg_log2FC>0),], n = 20)
+platelets_markers<-FeaturePlot(d10x.combined_myeloid, reduction = "umap", features = c("PPBP","NRGN"), ncol = 2)
+save_plts(platelets_markers, "IFALD_platelets_markers_cluster_umap", w=8,h=4)
 
 
 
@@ -1042,8 +1048,9 @@ d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.
 d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("2","3"))]<-"KC Like"
 d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("4"))]<-"Neutrophil"
 d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("7"))]<-"CDC1"
-d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("5","6","8"))]<-"Doublet"
+d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("6","8"))]<-"Doublet"
 d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("1"))]<-"Macrophage (MHCII high)"
+d10x.combined_myeloid@meta.data$CellType_rough[which(d10x.combined_myeloid@meta.data$seurat_clusters%in%c("5"))]<-"Platelets"
 
 DefaultAssay(d10x.combined_myeloid) <- "RNA"
 marker_mye<-DotPlot(object = d10x.combined_myeloid, features = c(recent_recruit_myeloid, kuffer_signature,CDC1, CDC2, neutro_gene, MHCII, LSEC, "CD3D", "IL32"))
@@ -1098,15 +1105,6 @@ save_plts(phase_bcell, "IFALD_umap_phase_bcell", w=5,h=4)
 phase_marker<-FeaturePlot(d10x.combined_bcell, reduction = "umap", features = c("MKI67","TOP2A"), ncol = 2)
 save_plts(phase_marker, "IFALD_umap_phaseMarker_bcell", w=10,h=4)
 
-## one unclear cluster
-# platlets
-#https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7049341/
-cluster4.markers <-  FindMarkers(d10x.combined_bcell, ident.1 = 4, min.pct = 0.25)
-head(cluster4.markers, n = 10)
-platelets_markers<-FeaturePlot(d10x.combined_bcell, reduction = "umap", features = c("PPBP","NRGN"), ncol = 2)
-save_plts(platelets_markers, "IFALD_platelets_markers_cluster_umap", w=8,h=4)
-
-FeaturePlot(d10x.combined_bcell, reduction = "umap", features = c("PPBP","NRGN","ITGA2B","CSF3R","CD61"), ncol = 2)
 
 cluster4.markers <-  FindMarkers(d10x.combined_bcell, ident.1 = 6, min.pct = 0.25)
 head(cluster4.markers, n = 10)
@@ -1257,7 +1255,7 @@ levels(d10x.combined@meta.data$CellType_refined)<-c("CD3+ T-cells","CDC1",
                                                     "Macrophage\n(MHCII high)", "Mature B-cells",
                                                     "Mono-Mac","Myeloid Erythrocytes\n(phagocytosis)", 
                                                     "Neutrophil", "NK-like cells",
-                                                    "Plasma cells")
+                                                    "Plasma cells","Platelets")
 
 d10x.combined@meta.data$CellType_refined<-factor(d10x.combined@meta.data$CellType_refined, levels = c("Mature B-cells","Plasma cells","Cycling Plasma",
                                                                                                       "CD3+ T-cells","gd T-cells","NK-like cells",
@@ -1265,7 +1263,12 @@ d10x.combined@meta.data$CellType_refined<-factor(d10x.combined@meta.data$CellTyp
                                                                                                       "Mono-Mac", "KC Like", "Macrophage\n(MHCII high)",
                                                                                                       "CDC1","Cycling Myeloid", 
                                                                                                       "Myeloid Erythrocytes\n(phagocytosis)",
-                                                                                                      "Erythrocytes","Neutrophil", "Doublet"))
+                                                                                                      "Erythrocytes","Neutrophil","Platelets","Doublet"))
+
+
+
+#load("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds")
+
 
 all_refined_cluster_umap<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, label=T,label.size = 3, group.by = "CellType_refined")+
   colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
@@ -1295,75 +1298,94 @@ colnames(cell_num_all)<-c("age_condition","CellCount")
 
 d10x.combined$age_condition<-factor(d10x.combined$age_condition, levels=c( "Ped Healthy","Ped IFALD", "Adult Healthy"))
 
-# age_condition_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_refined", split.by="age_condition", pt.size=0.05, ncol=2)+colscale_cellType+ggtitle("")+
-#   geom_text(aes(x=-13, y=-13, label=paste0("n = ",comma(CellCount))), cell_num_all)+xlab("UMAP 1")+ylab("UMAP 2")
-# save_plts(age_condition_split, "IFALD_age_condition_roughCell_facet_rPCA_UMAP_refined", w=15,h=10)
-# 
-# #### Fancy UMAP plots
-# all_refined_cluster_umap_nolab<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
-#   annotate("text",x=-13, y=-13, label=paste0("n = ",comma(ncol(d10x.combined))))
-# all_refined_cluster_umap_nolab
-# save_plts(all_refined_cluster_umap_nolab, "IFALD_refined_cellType_map_nolabel", w=12,h=8)
-# 
-# fancyUMAP_all<-fanciest_UMAP(d10x.combined,NA,F)
-# save_plts(fancyUMAP_all, "IFALD_refined_cellType_umpa_fancy", w=6,h=4)
-# 
-# fancyUMAP_all_split<-fanciest_UMAP(d10x.combined,NA,T)
-# save_plts(fancyUMAP_all_split, "IFALD_refined_cellType_umpa_fancy_split", w=12,h=8)
-# 
-# #
-# # d10x.combined_health<-subset(d10x.combined, subset = age_condition %in% c("Ped Healthy","Adult Healthy"))
-# # d10x.combined_health$age_condition<-as.character(d10x.combined_health$age_condition)
-# # cell_num_all_health<-cell_num_all[which(cell_num_all$age_condition%in% c("Ped Healthy","Adult Healthy")),]
-# # age_condition_split<-DimPlot(d10x.combined_health, reduction = "umap", group.by = "CellType_refined", split.by="age_condition", pt.size=0.05, ncol=2)+colscale_cellType+ggtitle("")+
-# #   geom_text(aes(x=-13, y=-13, label=paste0("n = ",comma(CellCount))), cell_num_all_health)+xlab("UMAP 1")+ylab("UMAP 2")
-# # save_plts(age_condition_split, "IFALD_age_condition_roughCell_facet_rPCA_UMAP_refined_healthyonly", w=15,h=5.5)
-# 
-# 
-# 
-# 
-# ##############
-# ### entropy in clusters
-# ##############
-# plt_entropy_individual<-entropy_d10(d10x.combined, "individual")
-# plt_entropy_age<-entropy_d10(d10x.combined, "AgeGroup")
-# plt_entropy_chem<-entropy_d10(d10x.combined, "chemistry")
-# plt_entropy_treatment<-entropy_d10(d10x.combined, "age_condition")
-# 
-# entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined)
-# save_plts(entropy_individual, "IFALD_entropy_individual_allclusters", w=15,h=10)
-# 
-# entropy_age<-entropy_plt(plt_entropy_age, "AgeGroup", d10x.combined)
-# save_plts(entropy_age, "IFALD_entropy_age_allclusters", w=15,h=10)
-# 
-# entropy_chem<-entropy_plt(plt_entropy_chem, "chemistry", d10x.combined)
-# save_plts(entropy_chem, "IFALD_entropy_chemistry_allclusters", w=15,h=10)
-# 
-# entropy_Treatment<-entropy_plt(plt_entropy_treatment, "age_condition", d10x.combined)
-# save_plts(entropy_Treatment, "IFALD_entropy_Treatment_allclusters", w=15,h=10)
-# 
-# #############
-# ## Cell type count table
-# #############
-# table(d10x.combined$CellType_refined, d10x.combined$CellType_rough)
-# 
-# d10x.combined$CellType_rough[which(d10x.combined$CellType_refined=="Cycling T-cells")]<-"NK and T cells"
-# d10x.combined$CellType_rough[which(d10x.combined$CellType_refined=="Cycling Myeloid")]<-"Myeloid cells"
-# d10x.combined$CellType_rough[which(d10x.combined$CellType_refined=="Doublet")]<-"Doublet"
-# 
-# count_plt<-as.data.frame(d10x.combined@meta.data %>% dplyr::select(CellType_rough,CellType_refined,age_condition) %>% group_by(age_condition) %>% count(CellType_refined,CellType_rough))
-# 
-# count_plt$CellType_rough<-factor(count_plt$CellType_rough, levels=c(
-#   "Hepatocytes","LSEC","HSC","Cholangiocytes",
-#   "Myeloid cells","NK and T cells",  "B-cells",
-#   "Erythrocytes" , "Doublet"))
-# 
-# cell_count<-ggplot(count_plt, aes(CellType_rough,n,  fill=CellType_refined))+
-#   geom_bar(stat="identity", color="black")+
-#   facet_wrap(~age_condition)+fillscale_cellType+th_present+theme_bw()+
-#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-#   theme(legend.position="bottom")+ylab("Cell Count")+xlab("Broad Cell Category")
-# save_plts(cell_count, "cell_count_age_condiditon_bar", w=9,h=7)
+age_condition_split<-DimPlot(d10x.combined, reduction = "umap", group.by = "CellType_refined", split.by="age_condition", pt.size=0.05, ncol=2)+colscale_cellType+ggtitle("")+
+  geom_text(aes(x=-13, y=-13, label=paste0("n = ",comma(CellCount))), cell_num_all)+xlab("UMAP 1")+ylab("UMAP 2")
+save_plts(age_condition_split, "IFALD_age_condition_roughCell_facet_rPCA_UMAP_refined", w=15,h=10)
+
+#### Fancy UMAP plots
+all_refined_cluster_umap_nolab<-DimPlot(d10x.combined, reduction = "umap", pt.size=0.25, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  annotate("text",x=-13, y=-13, label=paste0("n = ",comma(ncol(d10x.combined))))
+all_refined_cluster_umap_nolab
+save_plts(all_refined_cluster_umap_nolab, "IFALD_refined_cellType_map_nolabel", w=12,h=8)
+
+fancyUMAP_all<-fanciest_UMAP(d10x.combined,NA,F)
+save_plts(fancyUMAP_all, "IFALD_refined_cellType_umpa_fancy", w=7,h=5)
+
+fancyUMAP_all_split<-fanciest_UMAP(d10x.combined,NA,T)
+save_plts(fancyUMAP_all_split, "IFALD_refined_cellType_umpa_fancy_split", w=12,h=8)
+
+
+## save legend fr bottom
+umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined, reduction = "umap"))#
+umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
+meta_myeloid<-d10x.combined@meta.data
+meta_myeloid$cell<-rownames(meta_myeloid)
+plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
+
+forlegned_plot<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
+  geom_point(aes(fill=CellType_refined),size=4, shape=21)+xlab("UMAP 1")+ylab("UMAP 2")+
+  fillscale_cellType+theme_bw()+
+  theme(legend.text = element_text(size=14),
+        legend.title = element_text(size=20),
+        legend.position="bottom")+
+  guides(fill = guide_legend(ncol = 12))
+nice_legend<-get_leg(forlegned_plot)
+save_plts(forlegned_plot, "Legend_fancy", w=20,h=10)
+
+
+#
+# d10x.combined_health<-subset(d10x.combined, subset = age_condition %in% c("Ped Healthy","Adult Healthy"))
+# d10x.combined_health$age_condition<-as.character(d10x.combined_health$age_condition)
+# cell_num_all_health<-cell_num_all[which(cell_num_all$age_condition%in% c("Ped Healthy","Adult Healthy")),]
+# age_condition_split<-DimPlot(d10x.combined_health, reduction = "umap", group.by = "CellType_refined", split.by="age_condition", pt.size=0.05, ncol=2)+colscale_cellType+ggtitle("")+
+#   geom_text(aes(x=-13, y=-13, label=paste0("n = ",comma(CellCount))), cell_num_all_health)+xlab("UMAP 1")+ylab("UMAP 2")
+# save_plts(age_condition_split, "IFALD_age_condition_roughCell_facet_rPCA_UMAP_refined_healthyonly", w=15,h=5.5)
+
+
+
+
+##############
+### entropy in clusters
+##############
+plt_entropy_individual<-entropy_d10(d10x.combined, "individual")
+plt_entropy_age<-entropy_d10(d10x.combined, "AgeGroup")
+plt_entropy_chem<-entropy_d10(d10x.combined, "chemistry")
+plt_entropy_treatment<-entropy_d10(d10x.combined, "age_condition")
+
+entropy_individual<-entropy_plt(plt_entropy_individual, "individual", d10x.combined)
+save_plts(entropy_individual, "IFALD_entropy_individual_allclusters", w=15,h=10)
+
+entropy_age<-entropy_plt(plt_entropy_age, "AgeGroup", d10x.combined)
+save_plts(entropy_age, "IFALD_entropy_age_allclusters", w=15,h=10)
+
+entropy_chem<-entropy_plt(plt_entropy_chem, "chemistry", d10x.combined)
+save_plts(entropy_chem, "IFALD_entropy_chemistry_allclusters", w=15,h=10)
+
+entropy_Treatment<-entropy_plt(plt_entropy_treatment, "age_condition", d10x.combined)
+save_plts(entropy_Treatment, "IFALD_entropy_Treatment_allclusters", w=15,h=10)
+
+#############
+## Cell type count table
+#############
+table(d10x.combined$CellType_refined, d10x.combined$CellType_rough)
+
+d10x.combined$CellType_rough[which(d10x.combined$CellType_refined=="Cycling T-cells")]<-"NK and T cells"
+d10x.combined$CellType_rough[which(d10x.combined$CellType_refined=="Cycling Myeloid")]<-"Myeloid cells"
+d10x.combined$CellType_rough[which(d10x.combined$CellType_refined=="Doublet")]<-"Doublet"
+
+count_plt<-as.data.frame(d10x.combined@meta.data %>% dplyr::select(CellType_rough,CellType_refined,age_condition) %>% group_by(age_condition) %>% count(CellType_refined,CellType_rough))
+
+count_plt$CellType_rough<-factor(count_plt$CellType_rough, levels=c(
+  "Hepatocytes","LSEC","HSC","Cholangiocytes",
+  "Myeloid cells","NK and T cells",  "B-cells",
+  "Erythrocytes" , "Doublet"))
+
+cell_count<-ggplot(count_plt, aes(CellType_rough,n,  fill=CellType_refined))+
+  geom_bar(stat="identity", color="black")+
+  facet_wrap(~age_condition)+fillscale_cellType+th_present+theme_bw()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  theme(legend.position="bottom")+ylab("Cell Count")+xlab("Broad Cell Category")
+save_plts(cell_count, "cell_count_age_condiditon_bar", w=9,h=7)
 
 
 ##############

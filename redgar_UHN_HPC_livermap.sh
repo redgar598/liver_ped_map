@@ -184,6 +184,10 @@ scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/Pediat
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_adult_ped_integrated_PBMC.rds /media/redgar/Seagate\ Portable\ Drive/processed_data 
 scp /media/redgar/Seagate\ Portable\ Drive/processed_data/IFALD_d10x_adult_ped_raw_PBMC.rds t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data
 
+
+
+
+
 ######################
 ### feb 2024 update
 ######################
@@ -193,11 +197,21 @@ scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/Pediat
 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_SCINA_cell_labels.RData /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
 
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_cellRefined_withDropletQC.rds /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
+
 
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/*pdf /home/redgar/Documents/liver_ped_map/figures
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/jpeg/*jpeg /home/redgar/Documents/liver_ped_map/figures/jpeg
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/png/*png /home/redgar/Documents/liver_ped_map/figures/png
 ######################
+
+
+
+
+
+
+
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/MALAT1_adult_ped_integrated.rds /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/MALAT1_adult_ped_cellRough.rds /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/data/IFALD_QC_metrics.Rdata /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
