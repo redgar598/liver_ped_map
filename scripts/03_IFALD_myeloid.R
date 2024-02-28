@@ -19,7 +19,7 @@ source("scripts/00_entropy_d10x.R")
 
 
 
-load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
 fancyUMAP_all<-fanciest_UMAP(d10x.combined,"KC Like",F)
 save_plts(fancyUMAP_all, "IFALD_KC_highlight_umap_fancy", w=6,h=4)
@@ -113,9 +113,9 @@ plot_gene_PCA(d10x.combined_myeloid, "LYVE1",0.6, T, "Macrophage\n(MHCII high)")
 ##############
 ## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
 # but not normalized or scaled
-d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+d10x<-readRDS(file = here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_d10x_adult_ped_raw.rds"))
 
-load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
@@ -249,7 +249,7 @@ d10x <- AddMetaData(d10x, metadata = cell_label)
 # This is log(TP10K+1)
 d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
 
-d10x_raw_RR<-subset(d10x, subset = CellType_refined %in% c("RR Myeloid"))
+d10x_raw_RR<-subset(d10x, subset = CellType_refined %in% c("Mono-Mac"))
 
 Idents(d10x_raw_RR)<-d10x_raw_RR$age_condition
 table(d10x_raw_RR$age_condition)
