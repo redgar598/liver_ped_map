@@ -254,7 +254,7 @@ levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFA
 levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFALD$CellType_harmonized)%in%c("NK-like cells","NK" ))]<-"NK cell"
 
 d10x.combined_myeloid<-subset(d10x.fetal_ped_IFALD, subset = CellType_refined %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)","Cycling Myeloid",
-                                                                        "Macrophage\n(CLEC9A high)","VCAM1+ Erythroblastic Island Macrophage",
+                                                                        "CDC1","VCAM1+ Erythroblastic Island Macrophage",
                                                                         "pDC precursor","Neutrophil-myeloid progenitor","Mono-NK",
                                                                         "Myeloid Erythrocytes\n(phagocytosis)","HSC/MPP","Monocyte-DC precursor","Mono-Mac",
                                                                         "Kupffer Cell","Neutrophil-myeloid progenitor","Mono-NK",
