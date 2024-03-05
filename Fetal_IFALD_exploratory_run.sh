@@ -15,4 +15,4 @@ module load R/4.2.1
 ##Rscript R_functions/test.R
 ##Rscript R_functions/test_notarget.R
 
-Rscript scripts/IFALD_ped_adult_fetal_integration.R
+Rscript scripts/02_IFALD_ped_adult_fetal_integration.R

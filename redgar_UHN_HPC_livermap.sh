@@ -40,6 +40,7 @@ cd liver_ped_map
 git pull
 sbatch IFALD_exploratory_run.sh
 sbatch cpdb_liver.sh
+sbatch Fetal_IFALD_exploratory_run.sh
 
 
 
