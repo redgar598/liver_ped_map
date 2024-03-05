@@ -15,7 +15,7 @@ source("scripts/00_pretty_plots.R")
 source("scripts/00_fanciest_UMAP.R")
 source("scripts/00_plot_gene_exp.R")
 
-load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
 umap_mat<-as.data.frame(Embeddings(object = d10x.combined, reduction = "umap"))#
 umap_mat$cell<-rownames(umap_mat)
@@ -32,91 +32,6 @@ arr <- list(x = min(plt$UMAP_1), y = min(plt$UMAP_2), x_len = len_x_bar, y_len =
 
 
 
-# ###############
-# ## Ped Healthy Output
-# ###############
-# means<-read.table(here("data/cellphonedb/statistical_analysis_significant_means_06_22_2023_09:47:59.txt"), sep="\t", header=T)
-# means[1:5,1:10]
-# 
-# CCR_sig<-means[grep("CCR",means$interacting_pair), ]
-# CCL_sig<-means[grep("CCL3|CCL4",means$interacting_pair), ]
-# CCL_sig[,c(1:12)]
-# 
-# CCL_plt<-melt(CCL_sig, id=colnames(CCL_sig)[1:12])
-# CCL_plt$variable<-as.character(CCL_plt$variable)
-# 
-# CCL_plt$Cell1<-sapply(1:nrow(CCL_plt), function(x) strsplit(CCL_plt$variable[x], "[.]")[[1]][1])
-# CCL_plt$Cell2<-sapply(1:nrow(CCL_plt), function(x) strsplit(CCL_plt$variable[x], "[.]")[[1]][2])
-# CCL_plt<-CCL_plt[which(!(is.na(CCL_plt$value))),]
-# 
-# ## fix cell labels
-# CCL_plt$Cell1<-as.factor(CCL_plt$Cell1)
-# levels(CCL_plt$Cell1)<-c("CD3+ T-cells", "CLNK T-cells", "Cycling Myeloid",
-#                          "Cycling T-cells","Doublet","gd T-cells",  
-#                          "KC Like","Low_Quality",  "Macrophage\n(CLEC9A high)",
-#                          "Macrophage\n(MHCII high)","Myeloid Erythrocytes\n(phagocytosis)",
-#                          "NK-like cells","Plasma cells", "Platelets","RR Myeloid")
-# CCL_plt$Cell2<-as.factor(CCL_plt$Cell2)
-# levels(CCL_plt$Cell2)<-c("CD3+ T-cells", "CLNK T-cells", "Cycling Myeloid",
-#                          "Cycling T-cells","Doublet", 
-#                          "KC Like","Low_Quality", 
-#                          "Macrophage\n(MHCII high)","Myeloid Erythrocytes\n(phagocytosis)",
-#                          "NK-like cells","RR Myeloid")
-# 
-# 
-# CCL_plt<-merge(CCL_plt,plt_mean, by.x="Cell1", by.y="CellType_refined")
-# colnames(CCL_plt)[which(colnames(CCL_plt)%in%c("mean_umap1","mean_umap2"))]<-c("Cell1x","Cell1y")
-# CCL_plt<-merge(CCL_plt,plt_mean, by.x="Cell2", by.y="CellType_refined")
-# colnames(CCL_plt)[which(colnames(CCL_plt)%in%c("mean_umap1","mean_umap2"))]<-c("Cell2x","Cell2y")
-# 
-# 
-# ## self interactions
-# CCL_plt_self<-do.call(rbind,lapply(1:nrow(CCL_plt), function(x) if(CCL_plt$Cell1[x]==CCL_plt$Cell2[x]){CCL_plt[x,]}else{}))
-# CCL_plt_notself<-do.call(rbind,lapply(1:nrow(CCL_plt), function(x) if(CCL_plt$Cell1[x]==CCL_plt$Cell2[x]){}else{CCL_plt[x,]}))
-# 
-# ## CCL only in KC
-# CCL_plt_notself_KC<-CCL_plt_notself[which(CCL_plt_notself$Cell1=="KC Like" & CCL_plt_notself$gene_a%in%c("CCL3","CCL4")),]
-# 
-# # Plotting the network
-# interacting_UMAP<-ggplot() +   
-#   annotate("segment", 
-#                       x = arr$x, xend = arr$x + c(arr$x_len, 0), 
-#                       y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
-#                       arrow = arrow(type = "closed", length = unit(2, 'pt'))) +
-#   theme_void()+theme(plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
-#                      axis.title.x = element_text(size=5,hjust = 0.05),
-#                      axis.title.y = element_text(size=5,hjust = 0.05,angle = 90),
-#                      legend.position = "none")+xlab("UMAP 1")+ylab("UMAP 2")+
-#   geom_point(aes(UMAP_1,UMAP_2), data=plt, size = 0.6, colour= "black", stroke = 1)+
-#   geom_point(aes(UMAP_1,UMAP_2, color=CellType_refined), data=plt,size=0.5)+xlab("UMAP 1")+ylab("UMAP 2")+
-#   #geom_rect(aes(xmin=range(plt$UMAP_1)[1]*1.1, xmax=range(plt$UMAP_1)[2]*1.1, ymin=range(plt$UMAP_2)[1]*1.1, ymax=range(plt$UMAP_2)[2]*1.1), fill="white", alpha=0.8) +
-#   geom_curve(
-#     data = CCL_plt_notself_KC[which(CCL_plt_notself_KC$interacting_pair=="CCL4_CCR5"),],
-#     aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y), 
-#     color = "red",curvature = 0.2,
-#     lineend = "round") +
-#   geom_curve(
-#     data = CCL_plt_notself_KC[which(CCL_plt_notself_KC$interacting_pair=="CCL3_CCR5"),],
-#     aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y), 
-#     color = "blue",curvature = 0.4,
-#     lineend = "round") +
-#   geom_curve(
-#     data = CCL_plt_notself_KC[which(CCL_plt_notself_KC$interacting_pair=="CCL3_CCR1"),],
-#     aes(x = Cell1x, y = Cell1y, xend = Cell2x, yend = Cell2y), 
-#     color = "grey",curvature = -0.4,
-#     lineend = "round") +
-#   geom_label(aes(mean_umap1, mean_umap2, label=CellType_refined, fill=CellType_refined), data=plt_mean, size=1.25, color="black")+
-#   geom_text(aes(x=range(plt$UMAP_1)[2]*0.9, y=range(plt$UMAP_2)[1]*0.9, label=unique(CCL_plt_notself_KC$interacting_pair)[1]), size=2, color="red")+
-#   geom_text(aes(x=range(plt$UMAP_1)[2]*0.9, y=range(plt$UMAP_2)[1]*0.95, label=unique(CCL_plt_notself_KC$interacting_pair)[2]), size=2, color="blue")+
-#   geom_text(aes(x=range(plt$UMAP_1)[2]*0.9, y=range(plt$UMAP_2)[1], label=unique(CCL_plt_notself_KC$interacting_pair)[3]), size=2, color="grey")+
-#   colscale_cellType+fillscale_cellType
-# interacting_UMAP
-# save_plts(interacting_UMAP, "interacting_UMAP_KC_CCL34", w=5,h=5)
-# 
-# 
-
-
-###################################################################################################################
 
 
 ##############
@@ -135,7 +50,7 @@ plt_median<-as.data.frame(plt_median)
 ###############
 ## Ped Healthy Output
 ###############
-means<-read.table(here("data/cellphonedb/statistical_analysis_significant_means_06_22_2023_09:47:59.txt"), sep="\t", header=T)
+means<-read.table(here("data/cellphonedb/statistical_analysis_significant_means_03_05_2024_15:06:27.txt"), sep="\t", header=T)
 means[1:5,1:10]
 
 differentialexp_cpdbsig_a<-means[which(means$gene_a%in%de_KC$X), ]
@@ -155,17 +70,17 @@ differentialexp_plt<-differentialexp_plt[which(!(is.na(differentialexp_plt$value
 
 ## fix cell labels
 differentialexp_plt$Cell1<-as.factor(differentialexp_plt$Cell1)
-levels(differentialexp_plt$Cell1)<-c("CD3+ T-cells","Cholangiocytes" , "CLNK T-cells", "Cycling Myeloid",
-                                     "Cycling T-cells","Doublet","Erythrocytes" ,"gd T-cells",  "Hepatocytes","HSC",
-                                     "KC Like","Low_Quality", "LSEC", "Macrophage\n(CLEC9A high)",
-                                     "Macrophage\n(MHCII high)","Mature B cells","Myeloid Erythrocytes\n(phagocytosis)",
-                                     "Neutrophil", "NK-like cells","Plasma cells", "Platelets","RR Myeloid")
+levels(differentialexp_plt$Cell1)<-c("CD3+ T-cells","CDC1","Cholangiocytes", "Cycling Myeloid", "Cycling Plasma",
+                                     "Doublet","Erythrocytes" ,"gd T-cells",  "Hepatocytes","HSC",
+                                     "KC Like", "LSEC", 
+                                     "Macrophage\n(MHCII high)","Mature B cells","Mono-Mac","Myeloid Erythrocytes\n(phagocytosis)",
+                                     "Neutrophil", "NK-like cells","Plasma cells", "Platelets")
 differentialexp_plt$Cell2<-as.factor(differentialexp_plt$Cell2)
-levels(differentialexp_plt$Cell2)<-c("CD3+ T-cells","Cholangiocytes" , "CLNK T-cells", "Cycling Myeloid",
-                                     "Cycling T-cells","Doublet","Erythrocytes" ,"gd T-cells",  "Hepatocytes","HSC",
-                                     "KC Like","Low_Quality", "LSEC", "Macrophage\n(CLEC9A high)",
-                                     "Macrophage\n(MHCII high)","Mature B cells","Myeloid Erythrocytes\n(phagocytosis)",
-                                     "Neutrophil", "NK-like cells","Plasma cells", "Platelets","RR Myeloid")
+levels(differentialexp_plt$Cell2)<-c("CD3+ T-cells","CDC1","Cholangiocytes", "Cycling Myeloid", "Cycling Plasma",
+                                     "Doublet","Erythrocytes" ,"gd T-cells",  "Hepatocytes","HSC",
+                                     "KC Like", "LSEC", 
+                                     "Macrophage\n(MHCII high)","Mature B cells","Mono-Mac","Myeloid Erythrocytes\n(phagocytosis)",
+                                     "Neutrophil", "NK-like cells","Plasma cells", "Platelets")
 
 
 differentialexp_plt<-merge(differentialexp_plt,plt_median, by.x="Cell1", by.y="CellType_refined")
@@ -245,7 +160,7 @@ interacting_UMAP<-function(interaction_pair){
                }}
 }
 
-interacting_UMAP("APP_CD74")
+interacting_UMAP("CCL3_CCR1")
 interacting_UMAP("CCL3_CCR5")
 
 
@@ -256,16 +171,11 @@ unique(differentialexp_plt_notself$interacting_pair)
 pdf(file = here("figures/ped_cpdb_significant.pdf"), w=5, h=5,)
 interacting_UMAP("CCL3_CCR5")
 interacting_UMAP("CCL4_CCR5")
-interacting_UMAP("CXCL2_CXCR2")
-interacting_UMAP("CXCL8_CXCR2")
-interacting_UMAP("CXCL3_CXCR2")
-interacting_UMAP("CCL8_CCR1")
-interacting_UMAP("CCL3L1_CCR1")
 interacting_UMAP("CCL3_CCR1")
-interacting_UMAP("CCL5_CCR1")
-interacting_UMAP("PTPRC_MRC1")
+interacting_UMAP("C3_integrin_aMb2_complex")
 interacting_UMAP("IL10_IL10_receptor")
 interacting_UMAP("IL1B_IL1_receptor")
+interacting_UMAP("IL1B_IL1_receptor_inhibitor")
 dev.off()
 
 
@@ -281,33 +191,6 @@ save_plts(interacting_UMAP("CCL3_CCR1"), "CCL3_CCR1_cpdb_pedhealthy", w=5,h=5)
 ###############
 ## Color by receptor ligand expression
 ###############
-save_plts(plot_gene_UMAP_2gene(d10x.combined,c("CCR5","CCL4")), "UMAP_CCL4_CCR5_map_celltype", w=6,h=4)
-save_plts(plot_gene_UMAP_2gene(d10x.combined,c("IL1B","IL1R1")), "UMAP_IL1B_IL1R1_map_celltype", w=6,h=4)
-save_plts(plot_gene_UMAP_2gene(d10x.combined,c("CCR5","CCL3")), "UMAP_CCL3_CCR5_map_celltype", w=6,h=4)
-
-
-
-#### with network as well as coloured by expression
-save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("CCR5","CCL4"),"CCL4_CCR5"), "UMAP_CCL4_CCR5_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("CCR5","CCL3"),"CCL3_CCR5"), "UMAP_CCL3_CCR5_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("CCR1","CCL3"),"CCL3_CCR1"), "UMAP_CCL3_CCR1_map_celltype_network", w=9,h=6)
-
-save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("IL1B","IL1R2"),"IL1B_IL1_receptor_inhibitor"), "UMAP_IL1B_IL1_receptor_inhibitor_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("IL1B","IL1RAP"),"IL1B_IL1_receptor_inhibitor"), "UMAP_IL1B_IL1_receptor_inhibitorAP_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("IL1B","IL1R1"),"IL1B_IL1_receptor"), "UMAP_IL1B_IL1_receptor_map_celltype_network", w=9,h=6)
-
-
-save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("CXCL3","CXCR2"),"CXCL3_CXCR2"), "UMAP_CXCL3_CXCR2_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("CXCL2","CXCR2"),"CXCL2_CXCR2"), "UMAP_CXCL2_CXCR2_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("CXCL8","CXCR2"),"CXCL8_CXCR2"), "UMAP_CXCL8_CXCR2_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("CXCL8","CXCR1"),"CXCL8_CXCR1"), "UMAP_CXCL8_CXCR1_map_celltype_network", w=9,h=6)
-
-save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("APOE","TREM2"),"APOE_TREM2_receptor"), "UMAP_APOE_TREM2_receptor_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network(d10x.combined,c("THBS1","CD36"),"THBS1_CD36"), "UMAP_THBS1_CD36_map_celltype_network", w=9,h=6)
-
-
-
-
 #### with network as well as coloured by expression but not a blend
 save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CCR5","CCL4"),"CCL4_CCR5",0.9), "UMAP_CCL4_CCR5_map_celltype_network", w=9,h=6)
 save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CCR5","CCL3"),"CCL3_CCR5",0.9), "UMAP_CCL3_CCR5_map_celltype_network", w=9,h=6)
@@ -316,12 +199,6 @@ save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CCR1","CCL3"),"
 save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("IL1B","IL1R2"),"IL1B_IL1_receptor_inhibitor",0.9), "UMAP_IL1B_IL1_receptor_inhibitor_map_celltype_network", w=9,h=6)
 save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("IL1B","IL1RAP"),"IL1B_IL1_receptor_inhibitor",0.9), "UMAP_IL1B_IL1_receptor_inhibitorAP_map_celltype_network", w=9,h=6)
 save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("IL1B","IL1R1"),"IL1B_IL1_receptor",0.9), "UMAP_IL1B_IL1_receptor_map_celltype_network", w=9,h=6)
-
-
-save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CXCL3","CXCR2"),"CXCL3_CXCR2",0.9), "UMAP_CXCL3_CXCR2_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CXCL2","CXCR2"),"CXCL2_CXCR2",0.9), "UMAP_CXCL2_CXCR2_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CXCL8","CXCR2"),"CXCL8_CXCR2",0.9), "UMAP_CXCL8_CXCR2_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CXCL8","CXCR1"),"CXCL8_CXCR1",0.9), "UMAP_CXCL8_CXCR1_map_celltype_network", w=9,h=6)
 
 save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("APOE","TREM2"),"APOE_TREM2_receptor",0.9), "UMAP_APOE_TREM2_receptor_map_celltype_network", w=9,h=6)
 save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("THBS1","CD36"),"THBS1_CD36",0.9), "UMAP_THBS1_CD36_map_celltype_network", w=9,h=6)

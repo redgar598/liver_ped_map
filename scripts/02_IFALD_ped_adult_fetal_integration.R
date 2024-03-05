@@ -49,6 +49,7 @@ d10x_fetal@meta.data$BMI<-NA
 d10x_fetal@meta.data$relALBChange<-NA
 d10x_fetal@meta.data$nuclear_fraction<-NA
 d10x_fetal@meta.data$cell_status<-NA
+d10x_fetal@meta.data$Perfused<-NA
 colnames(d10x_fetal@meta.data)[which(colnames(d10x_fetal@meta.data)=="Cell.Labels")]<-"CellType_refined"
 d10x_fetal@meta.data$age_condition<-paste(d10x_fetal$AgeGroup, d10x_fetal$Treatment, sep=" ")
 
@@ -68,6 +69,10 @@ d10x_ped_IFALD@meta.data$integrated_snn_res.0.5 <-NULL
 d10x_ped_IFALD@meta.data$seurat_clusters<-NULL
 d10x_ped_IFALD@meta.data$age_id<-NULL
 d10x_ped_IFALD@meta.data$index<-NULL
+d10x_ped_IFALD@meta.data$SCINA_broad<-NULL
+d10x_ped_IFALD@meta.data$SCINA_refined<-NULL
+d10x_ped_IFALD@meta.data$cluster_consensus<-NULL
+d10x_ped_IFALD@meta.data$Characteristics.clinical.information.<-NA
 
 
 head(d10x_ped_IFALD@meta.data)

@@ -206,6 +206,7 @@ scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/Pediat
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_cellRefined_withDropletQC.rds /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_PBMC_integrated.rds /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
 
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/statistical_analysis_*.txt /home/redgar/Documents/liver_ped_map/data/cellphonedb
 
 
 

@@ -20,7 +20,9 @@ source("scripts/00_plot_gene_exp.R")
 ###############
 ## Ped Healthy Output
 ###############
-means<-read.table(here("data/cellphonedb/statistical_analysis_significant_means_06_20_2023_17:10:20.txt"), sep="\t", header=T)
+means<-read.table(here("data/cellphonedb/statistical_analysis_significant_means_03_05_2024_15:06:27.txt"), sep="\t", header=T)
+
+
 means[1:5,1:10]
 
 

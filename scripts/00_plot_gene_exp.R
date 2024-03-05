@@ -565,7 +565,7 @@ plot_gene_UMAP_2gene_network_notblend<-function(d10x, gene,interaction_pair, per
   
   len_x_bar<-((range(plt_myeloid$UMAP_1))[2]-(range(plt_myeloid$UMAP_1))[1])/10
   len_y_bar<-((range(plt_myeloid$UMAP_2))[2]-(range(plt_myeloid$UMAP_2))[1])/10
-  arr <- list(x = min(plt_myeloid$UMAP_1), y = min(plt_myeloid$UMAP_2), x_len = len_x_bar, y_len = len_y_bar)
+  arr <- list(x = min(plt_myeloid$UMAP_1)-2, y = min(plt_myeloid$UMAP_2)-2, x_len = len_x_bar, y_len = len_y_bar)
   
   
   gene_exp<-FetchData(d10x, vars=gene)
@@ -602,7 +602,7 @@ plot_gene_UMAP_2gene_network_notblend<-function(d10x, gene,interaction_pair, per
     geom_point(aes(UMAP_1,UMAP_2),plt_myeloid, size = 1, colour= "black", stroke = 1)+
     geom_point(aes(UMAP_1,UMAP_2),plt_myeloid, color="grey",size=0.75)+
     geom_point(aes(UMAP_1,UMAP_2, color=color),plt_point_color, size=0.5)+
-    geom_rect(data=plt_median, mapping=aes(xmin=min(mean_umap1)*1.1, xmax=max(mean_umap1)*1.21, ymin=min(mean_umap2)*1.25, ymax=max(mean_umap2)*1.5), fill = "white", alpha=0.05)+
+    geom_rect(data=plt_median, mapping=aes(xmin=min(mean_umap1)*1.21, xmax=max(mean_umap1)*1.75, ymin=min(mean_umap2)*1.25, ymax=max(mean_umap2)*1.5), fill = "white", alpha=0.05)+
     xlab("UMAP 1")+ylab("UMAP 2")+
     scale_color_manual(values=c("#88a000","#b80783","#03008e"))+
     geom_point(aes(mean_umap1,mean_umap2, fill=CellType_refined), data=plt_median,size=4, shape=21, color="white")+
@@ -637,7 +637,8 @@ plot_gene_UMAP_2gene_network_notblend<-function(d10x, gene,interaction_pair, per
                                     data=plt_median,size=3, shape=21, color="white")+
                          fillscale_cellType+theme_void()+
                          theme(legend.text=element_text(size=8),legend.title=element_text(size=10),
-                               plot.margin = margin(0.1,0.1,0.1,0.1, "cm")))
+                               plot.margin = margin(0.1,0.1,0.1,0.1, "cm"))+
+                         guides(fill=guide_legend(ncol=2)))
   
   ## gene expression legend
   exp_legend<-get_leg(ggplot()+
