@@ -34,13 +34,6 @@ gc()
 levels(d10x.combined.subset$CellType_refined)<-gsub(" |[+]|-|[\n(]","_", levels(d10x.combined.subset$CellType_refined))
 levels(d10x.combined.subset$CellType_refined)<-gsub("[)]","", levels(d10x.combined.subset$CellType_refined))
 
-              #levels(d10x.combined.subset$CellType_refined)[c(6,12)]<-c("CLNK_T_cell","KC_like")
-
-              ##just two cell types
-              # d10x.combined.subset<-subset(d10x.combined.subset, subset = CellType_refined %in% c("KC_like","CLNK_T_cell"))
-              # d10x.combined.subset <- d10x.combined.subset[, sample(colnames(d10x.combined.subset), size = 200, replace=F)]
-
-
 d10x.combined.subset <- NormalizeData(d10x.combined.subset, scale.factor = 10000, normalization.method = "LogNormalize")
 
 SaveH5Seurat(d10x.combined.subset, filename = here("../../../projects/macparland/RE/PediatricAdult/processed_data","ped_healthy.h5Seurat"), overwrite = T)
@@ -91,13 +84,6 @@ gc()
 
 levels(d10x.combined.subset$CellType_refined)<-gsub(" |[+]|-|[\n(]","_", levels(d10x.combined.subset$CellType_refined))
 levels(d10x.combined.subset$CellType_refined)<-gsub("[)]","", levels(d10x.combined.subset$CellType_refined))
-
-#levels(d10x.combined.subset$CellType_refined)[c(6,12)]<-c("CLNK_T_cell","KC_like")
-
-##just two cell types
-# d10x.combined.subset<-subset(d10x.combined.subset, subset = CellType_refined %in% c("KC_like","CLNK_T_cell"))
-# d10x.combined.subset <- d10x.combined.subset[, sample(colnames(d10x.combined.subset), size = 200, replace=F)]
-
 
 d10x.combined.subset <- NormalizeData(d10x.combined.subset, scale.factor = 10000, normalization.method = "LogNormalize")
 

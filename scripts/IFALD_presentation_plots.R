@@ -25,11 +25,11 @@ source("scripts/00_fanciest_UMAP.R")
 ####################################
 ## Fancy dot plot
 ####################################
-d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+d10x<-readRDS(file = here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_d10x_adult_ped_raw.rds"))
 d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
 
 ## add cell type labels
-load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
@@ -44,8 +44,9 @@ Cholangiocytes_genes<-c( "EPCAM", "KRT7")
 HSCs_genes<-c( "IGFBP7",  "SPARC")
 T_genes<-c("CD3D","CD8A")
 NK_genes<-c("NKG7","CD7")
+CDC1_genes<-c("CLEC9A","XCR1")
 gd_genes<-c("GNLY")
-RBC<-c("HBB","HBA2","HBA1","FCGR3A")
+RBC<-c("HBA1","FCGR3A")
 MAST<-c("TPSAB1", "AREG")
 recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
 kuffer_signature<-c("VSIG4","CD5L")
@@ -53,13 +54,14 @@ neutro_gene<-c("CSF3R","FCGR3B")
 MHCII<-c("HLA-DRA","HLA-DPB1")
 b_genes_noIG<-c("MS4A1", "CD79B")
 immunoglobins<-c("IGKC","IGHG1")
-MacrophageCLEC9A_genes<-c("IDO1","CLEC9A")
 platelet_genes<-c("PPBP","NRGN")
+cycle_genes<-c("MKI67","TOP2A")
+
 
 
 gene_exp<-FetchData(d10x, vars=c(Macrophage_genes,LEC_genes,Hepatocyte_genes,Cholangiocytes_genes,HSCs_genes,T_genes,NK_genes,gd_genes,RBC,
-                                 MAST, recent_recruit_myeloid, kuffer_signature, neutro_gene, MHCII, b_genes_noIG, immunoglobins, 
-                                 MacrophageCLEC9A_genes,platelet_genes))
+                                 recent_recruit_myeloid, kuffer_signature, neutro_gene, MHCII,CDC1_genes, b_genes_noIG, immunoglobins, 
+                                 platelet_genes,cycle_genes))
 gene_exp$cell<-rownames(gene_exp)
 gene_exp<-melt(gene_exp)
 
@@ -78,10 +80,16 @@ plt_summary<-as.data.frame(plt_summary)
 # remove dots where 0 cell expressing marker
 plt_summary<-plt_summary[(which(plt_summary$count>0)),]
 
-plt_summary$variable<-factor(plt_summary$variable, levels=rev(c(b_genes_noIG, immunoglobins, T_genes,gd_genes,NK_genes, Cholangiocytes_genes,LEC_genes,
-                                                            Macrophage_genes,recent_recruit_myeloid,MHCII, kuffer_signature, MacrophageCLEC9A_genes, 
-                                                            neutro_gene, MAST,platelet_genes, 
-                                                            RBC,HSCs_genes,Hepatocyte_genes)))
+plt_summary$variable<-factor(plt_summary$variable, levels=rev(c(b_genes_noIG, immunoglobins, T_genes,gd_genes,NK_genes, 
+                                                            Macrophage_genes,recent_recruit_myeloid,kuffer_signature,MHCII, CDC1_genes,
+                                                            RBC, neutro_gene, platelet_genes,
+                                                            Cholangiocytes_genes,LEC_genes,HSCs_genes,Hepatocyte_genes,cycle_genes)))
+
+plt_summary$CellType_refined<-factor(plt_summary$CellType_refined, levels=(c("Mature B-cells","Plasma cells","Cycling Plasma","CD3+ T-cells",
+                                                                                "gd T-cells","NK-like cells",
+                                                                                "Mono-Mac","KC Like","Macrophage\n(MHCII high)","CDC1","Cycling Myeloid",
+                                                                                "Myeloid Erythrocytes\n(phagocytosis)","Erythrocytes","Neutrophil","Platelets",
+                                                                                "Cholangiocytes","LSEC","HSC","Hepatocytes","Doublet" )))
 
 fancy_dotplot<-plot_grid(
   ggplot(plt_summary, aes(CellType_refined, variable, color=scaled, size=percent_exp))+geom_point()+
@@ -90,12 +98,21 @@ fancy_dotplot<-plot_grid(
     scale_size(name="Percent\nCells\nExpressing")+
     theme(axis.text.x = element_blank(),axis.title = element_blank(),axis.ticks.x = element_blank(),
           plot.margin = margin(0.25,0.25,0,0.25,"cm"))+
-    geom_hline(yintercept = 33.5)+ geom_hline(yintercept = 36.5)+ 
-    geom_hline(yintercept = 33.5)+ geom_hline(yintercept = 27.5)+ 
-    geom_hline(yintercept = 29.5)+ geom_hline(yintercept = 31.5)+ 
-    geom_hline(yintercept = 16.5)+geom_hline(yintercept = 14.5)+geom_hline(yintercept = 12.5)+ 
-    geom_hline(yintercept = 8.5)+  geom_hline(yintercept = 10.5)+
-    geom_hline(yintercept = 4.5)+ geom_hline(yintercept = 2.5)  ,
+    geom_hline(yintercept = 34.5, color="grey70")+ 
+    geom_hline(yintercept = 32.5, color="grey70")+ 
+    geom_hline(yintercept = 29.5, color="grey70")+ 
+    geom_hline(yintercept = 26.5, color="grey70")+ 
+    geom_hline(yintercept = 22.5, color="grey70")+ 
+    geom_hline(yintercept = 20.5, color="grey70")+ 
+    geom_hline(yintercept = 18.5, color="grey70")+ 
+    geom_hline(yintercept = 16.5, color="grey70")+
+    geom_hline(yintercept = 14.5, color="grey70")+
+    geom_hline(yintercept = 12.5, color="grey70")+
+    geom_hline(yintercept = 10.5, color="grey70")+  
+    geom_hline(yintercept = 8.5, color="grey70")+
+    geom_hline(yintercept = 6.5, color="grey70")+
+    geom_hline(yintercept = 4.5, color="grey70")+ 
+    geom_hline(yintercept = 2.5, color="grey70")  ,
   ggplot(plt_summary, aes(CellType_refined, y=1, fill=CellType_refined))+geom_tile(color="black")+
     th+theme_classic()+fillscale_cellType+
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
@@ -111,7 +128,7 @@ save_plts(fancy_dotplot, "IFALD_dot_plot_celltype", w=6,h=10)
 ####################################
 ## individual gene expression
 ####################################
-load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
 allcell_keymakers<-plot_grid(plot_gene_UMAP(d10x.combined,"PTPRC", 0.9),
                              plot_gene_UMAP(d10x.combined,"ALB", 0.9))
@@ -122,9 +139,7 @@ save_plts(allcell_keymakers, "IFALD_all_cell_key_markers", w=11,h=5)
 #####################################
 ## fancy UMAP individual
 #####################################
-load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
-
-
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
 ## grab legened from plot
 get_leg = function(a.gplot){
@@ -169,19 +184,18 @@ fanciest_UMAP<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
 ## cell count
 cell_num_all<-as.data.frame(table(d10x.combined@meta.data$age_id))
 colnames(cell_num_all)<-c("age_id","CellCount")
-fanciest_UMAP <- fanciest_UMAP + facet_wrap(~age_id, ncol=3)+  geom_text(aes(x = min(plt_myeloid$UMAP_1)+(0.95*len_x_bar), y = min(plt_myeloid$UMAP_2)+(0.5*len_y_bar), label=paste0("n = ",comma(CellCount))), cell_num_all, size=2)
+fanciest_UMAP <- fanciest_UMAP + facet_wrap(~age_id, ncol=4)+  geom_text(aes(x = min(plt_myeloid$UMAP_1)+(0.95*len_x_bar), y = min(plt_myeloid$UMAP_2)+(0.5*len_y_bar), label=paste0("n = ",comma(CellCount))), cell_num_all, size=2)
 
 
-
-fancy_individual<-plot_grid(fanciest_UMAP,nice_legend, rel_widths = c(5,2))
-save_plts(fancy_individual, "IFALD_individual_fancy", w=15,h=20)
+fancy_individual<-plot_grid(fanciest_UMAP,nice_legend, rel_widths = c(5,1))
+save_plts(fancy_individual, "IFALD_individual_fancy", w=20,h=18)
 
 
 
 ####################################
 ## Cell type counts in map
 ####################################
-load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 table(cell_label$CellType_refined, cell_label$age_condition)
 table(cell_label$age_condition)
 

@@ -20,7 +20,7 @@ color_possibilities_celltype<-c("B-cells","Mature B-cells","Plasma cells","CD3+ 
                                 "LSEC\n(Hepatocyte Like)","Myeloid cells\n(Hepatocyte Like)","B-cells\n(Hepatocyte Like)","NKT cells","Mono-Mac",
                                 "KC Like","Neutrophil","Neutrophil\n(DEFA+)","Erythrocytes","Mast cell",
                                 "Myeloid Erythrocytes\n(phagocytosis)","Doublet","Macrophage\n(MHCII high)","Cycling T-cells","CDC1",
-                                "Platelets","CLNK T-cells","Cycling Myeloid","Mature B-cells (104)","pDC",
+                                "Platelets","CLNK T-cells","Cycling Myeloid","Mature B-cells (High MT)","pDC",
                                 "pre B-cell","KC Like\n(Hepatocyte Like)","KC Like (C97)","Naive CD4 T-cells","Memory CD4 T-cells",
                                 "NK cells","DC","CD8 T-cells","CD14+ Mono","Cycling Plasma")
 names(myColors_celltype) <- color_possibilities_celltype

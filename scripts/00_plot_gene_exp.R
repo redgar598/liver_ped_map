@@ -31,7 +31,8 @@ plot_gene_UMAP<-function(d10x, gene, percentile){
                      plt_myeloid[which(!(is.na(plt_myeloid$gene_exp_limited))),][(order(plt_myeloid[which(!(is.na(plt_myeloid$gene_exp_limited))),]$gene_exp_limited)),])
   
   ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
-    geom_point(aes(color=log(gene_exp_limited)),size=0.75)+xlab("UMAP 1")+ylab("UMAP 2")+
+    geom_point(color="black",size=1)+xlab("UMAP 1")+ylab("UMAP 2")+
+    geom_point(aes(color=log(gene_exp_limited)),size=0.5)+xlab("UMAP 1")+ylab("UMAP 2")+
     #facet_wrap(~age_condition,ncol=2)+
     #geom_text(aes(x = 7, y = -15, label=paste0("n = ",comma(CellCount))), cell_num_all)+
     scale_color_continuous_sequential(palette = "Blues 3", rev=T, 

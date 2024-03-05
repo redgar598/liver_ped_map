@@ -9,13 +9,14 @@ library(reshape2)
 library(gtools)
 library(colorspace)
 library(cowplot)
+library(RColorBrewer)
 
 
 source("scripts/00_pretty_plots.R")
 source("scripts/00_plot_gene_exp.R")
 source("scripts/00_fanciest_UMAP.R")
 
-load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
 fancyUMAP_all<-fanciest_UMAP(d10x.combined,"HSC",F)
 save_plts(fancyUMAP_all, "IFALD_HSC_highlight_umap_fancy", w=6,h=4)
@@ -42,11 +43,17 @@ save_plts(HSC_map, "IFALD_HSC_map", w=7,h=6)
 DimPlot(d10x.combined_hsc, reduction = "umap", pt.size=0.25, label=T,split.by = "age_id", group.by = "CellType_refined", ncol=4)+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")
 
 d10x.combined_hsc@meta.data$CellType_rough<-as.character(d10x.combined_hsc@meta.data$CellType_rough)
-d10x.combined_hsc@meta.data$CellType_rough[which(d10x.combined_hsc@meta.data$seurat_clusters%in%c("0"))]<-"healthy_ped_HSC"
-d10x.combined_hsc@meta.data$CellType_rough[which(d10x.combined_hsc@meta.data$seurat_clusters%in%c("1","2"))]<-"adult_IFALD_HSC"
-d10x.combined_hsc@meta.data$CellType_rough[which(d10x.combined_hsc@meta.data$seurat_clusters%in%c("3"))]<-"Outlier HSC"
+d10x.combined_hsc@meta.data$CellType_rough[which(d10x.combined_hsc@meta.data$seurat_clusters%in%c("0","2"))]<-"healthy_ped_HSC"
+d10x.combined_hsc@meta.data$CellType_rough[which(d10x.combined_hsc@meta.data$seurat_clusters%in%c("1","3"))]<-"adult_IFALD_HSC"
+d10x.combined_hsc@meta.data$CellType_rough[which(d10x.combined_hsc@meta.data$seurat_clusters%in%c("4"))]<-"Outlier HSC"
+
+save(d10x.combined_hsc, file=here("data/HSC_integrated.RData"))
+
 
 table(d10x.combined_hsc@meta.data$CellType_rough, d10x.combined_hsc$age_condition)
+#Adult IFALD 70% Adult/IFLAD
+#Healthy Ped 92% healthy ped
+
 
 fancy_HSC<-fanciest_UMAP(d10x.combined_hsc, NA,F)
 fancy_HSC
@@ -61,12 +68,10 @@ save_plts(fancy_HSC, "IFALD_HSC_UMAP_split", w=8,h=6)
 ##############
 ## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
 # but not normalized or scaled
-d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+d10x<-readRDS(file = here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_d10x_adult_ped_raw.rds"))
 
-######
-## add cell type labels
-######
-load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
@@ -79,7 +84,10 @@ d10x <- AddMetaData(d10x, metadata = cell_label)
 d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
 
 d10x_raw_hsc<-subset(d10x, subset = CellType_rough %in% c("HSC"))
+rm(d10x)
+gc()
 
+load(here("data/HSC_integrated.RData"))
 identical(colnames(d10x_raw_hsc), colnames(d10x.combined_hsc))
 d10x_raw_hsc <- AddMetaData(d10x_raw_hsc, metadata = d10x.combined_hsc@meta.data)
 
@@ -121,6 +129,52 @@ HSC_markers
 save_plts(HSC_markers, "IFALD_HSC_diff_genes_fancy", w=14,h=2.5)
 
 save_plts(plot_gene_UMAP(d10x.combined_hsc,"PDGFRA", 0), "IFALD_HSC_diff_PDGFRA_fancy", w=3,h=2.5)
+
+
+#############
+## Heat Map of differential genes
+#############
+gene<-c("PDGFRA","CXCL12","COL1A1","IGFBP3")
+
+meta_HSC<-d10x.combined_hsc@meta.data
+meta_HSC$cell<-rownames(meta_HSC)
+
+gene_exp<-FetchData(d10x_raw_hsc, vars=gene)
+gene_exp$cell<-rownames(gene_exp)
+
+meta_HSC<-meta_HSC[,c("age_condition","CellType_rough","cell")]
+plt_hsc<-merge(meta_HSC, gene_exp, by='cell')
+
+melt_exp<-melt(plt_hsc)
+
+
+### scale each genen across cells then take mean for gene in each cell type
+scale_this <- function(x){(x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)}
+
+plt_exp_summary <- melt_exp %>% 
+  group_by(variable, CellType_rough) %>%
+  dplyr::summarize(Mean = mean(value, na.rm=TRUE))
+
+plt_exp_scaled <- plt_exp_summary %>% group_by(variable) %>%
+  dplyr::mutate(scaled = scale_this(Mean))
+plt_exp_summary<-as.data.frame(plt_exp_scaled)
+
+plt_exp_summary$variable<-factor(plt_exp_scaled$variable, levels=rev(gene))
+
+plt_exp_summary$CellType_rough<-as.factor(plt_exp_summary$CellType_rough)
+levels(plt_exp_summary$CellType_rough)<-c("Adult \nand\nIFALD\nHSC","Healthy\nPed\nHSC","Outlier\nHSC")
+
+de_0sig$variable<-rownames(de_0sig)
+sig<-de_0sig[which(de_0sig$variable%in%gene),]
+sig$label<-"*"
+sig$CellType_rough<-"Adult \nand\nIFALD\nHSC"
+HSC_fibrosis<-ggplot()+
+  geom_tile(aes( CellType_rough,variable, fill=scaled), plt_exp_summary)+
+  th+theme_classic()+scale_fill_gradientn(colours = colorRampPalette(rev(brewer.pal(8, 'RdBu')), space='Lab')(100), name="Scaled\nMean\nExpression")+
+  ylab("")+xlab("")+geom_text(data=sig, aes(CellType_rough,variable, label=label))
+save_plts(HSC_fibrosis, "HSC_Fibrosis_heat", w=4.5,h=4)
+
+
 
 
 #########
@@ -182,7 +236,7 @@ cell_counts$label<-sapply(1:nrow(cell_counts), function(x){
     paste(cell_counts$Age[x], "\n(", strsplit(cell_counts$individual[x],"_")[[1]][1],")", sep="")}}
 })
 
-cell_counts$label<-factor(cell_counts$label, c("2\n(C104)","9\n(C105)","11\n(C85)","12\n(C93)", "16\n(C102)","17\n(C64)", "17\n(C96)",
+cell_counts$label<-factor(cell_counts$label, c("2\n(C104)","9\n(C105)","11\n(C85)","11\n(C115)","12\n(C93)", "16\n(C102)","16\n(C113)", "17\n(C64)", "17\n(C96)",
                                                "0.33\n(IFALD030)","0.58\n(IFALD073)", "9\n(IFALD006)", 
                                                "26\n(C82)","48\n(C70)", "57\n(C97)","61\n(C68)",
                                                "65\n(C39 NPC)", "65\n(C39 TLH)", "67\n(C54)","69\n(C88)"))
@@ -203,12 +257,10 @@ save_plts(HSC_composistion, "HSC_composistion", w=16,h=8)
 #########################
 ## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
 # but not normalized or scaled
-d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+d10x<-readRDS(file = here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_d10x_adult_ped_raw.rds"))
 
-######
-## add cell type labels
-######
-load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
@@ -245,36 +297,14 @@ write.csv(de_IFALD, file=here("data","differential_IFALDHSC.csv"))
 
 
 
-
+############
 #### CHECK claim that fibrosis would have been missed with only IFALD and adults
-load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
-
-d10x.combined_hsc<-subset(d10x.combined, subset = CellType_rough %in% c("HSC"))
-d10x.combined_hsc_adult_IFALD<-subset(d10x.combined_hsc, subset = age_condition %in% c("Ped IFALD","Adult Healthy"))
-
-rm(d10x.combined)
-gc()
-d10x.combined_hsc_adult_IFALD <- RunPCA(d10x.combined_hsc_adult_IFALD, npcs = 30, verbose = FALSE)
-d10x.combined_hsc_adult_IFALD <- RunUMAP(d10x.combined_hsc_adult_IFALD, reduction = "pca", dims = 1:30)
-d10x.combined_hsc_adult_IFALD <- FindNeighbors(d10x.combined_hsc_adult_IFALD, reduction = "pca", dims = 1:30)
-d10x.combined_hsc_adult_IFALD <- FindClusters(d10x.combined_hsc_adult_IFALD, resolution = 0.1)
-
-
-
-DimPlot(d10x.combined_hsc_adult_IFALD, label=T)
-DimPlot(d10x.combined_hsc_adult_IFALD, label=T, group.by="age_condition")
-
-
-table(d10x.combined_hsc_adult_IFALD@meta.data$seurat_clusters, d10x.combined_hsc_adult_IFALD$age_condition)
-
+############
 ## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
 # but not normalized or scaled
-d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+d10x<-readRDS(file = here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_d10x_adult_ped_raw.rds"))
 
-######
-## add cell type labels
-######
-load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
@@ -287,9 +317,8 @@ d10x <- AddMetaData(d10x, metadata = cell_label)
 d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
 
 d10x_raw_hsc<-subset(d10x, subset = CellType_rough %in% c("HSC"))
-
-identical(colnames(d10x_raw_hsc), colnames(d10x.combined_hsc))
-d10x_raw_hsc <- AddMetaData(d10x_raw_hsc, metadata = d10x.combined_hsc@meta.data)
+rm(d10x)
+gc()
 
 
 Idents(d10x_raw_hsc)<-d10x_raw_hsc$age_condition
@@ -300,9 +329,15 @@ head(de_0sig[which(de_0sig$avg_log2FC>0),], n=10)
 head(de_0sig[which(de_0sig$avg_log2FC<0),])
 
 de_0sig[which(rownames(de_0sig) %in% c("PDGFRA","CXCL12","COL1A1","IGFBP3")),]
+de_0[which(rownames(de_0) %in% c("PDGFRA","CXCL12","COL1A1","IGFBP3")),]
 
 
-Fib_markers<-FeaturePlot(d10x.combined_hsc, features = c("PDGFRA","CXCL12","COL1A1","IGFBP3"), min.cutoff = "q9", pt.size=0.25)
+load(here("data/HSC_integrated.RData"))
+d10x.combined_hsc_adult_IFALD<-subset(d10x.combined_hsc, subset = age_condition %in% c("Ped IFALD","Adult Healthy"))
+
+DimPlot(d10x.combined_hsc_adult_IFALD, group.by = "age_condition")
+Fib_markers<-FeaturePlot(d10x.combined_hsc_adult_IFALD, features = c("PDGFRA","CXCL12","COL1A1","IGFBP3"), min.cutoff = "q9", pt.size=0.25)
+Fib_markers
 VlnPlot(d10x_raw_hsc, features = c("PDGFRA","CXCL12","COL1A1","IGFBP3"))
 
 
@@ -319,8 +354,34 @@ de_outlier_sig<-de_outlier[which(de_outlier$p_val_adj < 0.005 & abs(de_outlier$a
 head(de_outlier_sig[which(de_outlier_sig$avg_log2FC>0),], n=10)
 head(de_outlier_sig[which(de_outlier_sig$avg_log2FC<0),])
 
-FeaturePlot(d10x.combined_hsc, features = c("LGI4","CDH19","GPM6B","SOX10"), min.cutoff = "q9", pt.size=0.25)
+FeaturePlot(d10x.combined_hsc, features = c("LGI4","ERBB3","SOX10","S100B"), min.cutoff = "q9", pt.size=0.25)
 
+HSC_markers<-plot_grid(plot_gene_UMAP(d10x.combined_hsc,"LGI4", 0),
+                       plot_gene_UMAP(d10x.combined_hsc,"ERBB3", 0),
+                       plot_gene_UMAP(d10x.combined_hsc,"SOX10", 0),
+                       plot_gene_UMAP(d10x.combined_hsc,"S100B", 0), ncol=4)
+HSC_markers
+save_plts(HSC_markers, "IFALD_HSC_Glial_like", w=14,h=2.5)
+
+
+de_outlier[grep("SPON|RSPO|ADAMTSL|NGFR|IGFBP3|SOX10",rownames(de_outlier)),]
+FeaturePlot(d10x.combined_hsc, features = c("RSPO3","ADAMTSL2","NGFR","IGFBP3"), min.cutoff = "q9", pt.size=0.25)
+VlnPlot(d10x_raw_hsc,features = c("IGFBP3","SOX10"))
+VlnPlot(d10x_raw_hsc,features = c("AOX1","SOX10","NGFR"))
+
+HSCs_genes<-c( "IGFBP7",  "SPARC")
+FeaturePlot(d10x.combined_hsc, features = c("IGFBP7",  "SPARC"), min.cutoff = "q9", pt.size=0.25)
+FeaturePlot(d10x.combined_hsc, features = c("MYH11",  "RGS5", "LUM", "COL1A1","PLA2G2A"), min.cutoff = "q9", pt.size=0.25)
+
+DimPlot(d10x.combined_hsc, group.by = "age_condition")
+table(d10x.combined_hsc$CellType_rough, d10x.combined_hsc$individual)
+
+
+# These ovelap with the genes in glial cells?
+#   https://www.science.org/doi/10.1126/science.abo0510
+# https://cellxgene.cziscience.com/e/d0c12af4-c0e4-4c7b-873a-70752b449689.cxg/
+#   https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3142460/
+# schwann cells?
 
 source("scripts/00_GSEA_function.R")
 GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
@@ -336,8 +397,8 @@ res = GSEA(gene_list, GO_file, pval = 0.05)
 
 plt_path<-res$Results
 plt_path$pathway<-sapply(1:nrow(plt_path), function(x) strsplit(plt_path$pathway[x], "%")[[1]][1])
-plt_path$Enrichment_Cell<-"Up-regulated in \nAdult and IFALD"
-plt_path$Enrichment_Cell[which(plt_path$Enrichment=="Down-regulated")]<-"Up-regulated in \n Healthy Pediatric"
+plt_path$Enrichment_Cell<-"Up-regulated in \nOutlier"
+plt_path$Enrichment_Cell[which(plt_path$Enrichment=="Down-regulated")]<-"Up-regulated in \n General HSC"
 
 plt_path$label<-lapply(1:nrow(plt_path), function(x) paste0(plt_path$leadingEdge[x][[1]][1:4], collapse = ", "))
 
@@ -348,55 +409,11 @@ plt_path$direction_label<-as.numeric(as.character(plt_path$direction_label))
 # top and bottom 15
 plt_path<-rbind(plt_path[1:15,], plt_path[(nrow(plt_path)-15):(nrow(plt_path)),])
 
-ggplot(plt_path, aes(NES, reorder(pathway, NES)))+geom_point(aes(size=size, fill=Enrichment_Cell), shape=21)+
+HSC_GSEA<-ggplot(plt_path, aes(NES, reorder(pathway, NES)))+geom_point(aes(size=size, fill=Enrichment_Cell), shape=21)+
   theme_bw()+th_present+ylab("")+xlab("Normalized Enrichment Score")+
   geom_text(aes(label=label),hjust="inward",  nudge_x = plt_path$direction_label, color="grey50", size=3)+
   geom_hline(yintercept=16.5, color="grey")
+save_plts(HSC_GSEA, "GSEA_outlier_HSC", w=20,h=6)
 
 
-
-
-
-#############
-## Heat Map of differential genes
-#############
-gene<-c("PDGFRA","CXCL12","COL1A1","IGFBP3")
-
-meta_HSC<-d10x.combined_hsc@meta.data
-meta_HSC$cell<-rownames(meta_HSC)
-
-gene_exp<-FetchData(d10x_raw_hsc, vars=gene)
-gene_exp$cell<-rownames(gene_exp)
-
-meta_HSC<-meta_HSC[,c("age_condition","CellType_rough","cell")]
-plt_hsc<-merge(meta_HSC, gene_exp, by='cell')
-
-melt_exp<-melt(plt_hsc)
-
-
-### scale each genen across cells then take mean for gene in each cell type
-scale_this <- function(x){(x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)}
-
-plt_exp_summary <- melt_exp %>% 
-  group_by(variable, CellType_rough) %>%
-  dplyr::summarize(Mean = mean(value, na.rm=TRUE))
-
-plt_exp_scaled <- plt_exp_summary %>% group_by(variable) %>%
-  dplyr::mutate(scaled = scale_this(Mean))
-plt_exp_summary<-as.data.frame(plt_exp_scaled)
-
-plt_exp_summary$variable<-factor(plt_exp_scaled$variable, levels=rev(gene))
-
-plt_exp_summary$CellType_rough<-as.factor(plt_exp_summary$CellType_rough)
-levels(plt_exp_summary$CellType_rough)<-c("Adult \nand\nIFALD\nHSC","Healthy\nPed\nHSC","Outlier\nHSC")
-
-de_0sig$variable<-rownames(de_0sig)
-sig<-de_0sig[which(de_0sig$variable%in%gene),]
-sig$label<-"*"
-sig$CellType_rough<-"Adult \nand\nIFALD\nHSC"
-HSC_fibrosis<-ggplot()+
-  geom_tile(aes( CellType_rough,variable, fill=scaled), plt_exp_summary)+
-  th+theme_classic()+scale_fill_gradientn(colours = colorRampPalette(rev(brewer.pal(8, 'RdBu')), space='Lab')(100), name="Scaled\nMean\nExpression")+
-  ylab("")+xlab("")+geom_text(data=sig, aes(CellType_rough,variable, label=label))
-save_plts(HSC_fibrosis, "HSC_Fibrosis_heat", w=4.5,h=4)
 

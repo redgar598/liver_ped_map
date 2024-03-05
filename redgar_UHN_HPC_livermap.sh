@@ -39,6 +39,10 @@ module load R/4.2.1
 cd liver_ped_map
 git pull
 sbatch IFALD_exploratory_run.sh
+sbatch cpdb_liver.sh
+
+
+
 sbatch MATAL1_exploratory_run.sh
 
 
@@ -199,6 +203,9 @@ scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/Pediat
 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_cellRefined_withDropletQC.rds /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/IFALD_adult_ped_PBMC_integrated.rds /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024 
+
+
 
 
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/*pdf /home/redgar/Documents/liver_ped_map/figures

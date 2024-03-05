@@ -15,5 +15,5 @@ Rscript scripts/cellphonedb_datasetup.R
 source /cluster/home/t117652uhn/miniconda3/etc/profile.d/conda.sh
 conda activate cpdb 
 
-#python -u scripts/cpdb_ped_healthy.py
+python -u scripts/cpdb_ped_healthy.py
 python -u scripts/cpdb_ped_IFALD.py
