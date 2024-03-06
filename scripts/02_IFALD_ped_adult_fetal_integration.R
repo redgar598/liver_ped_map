@@ -152,8 +152,7 @@ source("scripts/00_entropy_d10x.R")
 # 
 
 load(file="/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated.rds")
-
-
+load(file="/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_d10x_adult_ped_raw.rds")
 
 
 
