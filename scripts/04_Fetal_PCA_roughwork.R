@@ -12,19 +12,29 @@ library(ggridges)
 
 source("scripts/00_pretty_plots.R")
 source("scripts/00_Heat_scree_plot_generic.R")
+source("scripts/00_fanciest_UMAP.R")
 source("scripts/varimax_delaram.R")
 
 
-#load(here("/media/redgar/Seagate Portable Drive/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData"))
+##############
+## All Myeloid
+##############
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData"))
+
+# only KC
+d10x.combined_KC<-subset(d10x.combined_myeloid, subset = CellType_harmonized %in% c("KC Like"))
+save(d10x.combined_KC, file=here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/Fetal_IFALD_adult_ped_integrated_KC_only.RData"))
+#save(d10x.combined_KC, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data","Fetal_IFALD_adult_ped_integrated_KC_only.RData"))
 
 
-                            
 
-## only KC
-# d10x.combined_KC<-subset(d10x.combined_myeloid, subset = CellType_harmonized %in% c("KC Like"))
-# save(d10x.combined_KC, file=here("/media/redgar/Seagate Portable Drive/processed_data/Fetal_IFALD_adult_ped_integrated_KC_only.RData"))
 
-load(here("/media/redgar/Seagate Portable Drive/processed_data/Fetal_IFALD_adult_ped_integrated_KC_only.RData"))
+
+
+##############
+## Just KC
+##############
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/Fetal_IFALD_adult_ped_integrated_KC_only.RData"))
 
 d10x.combined_KC <- RunPCA(d10x.combined_KC, npcs = 30, verbose = FALSE)
 d10x.combined_KC <- RunUMAP(d10x.combined_KC, reduction = "pca", dims = 1:30)
@@ -62,15 +72,6 @@ VlnPlot(d10x.combined_KC, features = 'PC_2', group.by="age_condition")
 RidgePlot(d10x.combined_KC, features = 'PC_2', group.by="age_condition")
 
 
-                            # gene_rank_in_PC<-function(genes,loadings){
-                            #   print(sum(sample(1:nrow(loadings), length(genes))))
-                            #   sapply(1:ncol(loadings), function(x){
-                            #     order_PC<-rownames(loadings)[order(loadings[,x])]
-                            #     sum(as.numeric(which(order_PC%in%genes)))
-                            #   })
-                            # }
-                            # 
-                            # gene_rank_in_PC(genes, loadings)
 
 ##########################
 #' ## PCA for batch effect

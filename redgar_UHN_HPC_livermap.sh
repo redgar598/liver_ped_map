@@ -208,6 +208,8 @@ scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/Pediat
 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/statistical_analysis_*.txt /home/redgar/Documents/liver_ped_map/data/cellphonedb
 
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_KC_only.RData /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024
 
 
 scp t117652uhn@h4huhnlogin1.uhnresearch.ca:/cluster/home/t117652uhn/liver_ped_map/figures/*pdf /home/redgar/Documents/liver_ped_map/figures
