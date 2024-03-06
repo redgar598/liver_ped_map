@@ -797,7 +797,7 @@ kc_age<-c("ALB","SAA1","CCL3","CCL4","IL1B")
 kc_ifald<-c("CD5L","A2M","LY96")
 
 # RR age
-rr_age<-c("AREG","FOS")
+rr_age<-c("AREG","HSPA1A")
 # RR IFALD
 rr_ifald<-c("S100A8","S100A9")
 
