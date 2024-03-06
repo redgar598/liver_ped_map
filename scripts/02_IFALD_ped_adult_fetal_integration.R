@@ -94,7 +94,7 @@ source("scripts/00_entropy_d10x.R")
 # d10x <- merge(d10x_ped_IFALD,d10x_fetal, merge.data=TRUE, project = "IFALD_fetal_adult_ped_map")
 # saveRDS(d10x, file = here("../../../projects/macparland/RE/PediatricAdult/processed_data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
 
-d10x<-readRDS(("../../../projects/macparland/RE/PediatricAdult/processed_data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
+d10x<-readRDS(here("../../../projects/macparland/RE/PediatricAdult/processed_data","Fetal_IFALD_d10x_adult_ped_raw.rds"))
 unique(d10x$individual)
 
 
