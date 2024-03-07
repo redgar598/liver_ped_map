@@ -249,7 +249,7 @@ save(embed,vars, Importance, meta_categorical, meta_continuous,Loadings, file=he
 ###########
 #load(here("../../../projects/macparland/RE/PediatricAdult/processed_data","Fetal_IFALD_adult_ped_integrated.rds"))
 
-#load(here("../../../projects/macparland/RE/PediatricAdult/processed_dataFetal_IFALD_adult_ped_integrated.rds"))
+load(here("../../../projects/macparland/RE/PediatricAdult/processed_dataFetal_IFALD_adult_ped_integrated.rds"))
 
 
 d10x.fetal_ped_IFALD$CellType_harmonized<-d10x.fetal_ped_IFALD$CellType_refined

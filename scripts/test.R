@@ -1,62 +1,93 @@
-library(caTools)
-library(randomForest)
+### Load libraries
+library(here)
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(gridExtra)
+library(reshape2)
+library(gtools)
+library(SoupX)
+library(colorspace)
+library(cowplot)
+library(DropletQC)
+library(anndata)
+library(RColorBrewer)
 
-colnames(plt_varimax) <- paste0('varPC_', 1:ncol(plt_varimax))
-identical(rownames(d10x.combined_myeloid@meta.data), rownames(plt_varimax))
-plt_varimax$age_group <-as.factor(d10x.combined_myeloid@meta.data$AgeGroup)
-table(plt_varimax$age_group)
-
-### splitting the train and test data
-sample = sample.split(plt_varimax$age_group, SplitRatio = .75)
-train = subset(plt_varimax, sample == TRUE) 
-test = subset(plt_varimax, sample == FALSE)
-
-### training the RF model
-age_group_pred_RF <- randomForest(age_group ~ . , data = train, importance = TRUE)
-
-
-pred = predict(age_group_pred_RF, newdata=test[,-ncol(test)])
-### generating a confusion matrix
-cm = table(label=test[,ncol(test)], prediction=pred)
-cm
-gridExtra::grid.table(cm)
-#### evaluating feature importance 
-imp.df = data.frame(importance(age_group_pred_RF))        
-imp.df[order(imp.df$MeanDecreaseAccuracy, decreasing = T),]
-dev.off()
-varImpPlot(age_group_pred_RF,main = 'age_group Prediction Based on Varimax-PCs')   
-
-ggplot(plt_varimax_meta, aes(X1, X4, color=age_condition))+geom_point()+colscale_agecondition
-ggplot(plt_varimax_meta, aes(age_condition, X4))+geom_violin(fill="grey", color="grey")+geom_boxplot(aes(fill=age_condition))+fillscale_agecondition+theme_bw()
-
-ggplot(plt_varimax_meta, aes(X1, X4, color=age_condition))+geom_point()+colscale_agecondition
-ggplot(plt_varimax_meta, aes(age_condition, X4))+geom_violin(fill="grey", color="grey")+geom_boxplot(aes(fill=age_condition))+fillscale_agecondition+theme_bw()
+source("scripts/00_pretty_plots.R")
+source("scripts/00_entropy_d10x.R")
 
 
 
-### PC4 loadings
-gene_list = as.data.frame(unclass(df$rotLoadings))$PC_4
-names(gene_list) = rownames(as.data.frame(unclass(df$rotLoadings)))
-gene_list = sort(gene_list, decreasing = TRUE)
-gene_list = gene_list[!duplicated(names(gene_list))]
+load(here("../../../projects/macparland/RE/PediatricAdult/processed_dataFetal_IFALD_adult_ped_integrated.rds"))
 
-res = GSEA(gene_list, GO_file, pval = 0.05)
 
-plt_path<-res$Results
-plt_path$pathway<-sapply(1:nrow(plt_path), function(x) strsplit(plt_path$pathway[x], "%")[[1]][1])
-plt_path$Enrichment_Cell<-"Down in PC5"
-plt_path$Enrichment_Cell[which(plt_path$Enrichment=="Down-regulated")]<-"Up in PC5"
+d10x.fetal_ped_IFALD$CellType_harmonized<-d10x.fetal_ped_IFALD$CellType_refined
+levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFALD$CellType_harmonized)=="Kupffer Cell")]<-"KC Like"
+levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFALD$CellType_harmonized)%in%c("Mono-Mac","Monocyte-DC precursor","Monocyte" ))]<-"Mono-Mac"
+levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFALD$CellType_harmonized)%in%c("DC2","DC1" ))]<-"Macrophage\n(MHCII high)"
+levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFALD$CellType_harmonized)%in%c("NK-like cells","NK" ))]<-"NK cell"
 
-plt_path$label<-lapply(1:nrow(plt_path), function(x) paste0(plt_path$leadingEdge[x][[1]][1:4], collapse = ", "))
+d10x.combined_myeloid<-subset(d10x.fetal_ped_IFALD, subset = CellType_refined %in% c("RR Myeloid","KC Like","Macrophage\n(MHCII high)","Cycling Myeloid",
+                                                                                     "CDC1","VCAM1+ Erythroblastic Island Macrophage",
+                                                                                     "pDC precursor","Neutrophil-myeloid progenitor","Mono-NK",
+                                                                                     "Myeloid Erythrocytes\n(phagocytosis)","HSC/MPP","Monocyte-DC precursor","Mono-Mac",
+                                                                                     "Kupffer Cell","Neutrophil-myeloid progenitor","Mono-NK",
+                                                                                     "VCAM1+ Erythroblastic Island Macrophage","Monocyte","Erythroblastic Island Macrophage"))
+d10x.combined_bcell<-subset(d10x.fetal_ped_IFALD, subset = CellType_harmonized %in% c("Mature B-cells","pro B cell","pre pro B cell","B cell",
+                                                                                      "pre B cell","Plasma cells"))
+d10x.combined_tcell<-subset(d10x.fetal_ped_IFALD, subset = CellType_harmonized %in% c("NK cell","CD3+ T-cells","CLNK T-cells","Cycling T-cells",
+                                                                                      "ILC precursor","Early lymphoid/T lymphocyte","Mono-NK",
+                                                                                      "gd T-cells",""))
+d10x.combined_HSC<-subset(d10x.fetal_ped_IFALD, subset = CellType_harmonized %in% c("HSC"))
 
-plt_path$direction_label<-as.factor(plt_path$Enrichment)
-levels(plt_path$direction_label)<-c(0.1,-0.1)
-plt_path$direction_label<-as.numeric(as.character(plt_path$direction_label))
+save(d10x.combined_bcell, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_bcell_only.RData"))
+save(d10x.combined_tcell, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_tcell_only.RData"))
+save(d10x.combined_HSC, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_HSC_only.RData"))
 
-# top and bottom 15
-plt_path<-rbind(plt_path[1:15,], plt_path[(nrow(plt_path)-15):(nrow(plt_path)),])
 
-ggplot(plt_path, aes(NES, reorder(pathway, NES)))+geom_point(aes(size=size, fill=Enrichment_Cell), shape=21)+
-  theme_bw()+th_present+ylab("")+xlab("Normalized Enrichment Score")+
-  geom_text(aes(label=label),hjust="inward",  nudge_x = plt_path$direction_label, color="grey50", size=3)+
-  geom_hline(yintercept=30.5, color="grey")+scale_fill_manual(values=c("#D64A56","cornflowerblue"))
+########
+## Myeloid overlapping
+########
+
+d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.2)
+
+
+myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T)
+myeloid_cluster_umap
+save_plts(myeloid_cluster_umap, "IFALD_fetal_myeloid_cluster_umap", w=5,h=4)
+
+myeloid_cluster_umap_individual<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T, split.by = "age_condition", ncol=2)
+myeloid_cluster_umap_individual
+save_plts(myeloid_cluster_umap_individual, "IFALD_fetal_myeloid_cluster_umap_individual", w=10,h=6)
+
+DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T,
+        group.by = "CellType_refined",split.by = "age_condition", ncol=2)+colscale_cellType_fetal
+
+DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T,
+        group.by = "CellType_refined")+colscale_cellType_fetal
+
+
+d10x.combined_myeloid$CellType_harmonized<-as.factor(d10x.combined_myeloid$CellType_refined)
+levels(d10x.combined_myeloid$CellType_harmonized)[which(levels(d10x.combined_myeloid$CellType_harmonized)=="Kupffer Cell")]<-"KC Like"
+# levels(d10x.combined_myeloid$CellType_harmonized)[which(levels(d10x.combined_myeloid$CellType_harmonized)%in%c("Mono-Mac"))]<-"Mono-Mac"
+# levels(d10x.combined_myeloid$CellType_harmonized)[which(levels(d10x.combined_myeloid$CellType_harmonized)%in%c("Monocyte" ))]<-"Monocyte"
+
+
+myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=F,
+                              group.by = "CellType_harmonized",split.by = "age_condition", ncol=2)+colscale_cellType_fetal_combo
+myeloid_cluster_umap
+save_plts(myeloid_cluster_umap, "IFALD_fetal_myeloid_cluster_umap_groups", w=10,h=6)
+
+######## Subset to just the overlapping cell types
+d10x.combined_myeloid<-subset(d10x.combined_myeloid, subset = CellType_harmonized %in% c("Mono-Mac","KC Like","Macrophage\n(MHCII high)","CDC1","Monocyte"))
+d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.2)
+
+save(d10x.combined_myeloid, file=here("../../../projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData"))
+

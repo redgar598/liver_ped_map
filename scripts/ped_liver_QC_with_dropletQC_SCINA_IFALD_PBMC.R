@@ -574,9 +574,9 @@ table(d10x.combined$second_best_cell, d10x.combined$CellType_rough)
 ##############
 ## Save integrated to look local
 ##############
-save(d10x.combined, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data"),"IFALD_adult_ped_integrated_PBMC.rds", sep=""))
+save(d10x.combined, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"IFALD_adult_ped_integrated_PBMC.rds", sep=""))
 cell_label<-d10x.combined@meta.data
-save(cell_label, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data"),"IFALD_adult_ped_cellRough_PBMC.rds", sep=""))
+save(cell_label, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"IFALD_adult_ped_cellRough_PBMC.rds", sep=""))
 
 #load(here("data","IFALD_adult_ped_integrated_PBMC.rds"))
 # 
