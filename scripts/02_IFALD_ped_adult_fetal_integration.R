@@ -151,9 +151,9 @@ d10x.fetal_ped_IFALD
 ##############
 ## Save integrated to look local
 ##############
-save(d10x.fetal_ped_IFALD, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data"),"Fetal_IFALD_adult_ped_integrated.rds", sep=""))
+save(d10x.fetal_ped_IFALD, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"Fetal_IFALD_adult_ped_integrated.rds", sep=""))
 cell_label<-d10x.fetal_ped_IFALD@meta.data
-save(cell_label, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data"),"Fetal_IFALD_adult_ped_cellRough.rds", sep=""))
+save(cell_label, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"Fetal_IFALD_adult_ped_cellRough.rds", sep=""))
 
 
 # load(file="/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated.rds")
@@ -247,7 +247,10 @@ save(embed,vars, Importance, meta_categorical, meta_continuous,Loadings, file=he
 ###########
 # subset objects for local plotting
 ###########
-load(here("../../../projects/macparland/RE/PediatricAdult/processed_data","Fetal_IFALD_adult_ped_integrated.rds"))
+#load(here("../../../projects/macparland/RE/PediatricAdult/processed_data","Fetal_IFALD_adult_ped_integrated.rds"))
+
+#load(here("../../../projects/macparland/RE/PediatricAdult/processed_dataFetal_IFALD_adult_ped_integrated.rds"))
+
 
 d10x.fetal_ped_IFALD$CellType_harmonized<-d10x.fetal_ped_IFALD$CellType_refined
 levels(d10x.fetal_ped_IFALD$CellType_harmonized)[which(levels(d10x.fetal_ped_IFALD$CellType_harmonized)=="Kupffer Cell")]<-"KC Like"

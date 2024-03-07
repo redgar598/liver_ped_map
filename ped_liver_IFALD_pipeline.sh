@@ -1,3 +1,14 @@
+# submit job on login node
+cd liver_ped_map
+git pull
+sbatch IFALD_exploratory_run.sh
+sbatch cpdb_liver.sh
+sbatch Fetal_IFALD_exploratory_run.sh
+
+
+###################################3
+
+
 01_ped_liver_QC_with_dropletQC_SCINA_IFALD.R
 01_fetal_liver.R
 
