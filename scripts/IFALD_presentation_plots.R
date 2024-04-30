@@ -37,7 +37,7 @@ identical(colnames(d10x), cell_label$index)
 d10x <- AddMetaData(d10x, metadata = cell_label)
 
 ## markers
-Macrophage_genes<-c( "PTPRC", "MARCO","CD74")
+Macrophage_genes<-c( "PTPRC", "CD74")
 LEC_genes<-c("CALCRL","RAMP2")
 Hepatocyte_genes<-c("ALB", "CYP3A4")
 Cholangiocytes_genes<-c( "EPCAM", "KRT7")
@@ -49,7 +49,7 @@ gd_genes<-c("GNLY")
 RBC<-c("HBA1","FCGR3A")
 MAST<-c("TPSAB1", "AREG")
 recent_recruit_myeloid<-c("S100A8","S100A9","CD68","LYZ")
-kuffer_signature<-c("VSIG4","CD5L")
+kuffer_signature<-c("MARCO","VSIG4","CD5L")
 neutro_gene<-c("CSF3R","FCGR3B")
 MHCII<-c("HLA-DRA","HLA-DPB1")
 b_genes_noIG<-c("MS4A1", "CD79B")
@@ -101,8 +101,8 @@ fancy_dotplot<-plot_grid(
     geom_hline(yintercept = 34.5, color="grey70")+ 
     geom_hline(yintercept = 32.5, color="grey70")+ 
     geom_hline(yintercept = 29.5, color="grey70")+ 
-    geom_hline(yintercept = 26.5, color="grey70")+ 
-    geom_hline(yintercept = 22.5, color="grey70")+ 
+    geom_hline(yintercept = 27.5, color="grey70")+ 
+    geom_hline(yintercept = 23.5, color="grey70")+ 
     geom_hline(yintercept = 20.5, color="grey70")+ 
     geom_hline(yintercept = 18.5, color="grey70")+ 
     geom_hline(yintercept = 16.5, color="grey70")+
@@ -134,6 +134,12 @@ allcell_keymakers<-plot_grid(plot_gene_UMAP(d10x.combined,"PTPRC", 0.9),
                              plot_gene_UMAP(d10x.combined,"ALB", 0.9))
 allcell_keymakers
 save_plts(allcell_keymakers, "IFALD_all_cell_key_markers", w=11,h=5)
+
+
+allcell_keymakers<-plot_grid(plot_gene_UMAP(d10x.combined[,1:100],"PTPRC", 0.9),
+                             plot_gene_UMAP(d10x.combined[,1:100],"ALB", 0.9))
+allcell_keymakers
+save_plts(allcell_keymakers, "IFALD_all_cell_key_markers_legend_save", w=11,h=5)
 
 
 #####################################

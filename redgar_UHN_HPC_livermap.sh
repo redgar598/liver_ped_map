@@ -210,6 +210,7 @@ scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/Pediat
 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_myeloid_only.RData /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_ped_IFALD_adult_PCA_myeloid.RData /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024
+scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_integrated_KC_only.RData /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024
 
 scp t117652uhn@h4huhndata1.uhnresearch.ca:/cluster/projects/macparland/RE/PediatricAdult/processed_data/Fetal_IFALD_adult_ped_pltData.RData /media/redgar/Seagate\ Portable\ Drive/ped_map_update_feb2024
 

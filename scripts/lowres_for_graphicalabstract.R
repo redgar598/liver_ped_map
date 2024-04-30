@@ -15,11 +15,10 @@ library(RColorBrewer)
 source("scripts/00_pretty_plots.R")
 source("scripts/00_fanciest_UMAP.R")
 source("scripts/00_plot_gene_exp.R")
-source("scripts/00_entropy_d10x.combined.R")
 
 
 
-load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
 
 
@@ -46,3 +45,6 @@ load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
   
 save_plts(fanciest_UMAP, "IFALD_refined_cellType_umpa_fancy_lowres", w=2,h=2)
+
+
+

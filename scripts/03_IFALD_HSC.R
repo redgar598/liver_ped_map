@@ -63,6 +63,7 @@ save_plts(fancy_HSC, "IFALD_HSC_UMAP", w=4,h=3)
 fancy_HSC<-fanciest_UMAP(d10x.combined_hsc, NA,T)
 save_plts(fancy_HSC, "IFALD_HSC_UMAP_split", w=8,h=6)
 
+
 ## colored by age_condition
 umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_hsc, reduction = "umap"))#
 umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
@@ -135,6 +136,12 @@ head(de_0sig[which(de_0sig$avg_log2FC<0),])
 
 Fib_markers<-FeaturePlot(d10x.combined_hsc, features = c("PDGFRA","CXCL12","COL1A1","IGFBP3"), min.cutoff = "q9", pt.size=0.25)
 save_plts(Fib_markers, "IFALD_HSC_diff_genes", w=7,h=6)
+
+
+### Diffential
+write.csv(de_0sig, file=here("data","differential_HSC_types.csv"))
+
+
 
 # Altogether our findings support a profibrotic role of PDGFR-α in HSCs
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7527859/
@@ -327,7 +334,7 @@ sig_de_IFALD<-de_IFALD[which(de_IFALD$p_val_adj < 0.005 & abs(de_IFALD$avg_log2F
 sig_de_IFALD[which(sig_de_IFALD$avg_log2FC>0),]
 sig_de_IFALD[which(sig_de_IFALD$avg_log2FC<0),]
 
-write.csv(de_IFALD, file=here("data","differential_IFALDHSC.csv"))
+write.csv(sig_de_IFALD, file=here("data","differential_IFALDHSC.csv"))
 
 
 
@@ -390,13 +397,14 @@ head(de_outlier_sig[which(de_outlier_sig$avg_log2FC<0),])
 
 FeaturePlot(d10x.combined_hsc, features = c("LGI4","ERBB3","SOX10","S100B"), min.cutoff = "q9", pt.size=0.25)
 
-HSC_markers<-plot_grid(plot_gene_UMAP(d10x.combined_hsc,"LGI4", 0),
+HSC_markers<-plot_grid(plot_gene_UMAP(d10x.combined_hsc,"NRXN1", 0),
                        plot_gene_UMAP(d10x.combined_hsc,"ERBB3", 0),
                        plot_gene_UMAP(d10x.combined_hsc,"SOX10", 0),
                        plot_gene_UMAP(d10x.combined_hsc,"S100B", 0), ncol=4)
 HSC_markers
-save_plts(HSC_markers, "IFALD_HSC_Glial_like", w=14,h=2.5)
+save_plts(HSC_markers, "HSC_Glial_like_top_genes", w=14,h=2.5)
 
+write.csv(de_outlier_sig[which(de_outlier_sig$avg_log2FC>0),], file="data/Glial_outlier_top_genes.csv")
 
 de_outlier[grep("SPON|RSPO|ADAMTSL|NGFR|IGFBP3|SOX10",rownames(de_outlier)),]
 FeaturePlot(d10x.combined_hsc, features = c("RSPO3","ADAMTSL2","NGFR","IGFBP3"), min.cutoff = "q9", pt.size=0.25)
@@ -404,8 +412,17 @@ VlnPlot(d10x_raw_hsc,features = c("IGFBP3","SOX10"))
 VlnPlot(d10x_raw_hsc,features = c("AOX1","SOX10","NGFR"))
 
 HSCs_genes<-c( "IGFBP7",  "SPARC")
-FeaturePlot(d10x.combined_hsc, features = c("IGFBP7",  "SPARC"), min.cutoff = "q9", pt.size=0.25)
+FeaturePlot(d10x.combined_hsc, features = c("COL1A2",  "SPARC"), min.cutoff = "q9", pt.size=0.25)
 FeaturePlot(d10x.combined_hsc, features = c("MYH11",  "RGS5", "LUM", "COL1A1","PLA2G2A"), min.cutoff = "q9", pt.size=0.25)
+
+HSC_markers<-plot_grid(plot_gene_UMAP(d10x.combined_hsc,"COL1A2", 0),
+                       plot_gene_UMAP(d10x.combined_hsc,"SPARC", 0),
+                       plot_gene_UMAP(d10x.combined_hsc,"ID3", 0),
+                       plot_gene_UMAP(d10x.combined_hsc,"IGFBP7", 0), ncol=4)
+HSC_markers
+save_plts(HSC_markers, "HSC_Glial_like_HSC_marker", w=14,h=2.5)
+
+
 
 DimPlot(d10x.combined_hsc, group.by = "age_condition")
 table(d10x.combined_hsc$CellType_rough, d10x.combined_hsc$individual)
@@ -449,5 +466,46 @@ HSC_GSEA<-ggplot(plt_path, aes(NES, reorder(pathway, NES)))+geom_point(aes(size=
   geom_hline(yintercept=16.5, color="grey")
 save_plts(HSC_GSEA, "GSEA_outlier_HSC", w=20,h=6)
 
+
+
+####################
+## colored by outlier
+####################
+umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_hsc, reduction = "umap"))#
+umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
+meta_myeloid<-d10x.combined_hsc@meta.data
+meta_myeloid$cell<-rownames(meta_myeloid)
+plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
+
+len_x_bar<-((range(plt_myeloid$UMAP_1))[2]-(range(plt_myeloid$UMAP_1))[1])/10
+len_y_bar<-((range(plt_myeloid$UMAP_2))[2]-(range(plt_myeloid$UMAP_2))[1])/10
+arr <- list(x = min(plt_myeloid$UMAP_1)-2, y = min(plt_myeloid$UMAP_2)-2, x_len = len_x_bar, y_len = len_y_bar)
+
+plt_myeloid$CellType_rough<-as.factor(plt_myeloid$CellType_rough)
+levels(plt_myeloid$CellType_rough)<-c("Fibrotic HSC","HSC", "Glial Like")
+
+forlegned_plot<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
+  geom_point(aes(fill=CellType_rough),size=2, shape=21)+xlab("UMAP 1")+ylab("UMAP 2")+
+  scale_fill_manual(values=c("#2c7fb8","#7fcdbb","#d95f0e"))+
+  theme_bw()+
+  theme(legend.text = element_text(size=5),
+        legend.title = element_text(size=6))
+nice_legend<-get_leg(forlegned_plot)
+
+fanciest_UMAP<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
+  geom_point(size = 0.06, colour= "black", stroke = 1)+
+  geom_point(aes(color=CellType_rough),size=0.05)+xlab("UMAP 1")+ylab("UMAP 2")+
+  scale_color_manual(values=c("#2c7fb8","#7fcdbb","#d95f0e"))+
+  annotate("segment", 
+           x = arr$x, xend = arr$x + c(arr$x_len, 0), 
+           y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
+           arrow = arrow(type = "closed", length = unit(2, 'pt'))) +
+  theme_void()+theme(plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
+                     axis.title.x = element_text(size=5,hjust = 0.05),
+                     axis.title.y = element_text(size=5,hjust = 0.05,angle = 90),
+                     legend.position = "none")+
+  annotate("text",x = min(plt_myeloid$UMAP_1)+(0.95*len_x_bar)-1, y = min(plt_myeloid$UMAP_2)+(0.5*len_y_bar)-2, label=paste0("n = ",comma(ncol(d10x.combined_hsc))), size=2)
+plot_grid(fanciest_UMAP,nice_legend, rel_widths = c(5,2))
+save_plts(plot_grid(fanciest_UMAP,nice_legend, rel_widths = c(5,2)), "Glial_HSC_UMAP", w=3, h=2)
 
 

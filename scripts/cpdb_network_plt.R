@@ -202,4 +202,3 @@ save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("IL1B","IL1R1"),
 
 save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("APOE","TREM2"),"APOE_TREM2_receptor",0.9), "UMAP_APOE_TREM2_receptor_map_celltype_network", w=9,h=6)
 save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("THBS1","CD36"),"THBS1_CD36",0.9), "UMAP_THBS1_CD36_map_celltype_network", w=9,h=6)
-
