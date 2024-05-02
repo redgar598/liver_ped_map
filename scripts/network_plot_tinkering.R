@@ -148,8 +148,7 @@ plot_gene_UMAP_2gene_network_notblend<-function(d10x, gene,interaction_pair, per
 
 
 
-save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CCR5","CCL4"),"CCL4_CCR5",0.9), "UMAP_CCL4_CCR5_map_celltype_network", w=9,h=6)
-
+#save_plts(plot_grid(interaction_legend,nice_legend, exp_legend,ncol=1,rel_heights = c(0.2,1,0.5)), "UMAP_CCL4_CCR5_map_Legend", w=3,h=8)
 
 
 

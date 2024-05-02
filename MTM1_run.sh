@@ -1,5 +1,6 @@
 #!/bin/bash
 #SBATCH --mem=150G
+#SBATCH -t 5-00:00:00
 #SBATCH -J MTM1
 #SBATCH -p veryhimem
 #SBATCH -c 32 
