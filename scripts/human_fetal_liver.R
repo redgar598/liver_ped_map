@@ -22,9 +22,11 @@ Idents(d10x_fetal) <- "Cell.Labels"
 DefaultAssay(d10x_fetal)<-"RNA"
 all.markers<-FindAllMarkers(d10x_fetal)
 
-all.markers[grep("Mtm1", all.markers$gene),]
+all.markers[grep("MTM1", all.markers$gene),]
 
-Mtm1_sig<-all.markers[grep("Mtm1", all.markers$gene),][which(all.markers[grep("Mtm1", all.markers$gene),]$p_val_adj<0.005),]
+save(all.markers,  file="../../../projects/macparland/RE/random_side/Fetal_differential_MTM1.RData")
+
+Mtm1_sig<-all.markers[grep("MTM1", all.markers$gene),][which(all.markers[grep("Mtm1", all.markers$gene),]$p_val_adj<0.005),]
 Mtm1_sig
 
 d10x_fetal <- NormalizeData(d10x_fetal)
