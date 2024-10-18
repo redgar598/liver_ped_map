@@ -4,7 +4,7 @@
 #devtools::install_github("lanagarmire/Asgard")
 
 library('Asgard')
-library(Hmisc)
+#library(Hmisc)
 
 
 ################
