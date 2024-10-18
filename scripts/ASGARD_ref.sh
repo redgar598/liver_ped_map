@@ -7,6 +7,6 @@
 #SBATCH --output=%x.out
 
 
-module load r/4.2.1
+module load r/4.4.0
 
 Rscript scripts/ASGARD_Ref_compute_can.R
