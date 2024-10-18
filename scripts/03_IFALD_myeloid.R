@@ -58,6 +58,7 @@ entropy_myeloidage<-entropy_plt(plt_entropy_age_condition, "age_condition", d10x
 entropy_myeloidage
 save_plts(entropy_myeloidage, "entropy_age_myeloid", w=15,h=10)
 
+
                                 # #################
                                 # ### add PC
                                 # #################
@@ -843,6 +844,136 @@ save_plts(myeloid_age_heat, "Myeloid_age_heat", w=7,h=5)
 myeloid_IFALD_heat<-plot_heat_map(d10x.combined_myeloid,c(kc_ifald,mhcII_ifald,rr_ifald ), 
                                   c("KC Like","Macrophage\n(MHCII high)","Mono-Mac"),T)
 save_plts(myeloid_IFALD_heat, "Myeloid_IFALD_heat", w=7,h=4)
+
+
+
+
+
+##############################
+#### IL1B vs IL10 in KC
+##############################
+d10x.combined_myeloid_kc<-subset(d10x.combined_myeloid, subset = CellType_refined %in% c("KC Like"))
+d10x.combined_myeloid_kc <- RunPCA(d10x.combined_myeloid_kc, npcs = 30, verbose = FALSE)
+d10x.combined_myeloid_kc <- RunUMAP(d10x.combined_myeloid_kc, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid_kc <- FindNeighbors(d10x.combined_myeloid_kc, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid_kc <- FindClusters(d10x.combined_myeloid_kc, resolution = 0.2)
+
+kc_IL1B_IL10<-FeaturePlot(d10x.combined_myeloid_kc, features = c("IL10", "IL1B"), blend = TRUE, blend.threshold=0.75, split.by = "age_condition", pt.size=0.5)
+save_plts(kc_IL1B_IL10, "KC_IL10_IL1B", w=9,h=7)
+
+DimPlot(d10x.combined_myeloid_kc, group.by = "age_condition")+colscale_agecondition
+DimPlot(d10x.combined_myeloid_kc)
+
+FeaturePlot(d10x.combined_myeloid_kc, features = c("IL10", "IL1B", "CCL3","CCL4"))
+save_plts(FeaturePlot(d10x.combined_myeloid_kc, features = c("IL10", "IL1B", "CCL3","CCL4")), "KC_only_key_genes", w=6,h=6)
+
+plt_entropy_treatment<-entropy_d10(d10x.combined_myeloid_kc, "age_condition")
+entropy_individual<-entropy_plt(plt_entropy_treatment, "age_condition", d10x.combined_myeloid_kc)
+entropy_individual
+save_plts(entropy_individual, "KC_only_age_condition", w=10,h=10)
+
+plot_grid(
+  plot_gene_UMAP(d10x.combined_myeloid_kc,"CCL4", 0.25),
+  plot_gene_UMAP(d10x.combined_myeloid_kc,"CCL3", 0.25),
+  plot_gene_UMAP(d10x.combined_myeloid_kc,"IL10", 0.25),
+  plot_gene_UMAP(d10x.combined_myeloid_kc,"IL1B", 0.25),ncol=2)
+
+
+
+
+d10x<-readRDS(file = here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_d10x_adult_ped_raw.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+
+cell_label$index<-rownames(cell_label)
+cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
+identical(colnames(d10x), cell_label$index)
+
+d10x <- AddMetaData(d10x, metadata = cell_label)
+##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
+# This is log(TP10K+1)
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
+d10x.combined_myeloid<-subset(d10x, subset = CellType_refined %in% c("KC Like"))
+
+
+DefaultAssay(d10x.combined_myeloid_kc)<-"RNA"
+deg<-FindMarkers(d10x.combined_myeloid_kc, ident.1 = "0", ident.2 = "1", logfc.threshold = 0)
+
+deg[grep("IL10|IL1B|CCL3|CCL4", rownames(deg)),]
+
+
+sig_de<-deg[which(deg$p_val_adj < 0.005 & abs(deg$avg_log2FC) > 1),]
+sig_de[which(sig_de$avg_log2FC>0),]
+sig_de[which(sig_de$avg_log2FC<0),]
+
+
+
+plot_grid(
+  plot_gene_UMAP(d10x.combined_myeloid_kc,"CD163", 0.5),
+  plot_gene_UMAP(d10x.combined_myeloid_kc,"VCAM1", 0.5),
+  plot_gene_UMAP(d10x.combined_myeloid_kc,"ALB", 0.5),
+  plot_gene_UMAP(d10x.combined_myeloid_kc,"SAA1", 0.5),ncol=2)
+
+
+
+#############
+## Heat Map of differential genes
+#############
+d10x<-readRDS(file = here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_d10x_adult_ped_raw.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+
+cell_label$index<-rownames(cell_label)
+cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
+identical(colnames(d10x), cell_label$index)
+
+d10x <- AddMetaData(d10x, metadata = cell_label)
+##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
+# This is log(TP10K+1)
+d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
+
+d10x.combined_myeloid<-subset(d10x, subset = CellType_refined %in% c("Mono-Mac","Macrophage\n(MHCII high)","KC Like","CDC1","Cycling Myeloid","Myeloid Erythrocytes\n(phagocytosis)"))
+
+
+
+
+# zonated and age
+kc_age<-c("APOE","CD5L","MARCO")
+
+
+### for adding *
+sig_de_IFALD_RR<-read.csv(file=here("data","differential_IFALD_RR.csv"))
+sig_de_IFALD_RR$age_condition<-"Ped\nIFALD"
+sig_de_IFALD_RR$CellType_refined<-"Mono-Mac"
+
+sig_de_IFALD_KC<-read.csv(file=here("data","differential_IFALD_KC.csv"))
+sig_de_IFALD_KC$age_condition<-"Ped\nIFALD"
+sig_de_IFALD_KC$CellType_refined<-"KC Like"
+
+sig_de_IFALD_MHCII<-read.csv(file=here("data","differential_IFLAD_MHCII.csv"))
+sig_de_IFALD_MHCII$age_condition<-"Ped\nIFALD"
+sig_de_IFALD_MHCII$CellType_refined<-"Macrophage\n(MHCII high)"
+
+sig_de_age_RR<-read.csv(file=here("data","differential_age_RR.csv"))
+sig_de_age_RR$age_condition<-"Adult\nHealthy"
+sig_de_age_RR$CellType_refined<-"Mono-Mac"
+
+sig_de_age_KC<-read.csv(file=here("data","differential_age_KC.csv"))
+sig_de_age_KC$age_condition<-"Adult\nHealthy"
+sig_de_age_KC$CellType_refined<-"KC Like"
+
+sig_de_age_MHCII<-read.csv(file=here("data","differential_age_MHCII.csv"))
+sig_de_age_MHCII$age_condition<-"Adult\nHealthy"
+sig_de_age_MHCII$CellType_refined<-"Macrophage\n(MHCII high)"
+
+de<-rbind(sig_de_IFALD_RR, sig_de_IFALD_KC, sig_de_IFALD_MHCII, sig_de_age_RR, sig_de_age_KC, sig_de_age_MHCII)
+colnames(de)[1]<-"variable"
+de$label<-"*"
+
+
+myeloid_age_heat<-plot_heat_map(d10x.combined_myeloid,c(kc_age), 
+                                c("KC Like","Macrophage\n(MHCII high)","Mono-Mac"),T)
+save_plts(myeloid_age_heat, "Myeloid_age_zonated", w=7,h=2.5)
+
 
 
 

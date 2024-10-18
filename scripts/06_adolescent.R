@@ -21,8 +21,7 @@ source("scripts/00_plot_gene_exp.R")
 source("scripts/00_fanciest_UMAP.R")
 source("scripts/00_entropy_d10x.R")
 
-
-load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
 
 d10x.combined_myeloid<-subset(d10x.combined, subset = CellType_refined %in% c("RR Myeloid","Macrophage\n(MHCII high)","KC Like","Macrophage\n(CLEC9A high)","Cycling Myeloid","Myeloid Erythrocytes\n(phagocytosis)"))
@@ -71,7 +70,7 @@ save_plts(entropy_myeloidage, "entropy_age_myeloid_adolescent", w=15,h=10)
 ##############
 ## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
 # but not normalized or scaled
-d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+d10x<-readRDS(file = here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_d10x_adult_ped_raw.rds"))
 
 d10x$age_group_adolescent<-d10x$Age
 d10x$age_group_adolescent<-as.factor(d10x$age_group_adolescent)
@@ -81,7 +80,7 @@ levels(d10x$age_group_adolescent)<-relevel_age
 d10x$age_condition_adolescent<-paste(d10x$age_group_adolescent, d10x$Treatment)
 d10x$age_condition_adolescent<-factor(d10x$age_condition_adolescent, levels=c("<16 IFALD","<16 Healthy","16-17 Healthy",">17 Healthy"))
 
-load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
@@ -103,9 +102,9 @@ KC_sig_de_full<-read.csv(here("data/differential_age_KC.csv"), row.names = 1)
 KC_sig_de_full_pos<-KC_sig_de_full[which(KC_sig_de_full$avg_log2FC>0),]
 KC_sig_de_full_neg<-KC_sig_de_full[which(KC_sig_de_full$avg_log2FC<0),]
 
-# overall same direction 23/52 44%
-length(intersect(rownames(KC_sig_de_full_pos),rownames(sig_de_pos))) #5/6
-length(intersect(rownames(KC_sig_de_full_neg),rownames(sig_de_neg))) #18/46
+# overall same direction 26/60 43%
+length(intersect(rownames(KC_sig_de_full_pos),rownames(sig_de_pos))) #12/25
+length(intersect(rownames(KC_sig_de_full_neg),rownames(sig_de_neg))) #14/35
 
 
 ### Plot key genes
@@ -134,7 +133,7 @@ ggplot(plt_myeloid, aes(Age,log(value)))+
 ##############
 ## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
 # but not normalized or scaled
-d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+d10x<-readRDS(file = here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_d10x_adult_ped_raw.rds"))
 
 d10x$age_group_adolescent<-d10x$Age
 d10x$age_group_adolescent<-as.factor(d10x$age_group_adolescent)
@@ -144,7 +143,7 @@ levels(d10x$age_group_adolescent)<-relevel_age
 d10x$age_condition_adolescent<-paste(d10x$age_group_adolescent, d10x$Treatment)
 d10x$age_condition_adolescent<-factor(d10x$age_condition_adolescent, levels=c("<16 IFALD","<16 Healthy","16-17 Healthy",">17 Healthy"))
 
-load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
@@ -166,9 +165,9 @@ MHCII_sig_de_full<-read.csv(here("data/differential_age_MHCII.csv"), row.names =
 MHCII_sig_de_full_pos<-MHCII_sig_de_full[which(MHCII_sig_de_full$avg_log2FC>0),]
 MHCII_sig_de_full_neg<-MHCII_sig_de_full[which(MHCII_sig_de_full$avg_log2FC<0),]
 
-# overall same direction 41/50 82%
-length(intersect(rownames(MHCII_sig_de_full_pos),rownames(sig_de_pos))) #5/5
-length(intersect(rownames(MHCII_sig_de_full_neg),rownames(sig_de_neg))) #36/45
+# overall same direction 19/68 28%
+length(intersect(rownames(MHCII_sig_de_full_pos),rownames(sig_de_pos))) #4/5
+length(intersect(rownames(MHCII_sig_de_full_neg),rownames(sig_de_neg))) #15/63
 
 
 
@@ -177,7 +176,7 @@ length(intersect(rownames(MHCII_sig_de_full_neg),rownames(sig_de_neg))) #36/45
 ##############
 ## this data is filtered genes with expression in less than 3 cells, cells <200 or > 6000 n_feature, percent MT >20 and doublets
 # but not normalized or scaled
-d10x<-readRDS(file = here("data","IFALD_d10x_adult_ped_raw.rds"))
+d10x<-readRDS(file = here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_d10x_adult_ped_raw.rds"))
 
 d10x$age_group_adolescent<-d10x$Age
 d10x$age_group_adolescent<-as.factor(d10x$age_group_adolescent)
@@ -187,14 +186,14 @@ levels(d10x$age_group_adolescent)<-relevel_age
 d10x$age_condition_adolescent<-paste(d10x$age_group_adolescent, d10x$Treatment)
 d10x$age_condition_adolescent<-factor(d10x$age_condition_adolescent, levels=c("<16 IFALD","<16 Healthy","16-17 Healthy",">17 Healthy"))
 
-load(here("data","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_cellRefined_withDropletQC.rds"))
 
 cell_label$index<-rownames(cell_label)
 cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
-d10x_raw_RR<-subset(d10x, subset = CellType_refined %in% c("RR Myeloid"))
+d10x_raw_RR<-subset(d10x, subset = CellType_refined %in% c("Mono-Mac"))
 
 Idents(d10x_raw_RR)<-d10x_raw_RR$age_condition_adolescent
 table(d10x_raw_RR$age_condition_adolescent)
@@ -209,7 +208,7 @@ RR_sig_de_full<-read.csv(here("data/differential_age_RR.csv"), row.names = 1)
 RR_sig_de_full_pos<-RR_sig_de_full[which(RR_sig_de_full$avg_log2FC>0),]
 RR_sig_de_full_neg<-RR_sig_de_full[which(RR_sig_de_full$avg_log2FC<0),]
 
-# overall same direction 28/45 62%
-length(intersect(rownames(RR_sig_de_full_pos),rownames(sig_de_pos))) #6/7
-length(intersect(rownames(RR_sig_de_full_neg),rownames(sig_de_neg))) #22/38
+# overall same direction 18/46 39%
+length(intersect(rownames(RR_sig_de_full_pos),rownames(sig_de_pos))) #3/3
+length(intersect(rownames(RR_sig_de_full_neg),rownames(sig_de_neg))) #15/43
 

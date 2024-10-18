@@ -372,6 +372,11 @@ head(de_0sig[which(de_0sig$avg_log2FC<0),])
 de_0sig[which(rownames(de_0sig) %in% c("PDGFRA","CXCL12","COL1A1","IGFBP3")),]
 de_0[which(rownames(de_0) %in% c("PDGFRA","CXCL12","COL1A1","IGFBP3")),]
 
+write.csv(de_0sig, file=here("data","differential_IFALD_adult_HSC.csv"))
+
+
+
+
 
 load(here("data/HSC_integrated.RData"))
 d10x.combined_hsc_adult_IFALD<-subset(d10x.combined_hsc, subset = age_condition %in% c("Ped IFALD","Adult Healthy"))
