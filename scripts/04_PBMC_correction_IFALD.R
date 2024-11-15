@@ -190,7 +190,7 @@ arr <- list(x = min(plt_myeloid$UMAP_1), y = min(plt_myeloid$UMAP_2), x_len = le
 
 forlegned_plot<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
   geom_point(aes(fill=Tissue),size=2, shape=21)+xlab("UMAP 1")+ylab("UMAP 2")+
-  scale_fill_manual(values=c("cornflowerblue","grey","red","forestgreen"))+theme_bw()+
+  scale_fill_manual(values=c("lightskyblue3","darkolivegreen3","firebrick3","slategray2","forestgreen"))+theme_bw()+
   theme(legend.text = element_text(size=5),
         legend.title = element_text(size=6))
 nice_legend<-get_leg(forlegned_plot)
@@ -342,7 +342,7 @@ meta_myeloid<-d10x.combined_bcell@meta.data
 meta_myeloid$cell<-rownames(meta_myeloid)
 plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
 
-plt_myeloid$Tissue<-factor(plt_myeloid$Tissue, levels=c("Biopsy Caudate","Biopsy Right Lobe", "Perfused Caudate","Perfused Right Lobe", "PBMC" ))
+#plt_myeloid$Tissue<-factor(plt_myeloid$Tissue, levels=c("Biopsy Caudate","Biopsy Right Lobe", "Perfused Caudate","Perfused Right Lobe", "PBMC" ))
 
 len_x_bar<-((range(plt_myeloid$UMAP_1))[2]-(range(plt_myeloid$UMAP_1))[1])/10
 len_y_bar<-((range(plt_myeloid$UMAP_2))[2]-(range(plt_myeloid$UMAP_2))[1])/10
@@ -375,6 +375,7 @@ fanciest_UMAP <- fanciest_UMAP + annotate("text",x = min(plt_myeloid$UMAP_1)+(0.
 fancy_type_tissue<-plot_grid(fanciest_UMAP,nice_legend, rel_widths = c(5,2))
 save_plts(fancy_type_tissue, "IFALD_liver_PBMC_bcell_tissue", w=6,h=4)
 
+save_plts(nice_legend, "legend_tissue", w=4,h=3)
 
 #####################################
 ## fancy UMAP individual

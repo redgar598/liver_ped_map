@@ -45,6 +45,43 @@ bcell_cluster_umap
 
 
 
+## colored by age_condition
+umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_bcell, reduction = "umap"))#
+umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
+meta_myeloid<-d10x.combined_bcell@meta.data
+meta_myeloid$cell<-rownames(meta_myeloid)
+plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
+
+len_x_bar<-((range(plt_myeloid$UMAP_1))[2]-(range(plt_myeloid$UMAP_1))[1])/10
+len_y_bar<-((range(plt_myeloid$UMAP_2))[2]-(range(plt_myeloid$UMAP_2))[1])/10
+arr <- list(x = min(plt_myeloid$UMAP_1)-2, y = min(plt_myeloid$UMAP_2)-2, x_len = len_x_bar, y_len = len_y_bar)
+
+forlegned_plot<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
+  geom_point(aes(fill=age_condition),size=2, shape=21)+xlab("UMAP 1")+ylab("UMAP 2")+
+  fillscale_agecondition+theme_bw()+
+  theme(legend.text = element_text(size=5),
+        legend.title = element_text(size=6))
+nice_legend<-get_leg(forlegned_plot)
+
+fanciest_UMAP<-ggplot(plt_myeloid[sample(nrow(plt_myeloid)),], aes(UMAP_1,UMAP_2))+
+  geom_point(size = 0.06, colour= "black", stroke = 1)+
+  geom_point(aes(color=age_condition),size=0.05)+xlab("UMAP 1")+ylab("UMAP 2")+
+  colscale_agecondition+
+  annotate("segment", 
+           x = arr$x, xend = arr$x + c(arr$x_len, 0), 
+           y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
+           arrow = arrow(type = "closed", length = unit(2, 'pt'))) +
+  theme_void()+theme(plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
+                     axis.title.x = element_text(size=5,hjust = 0.05),
+                     axis.title.y = element_text(size=5,hjust = 0.05,angle = 90),
+                     legend.position = "none")+
+  annotate("text",x = min(plt_myeloid$UMAP_1)+(0.95*len_x_bar)-1, y = min(plt_myeloid$UMAP_2)+(0.5*len_y_bar)-2, label=paste0("n = ",comma(ncol(d10x.combined_bcell))), size=2)
+save_plts(plot_grid(fanciest_UMAP,nice_legend, rel_widths = c(5,2)), "Healthy_and_IFALD_BCell_UMAP", w=3, h=2)
+
+
+
+
+
 ##############
 ## markers
 ##############
@@ -150,6 +187,35 @@ cell_counts<-d10x.combined_bcell@meta.data %>%
   mutate(per=100*count/countT)
 
 
+
+
+count_plt<-as.data.frame(table(d10x.combined_bcell@meta.data$CellType_refined, d10x.combined_bcell$age_condition))
+
+
+count_plt_percentage <- count_plt %>%
+  group_by(Var1, Var2) %>%
+  summarise(count = sum(Freq), .groups = 'drop') %>%
+  group_by(Var1) %>%
+  mutate(total_count = sum(count),
+         percentage = (count / total_count) * 100) %>%
+  ungroup()
+
+count_percent<-ggplot(count_plt_percentage[which(count_plt_percentage$Var1%in%c("pDC","pre B-cell")),], aes(Var1,percentage))+
+  geom_bar(aes(fill=Var2),stat="identity", color="black")+
+  fillscale_agecondition+theme_bw()+
+  xlab("")+ylab("Percent of Cells")+guides(fill=guide_legend(ncol=3))+coord_flip()+
+  theme(legend.position="none")+
+  theme(
+    axis.text = element_text(size=12),
+    strip.text = element_text(size=15),
+    axis.title.y = element_text(size=15))
+count_percent
+save_plts(count_percent, "Bcell_bar_plot", w=4,h=1)
+
+
+
+
+
 cell_counts$label<-sapply(1:nrow(cell_counts), function(x){
   if(length(grep("NPC", cell_counts$individual[x]))==1){
     paste(cell_counts$Age[x], "\n(", strsplit(cell_counts$individual[x],"_")[[1]][1]," NPC)", sep="")
@@ -201,7 +267,7 @@ save_plts(bcell_cluster_umap, "IFALD_Bcell_map_split_individual", w=12,h=10)
 
 fancy_bcell<-fanciest_UMAP(d10x.combined_bcell, NA,F)
 fancy_bcell
-save_plts(fancy_bcell, "IFALD_bcell_UMAP", w=4,h=3)
+save_plts(fancy_bcell, "IFALD_bcell_UMAP", w=3,h=2)
 
 fancy_bcell<-fanciest_UMAP(d10x.combined_bcell, NA,T)
 save_plts(fancy_bcell, "IFALD_bcell_UMAP_split", w=8,h=6)
@@ -221,4 +287,64 @@ b_markers<-plot_grid(plot_gene_UMAP(d10x.combined_bcell,"IGLL1", 0),
                      plot_gene_UMAP(d10x.combined_bcell,"MS4A1", 0))
 b_markers
 save_plts(b_markers, "IFALD_prebcell_diff_genes_bcellonly_tidy", w=7,h=2.5)
+
+
+
+
+
+####################################
+## Fancy dot plot
+####################################
+
+DefaultAssay(d10x.combined_bcell)<-"RNA"
+
+## markers
+b_genes_noIG<-c("MS4A1","CD19","CD79B","TCL1A","IGLL1","JCHAIN","IGKC","IGHG1","MKI67","TOP2A","PLAC8","IL3RA")
+
+gene_exp<-FetchData(d10x.combined_bcell, vars=c(b_genes_noIG))
+gene_exp$cell<-rownames(gene_exp)
+gene_exp<-melt(gene_exp)
+
+plt<-merge(gene_exp, d10x.combined_bcell@meta.data, by="cell")
+
+
+## summarize
+scale_this <- function(x){(x - mean(x, na.rm=TRUE)) / sd(x, na.rm=TRUE)}
+
+plt_summary<-plt %>% group_by(CellType_refined, variable) %>% 
+  summarise(mn=mean(value), count=length(which(value>0)), percent_exp=(length(which(value>0))/length(value))*100)
+plt_summary <- plt_summary %>% group_by(variable) %>%
+  dplyr::mutate(scaled = scale_this(mn))
+plt_summary<-as.data.frame(plt_summary)
+
+# remove dots where 0 cell expressing marker
+plt_summary<-plt_summary[(which(plt_summary$count>0)),]
+
+plt_summary$variable<-factor(plt_summary$variable, levels=rev(c(b_genes_noIG)))
+
+plt_summary$CellType_refined<-factor(plt_summary$CellType_refined, levels=(c("Mature B-cells","Mature B-cells (High MT)","pre B-cell",
+                                                                             "Plasma cells","Cycling Plasma","pDC" )))
+
+
+fancy_dotplot<-plot_grid(
+  ggplot(plt_summary, aes(CellType_refined, variable, color=scaled, size=percent_exp))+geom_point()+
+    th+theme_classic()+
+    scale_color_continuous_sequential(palette = "Oslo", rev=F, name="Scaled\nMean\nExpression")+
+    scale_size(name="Percent\nCells\nExpressing")+
+    theme(axis.text.x = element_blank(),axis.title = element_blank(),axis.ticks.x = element_blank(),
+          plot.margin = margin(0.25,0.25,0,0.25,"cm"))+
+    geom_hline(yintercept = 10.5, color="grey70")+  
+    geom_hline(yintercept = 8.5, color="grey70")+
+    geom_hline(yintercept = 7.5, color="grey70")+
+    geom_hline(yintercept = 4.5, color="grey70")+ 
+    geom_hline(yintercept = 2.5, color="grey70")  ,
+  ggplot(plt_summary, aes(CellType_refined, y=1, fill=CellType_refined))+geom_tile(color="black")+
+    th+theme_classic()+fillscale_cellType+
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+          axis.text.y = element_blank(),axis.title = element_blank(),axis.ticks = element_blank(),
+          legend.position = "none",axis.line  = element_blank(),
+          plot.margin = margin(0,0,1,1,"cm")),
+  ncol=1, rel_heights = c(1.5,1), align = "v", axis="lr")
+fancy_dotplot
+save_plts(fancy_dotplot, "Healthy_only_dot_plot_celltype_Bcell", w=3,h=5)
 

@@ -277,9 +277,6 @@ stim<-read.csv("data/stimulation_data.csv")
 t.test(IL1B.Positive..~Age, data=stim[which(stim$Gate=="CD11B_CD68"),])
 t.test(IL1B.Positive..~Age, data=stim[which(stim$Gate=="CD14_CD68"),])
 
-wilcox.test(IL1B.Positive..~Age, data=stim[which(stim$Gate=="CD14_CD68"),])
-wilcox.test(IL1B.Positive..~Age, data=stim[which(stim$Gate=="CD11B_CD68"),])
-
 stderror <- function(x) sd(x)/sqrt(length(x))
 
 
@@ -319,3 +316,49 @@ save_plts(CD11B_CD68, "CD11B_CD68_ICS", h=5,w=3)
 
 
 
+
+
+####################################
+## IF Data
+####################################
+IF<-read.csv("data/IF_percent_positive.csv")
+
+wilcox.test(MD2_CD86~Condition, data=IF)
+
+stderror <- function(x) sd(x)/sqrt(length(x))
+
+
+mean_data<- IF %>% group_by(Condition) %>% summarise(mn=mean(MD2_CD86), SEM = stderror(MD2_CD86))
+
+ggplot()+geom_bar(aes(Condition,MD2_CD86, fill=Condition),IF, stat='summary', color="black")+
+  geom_point(aes(Condition,MD2_CD86, fill=Condition),IF, shape=21)+
+  theme_bw()+scale_fill_manual(values = c("cornflowerblue","#B4EB65"))+
+  geom_errorbar(aes(Condition, ymin = mn-SEM, ymax = mn+SEM), mean_data, width = 0.2)+
+  ylab("% pos")
+
+ggplot()+geom_bar(aes(Condition,MD2_noCD68, fill=Condition),IF, stat='summary', color="black")+
+  geom_point(aes(Condition,MD2_noCD68, fill=Condition),IF, shape=21)+
+  theme_bw()+scale_fill_manual(values = c("#B4EB65","cornflowerblue"))+
+  geom_errorbar(aes(Condition, ymin = mn-SEM, ymax = mn+SEM), mean_data, width = 0.2)+
+  ylab("% pos")
+
+ggplot()+geom_bar(aes(Condition,noMD2_CD68, fill=Condition),IF, stat='summary', color="black")+
+  geom_point(aes(Condition,noMD2_CD68, fill=Condition),IF, shape=21)+
+  theme_bw()+scale_fill_manual(values = c("#B4EB65","cornflowerblue"))+
+  geom_errorbar(aes(Condition, ymin = mn-SEM, ymax = mn+SEM), mean_data, width = 0.2)+
+  ylab("% pos")
+
+
+
+MD2_CD68<-ggplot()+geom_bar(aes(Condition,MD2_CD86, fill=Condition),IF, stat='summary', color="black")+
+  geom_point(aes(Condition,MD2_CD86, fill=Condition),IF, shape=21, size=2)+
+  theme_bw()+scale_fill_manual(values = c("cornflowerblue","#B4EB65"))+
+  geom_errorbar(aes(Condition, ymin = mn-SEM, ymax = mn+SEM), mean_data, width = 0.2)+
+  ylab("MD2+ Myeloid Cells (CD68+)\n (% of All Cells)")+theme(legend.position = "none")+th_present+
+  annotate("text", x=1.5, y=26.25, label="*", size=8)+
+  annotate("segment", x = 1, xend = 2, y = 26, yend = 26)+
+  annotate("segment", x = 1, xend = 1, y = 26, yend = 25.5)+
+  annotate("segment", x = 2, xend = 2, y = 26, yend = 25.5)
+MD2_CD68
+save_plts(MD2_CD68, "MD2_CD68_IF", h=5,w=3)
+save_plts(MD2_CD68, "MD2_CD68_IF_narrow", h=4,w=2)

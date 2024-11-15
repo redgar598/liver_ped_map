@@ -11,6 +11,7 @@ library(SoupX)
 library(colorspace)
 library(cowplot)
 library(DropletQC)
+library(ggsignif)
 
 
 
@@ -92,4 +93,6 @@ fancy_dotplot<-plot_grid(
           plot.margin = margin(0,0,1,1,"cm")),
   ncol=1, rel_heights = c(6,1.3), align = "v", axis="lr")
 save_plts(fancy_dotplot, "dot_plot_celltype", w=6,h=10)
+
+
 

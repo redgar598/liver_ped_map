@@ -12,3 +12,7 @@ R
 
 
 sbatch scripts/ASGARD_ref.sh
+
+
+
+scp redgar25@cedar.alliancecan.ca:/home/redgar25/scratch/L1000/DrugReference/*txt /media/redgar/Seagate\ Portable\ Drive/L1000/DrugReference

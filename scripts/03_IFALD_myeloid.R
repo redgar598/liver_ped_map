@@ -19,6 +19,54 @@ source("scripts/00_entropy_d10x.R")
 
 
 
+
+#############
+## only healthy UMAP
+#############
+load("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/IFALD_adult_ped_integrated_healthy_only.rds")
+
+fancyUMAP_all<-fanciest_UMAP(d10x.combined_healthy,"KC Like",F)
+save_plts(fancyUMAP_all, "Healthyonly_KC_highlight_umap_fancy", w=6,h=4)
+
+
+
+d10x.combined_myeloid<-subset(d10x.combined_healthy, subset = CellType_refined %in% c("Mono-Mac","Macrophage\n(MHCII high)","KC Like","CDC1","Cycling Myeloid","Myeloid Erythrocytes\n(phagocytosis)"))
+rm(d10x.combined_healthy)
+gc()
+d10x.combined_myeloid <- RunPCA(d10x.combined_myeloid, npcs = 30, verbose = FALSE)
+d10x.combined_myeloid <- RunUMAP(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindNeighbors(d10x.combined_myeloid, reduction = "pca", dims = 1:30)
+d10x.combined_myeloid <- FindClusters(d10x.combined_myeloid, resolution = 0.3)
+
+myeloid_subtype<-DimPlot(d10x.combined_myeloid, label=T)
+myeloid_subtype
+save_plts(myeloid_subtype, "Healthyonly_myeloid_map_clusters", w=7,h=6)
+
+myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=T, group.by = "CellType_refined")+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  annotate("text",x=-7, y=-9, label=paste0("n = ",comma(ncol(d10x.combined_myeloid))))
+myeloid_cluster_umap
+save_plts(myeloid_cluster_umap, "Healthyonly_myeloid_map_celltype", w=7,h=6)
+
+cell_num_myeloid<-as.data.frame(table(d10x.combined_myeloid$age_condition))
+colnames(cell_num_myeloid)<-c("age_condition","CellCount")
+myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=F,split.by = "age_condition", group.by = "CellType_refined", ncol=2)+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  geom_text(aes(y=-7, x=-9,label=paste0("n = ",comma(CellCount))),cell_num_myeloid, hjust=-0.1, size=3)
+myeloid_cluster_umap
+save_plts(myeloid_cluster_umap, "Healthyonly_myeloid_map", w=7,h=6)
+
+myeloid_cluster_umap<-DimPlot(d10x.combined_myeloid, reduction = "umap", pt.size=0.25, label=F,split.by = "age_id", group.by = "CellType_refined", ncol=4)+colscale_cellType+ggtitle("")+xlab("UMAP 1")+ylab("UMAP 2")+
+  annotate("text",x=-14, y=-12, label=paste0("n = ",comma(ncol(d10x.combined_myeloid))))
+myeloid_cluster_umap
+save_plts(myeloid_cluster_umap, "Healthyonly_myeloid_map_individual", w=12,h=10)
+
+
+fancy_myeloid<-fanciest_UMAP(d10x.combined_myeloid, NA,T)
+save_plts(fancy_myeloid, "Healthyonly_myeloid_UMAP", w=4,h=3)
+
+
+#############
+## with IFALD UMAP
+#############
 load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
 fancyUMAP_all<-fanciest_UMAP(d10x.combined,"KC Like",F)
@@ -123,6 +171,7 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+d10x$Sex[which(d10x$individual%in%c("C113","C115"))]<-"M"
 
 ##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
 # This is log(TP10K+1)
@@ -247,6 +296,7 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+d10x$Sex[which(d10x$individual%in%c("C113","C115"))]<-"M"
 ##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
 # This is log(TP10K+1)
 d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
@@ -353,6 +403,7 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+d10x$Sex[which(d10x$individual%in%c("C113","C115"))]<-"M"
 ##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
 # This is log(TP10K+1)
 d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
@@ -460,6 +511,7 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+d10x$Sex[which(d10x$individual%in%c("C113","C115"))]<-"M"
 ##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
 # This is log(TP10K+1)
 d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
@@ -783,6 +835,7 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+d10x$Sex[which(d10x$individual%in%c("C113","C115"))]<-"M"
 ##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
 # This is log(TP10K+1)
 d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
@@ -795,7 +848,7 @@ d10x.combined_myeloid<-subset(d10x, subset = CellType_refined %in% c("Mono-Mac",
 # cluster0 age
 kc_age<-c("ALB","SAA1","CCL3","CCL4","IL1B")
 # cluster0 IFALD
-kc_ifald<-c("CD5L","A2M","LY96")
+kc_ifald<-c("IL1B","A2M","LY96")
 
 # RR age
 rr_age<-c("AREG","HSPA1A")
@@ -837,15 +890,23 @@ colnames(de)[1]<-"variable"
 de$label<-"*"
 
 
-myeloid_age_heat<-plot_heat_map(d10x.combined_myeloid,c(kc_age, mhcII_age,rr_age), 
-                                c("KC Like","Macrophage\n(MHCII high)","Mono-Mac"),T)
-save_plts(myeloid_age_heat, "Myeloid_age_heat", w=7,h=5)
+
 
 myeloid_IFALD_heat<-plot_heat_map(d10x.combined_myeloid,c(kc_ifald,mhcII_ifald,rr_ifald ), 
                                   c("KC Like","Macrophage\n(MHCII high)","Mono-Mac"),T)
 save_plts(myeloid_IFALD_heat, "Myeloid_IFALD_heat", w=7,h=4)
 
 
+
+d10x.combined_myeloid_healthy<-subset(d10x.combined_myeloid, subset = Treatment %in% c("Healthy"))
+de<-rbind(sig_de_age_RR, sig_de_age_KC, sig_de_age_MHCII)
+colnames(de)[1]<-"variable"
+de$label<-"*"
+
+
+myeloid_age_heat<-plot_heat_map(d10x.combined_myeloid_healthy,c(kc_age, mhcII_age,rr_age), 
+                                c("KC Like","Macrophage\n(MHCII high)","Mono-Mac"),T)
+save_plts(myeloid_age_heat, "Myeloid_age_heat", w=5,h=5)
 
 
 
@@ -889,6 +950,7 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+d10x$Sex[which(d10x$individual%in%c("C113","C115"))]<-"M"
 ##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
 # This is log(TP10K+1)
 d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
@@ -927,12 +989,13 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+d10x$Sex[which(d10x$individual%in%c("C113","C115"))]<-"M"
 ##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
 # This is log(TP10K+1)
 d10x <- NormalizeData(d10x,scale.factor = 10000, normalization.method = "LogNormalize")
 
 d10x.combined_myeloid<-subset(d10x, subset = CellType_refined %in% c("Mono-Mac","Macrophage\n(MHCII high)","KC Like","CDC1","Cycling Myeloid","Myeloid Erythrocytes\n(phagocytosis)"))
-
+d10x.combined_myeloid_healthy<-subset(d10x.combined_myeloid, subset = Treatment == "Healthy")
 
 
 
@@ -965,14 +1028,14 @@ sig_de_age_MHCII<-read.csv(file=here("data","differential_age_MHCII.csv"))
 sig_de_age_MHCII$age_condition<-"Adult\nHealthy"
 sig_de_age_MHCII$CellType_refined<-"Macrophage\n(MHCII high)"
 
-de<-rbind(sig_de_IFALD_RR, sig_de_IFALD_KC, sig_de_IFALD_MHCII, sig_de_age_RR, sig_de_age_KC, sig_de_age_MHCII)
+de<-rbind(sig_de_age_RR, sig_de_age_KC, sig_de_age_MHCII)
 colnames(de)[1]<-"variable"
 de$label<-"*"
 
 
-myeloid_age_heat<-plot_heat_map(d10x.combined_myeloid,c(kc_age), 
+myeloid_age_heat<-plot_heat_map(d10x.combined_myeloid_healthy,c(kc_age), 
                                 c("KC Like","Macrophage\n(MHCII high)","Mono-Mac"),T)
-save_plts(myeloid_age_heat, "Myeloid_age_zonated", w=7,h=2.5)
+save_plts(myeloid_age_heat, "Myeloid_age_zonated", w=6,h=2.5)
 
 
 

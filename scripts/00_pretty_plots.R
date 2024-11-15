@@ -39,7 +39,7 @@ fillscale_age <- scale_fill_manual(name="Age\nGroup",
 colscale_age <- scale_color_manual(name="Age\nGroup",
                                          values = myColors_age, drop = T, limits=force)
 
-myColors_agecondition <- c("#D64A56","cornflowerblue","#374eb8")
+myColors_agecondition <- c("#D64A56","cornflowerblue","#B4EB65")
 color_possibilities_agecondition<-c( "Adult Healthy","Ped Healthy","Ped IFALD")
 names(myColors_agecondition) <- color_possibilities_agecondition
 fillscale_agecondition <- scale_fill_manual(name="Age\nGroup",

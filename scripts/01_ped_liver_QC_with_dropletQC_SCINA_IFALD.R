@@ -1364,6 +1364,20 @@ save_plts(entropy_chem, "IFALD_entropy_chemistry_allclusters", w=15,h=10)
 entropy_Treatment<-entropy_plt(plt_entropy_treatment, "age_condition", d10x.combined)
 save_plts(entropy_Treatment, "IFALD_entropy_Treatment_allclusters", w=15,h=10)
 
+
+### Save bars seperately
+save_plts(plot_grid(entropy_plt_bar_only(plt_entropy_treatment, "age_condition", d10x.combined),
+          entropy_plt_bar_only(plt_entropy_chem, "chemistry", d10x.combined),
+          entropy_plt_bar_only(plt_entropy_individual, "individual", d10x.combined), ncol=1, align="v", axis="lr"), 
+          "Entropy_baronly_allclusters", w=15,h=15)
+
+save_plts(plot_grid(DimPlot(d10x.combined, pt.size=1, label=T) + theme(legend.position = "none") +ggtitle(""),
+                    DimPlot(d10x.combined, group.by = "age_condition",pt.size=1, shuffle=T) + theme(legend.position = "none") +ggtitle("")+colscale_agecondition,
+                    DimPlot(d10x.combined, group.by = "chemistry",pt.size=1, shuffle=T) + theme(legend.position = "none") +ggtitle("")+scale_color_manual(values=sequential_hcl(length(unique(d10x.combined@meta.data[,"chemistry"])), "Batlow")),
+                    DimPlot(d10x.combined, group.by = "individual",pt.size=1, shuffle=T) + theme(legend.position = "none") +ggtitle("")+scale_color_manual(values=sequential_hcl(length(unique(d10x.combined@meta.data[,"individual"])), "Batlow")),
+                    ncol=2, align="vh", axis="lr"), "Entropy_umaponly_allclusters", w=15,h=15)
+
+
 #############
 ## Cell type count table
 #############
@@ -1398,7 +1412,67 @@ cell_label<-d10x.combined@meta.data
 save(cell_label, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"IFALD_adult_ped_cellRefined_withDropletQC.rds", sep=""))
 
 
+#################
+## Healthy only
+#################
 
+d10x.combined_healthy<-subset(d10x.combined, subset = Treatment %in% c("Healthy"))
+rm(d10x.combined)
+gc()
+d10x.combined_healthy <- RunPCA(d10x.combined_healthy, npcs = 30, verbose = FALSE)
+d10x.combined_healthy <- RunUMAP(d10x.combined_healthy, reduction = "pca", dims = 1:30)
+
+
+save(d10x.combined_healthy, file=paste(here("../../../projects/macparland/RE/PediatricAdult/processed_data/"),"IFALD_adult_ped_integrated_healthy_only.rds", sep=""))
+
+
+
+
+
+load("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/IFALD_adult_ped_integrated_healthy_only.rds")
+
+
+fancyUMAP_all<-fanciest_UMAP(d10x.combined_healthy,NA,F)
+save_plts(fancyUMAP_all, "Healthy_refined_cellType_umpa_fancy", w=7,h=5)
+
+fancyUMAP_all_split<-fanciest_UMAP(d10x.combined_healthy,NA,T)
+save_plts(fancyUMAP_all_split, "Healthy_refined_cellType_umpa_fancy_split", w=12,h=8)
+
+
+
+## colored by age_condition
+umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_healthy, reduction = "umap"))#
+umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
+meta_myeloid<-d10x.combined_healthy@meta.data
+meta_myeloid$cell<-rownames(meta_myeloid)
+plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
+
+len_x_bar<-((range(plt_myeloid$UMAP_1))[2]-(range(plt_myeloid$UMAP_1))[1])/10
+len_y_bar<-((range(plt_myeloid$UMAP_2))[2]-(range(plt_myeloid$UMAP_2))[1])/10
+arr <- list(x = min(plt_myeloid$UMAP_1)-2, y = min(plt_myeloid$UMAP_2)-2, x_len = len_x_bar, y_len = len_y_bar)
+
+forlegned_plot<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
+  geom_point(aes(fill=age_condition),size=2, shape=21)+xlab("UMAP 1")+ylab("UMAP 2")+
+  fillscale_agecondition+theme_bw()+
+  theme(legend.text = element_text(size=5),
+        legend.title = element_text(size=6))
+nice_legend<-get_leg(forlegned_plot)
+
+fanciest_UMAP<-ggplot(plt_myeloid[sample(nrow(plt_myeloid)),], aes(UMAP_1,UMAP_2))+
+  geom_point(size = 0.06, colour= "black", stroke = 1)+
+  geom_point(aes(color=age_condition),size=0.05)+xlab("UMAP 1")+ylab("UMAP 2")+
+  colscale_agecondition+
+  annotate("segment", 
+           x = arr$x, xend = arr$x + c(arr$x_len, 0), 
+           y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
+           arrow = arrow(type = "closed", length = unit(2, 'pt'))) +
+  theme_void()+theme(plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
+                     axis.title.x = element_text(size=5,hjust = 0.05),
+                     axis.title.y = element_text(size=5,hjust = 0.05,angle = 90))+
+  annotate("text",x = min(plt_myeloid$UMAP_1)+(0.95*len_x_bar)-1, y = min(plt_myeloid$UMAP_2)+(0.5*len_y_bar)-2, label=paste0("n = ",comma(ncol(d10x.combined_healthy))), size=2)
+
+save_plts(fanciest_UMAP, "Healthy_refined_cellType_umpa_fancy_colouredbyage", w=6,h=5)
+save_plts(nice_legend, "Healthy_refined_cellType_umpa_fancy_colouredbyage_legend", w=2,h=2)
 
 
 

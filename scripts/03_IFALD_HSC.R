@@ -52,8 +52,36 @@ save(d10x.combined_hsc, file=here("data/HSC_integrated.RData"))
 
 
 table(d10x.combined_hsc@meta.data$CellType_rough, d10x.combined_hsc$age_condition)
+table(d10x.combined_hsc@meta.data$CellType_rough)
 #Adult IFALD 70% Adult/IFLAD
 #Healthy Ped 92% healthy ped
+
+count_plt<-as.data.frame(table(d10x.combined_hsc@meta.data$CellType_rough, d10x.combined_hsc$age_condition))
+ggplot(count_plt, aes(fill=Var2, y=Freq, x=Var1)) + 
+  geom_bar(position="stack", stat="identity")
+
+count_plt_percentage <- count_plt %>%
+  group_by(Var1, Var2) %>%
+  summarise(count = sum(Freq), .groups = 'drop') %>%
+  group_by(Var1) %>%
+  mutate(total_count = sum(count),
+         percentage = (count / total_count) * 100) %>%
+  ungroup()
+
+count_percent<-ggplot(count_plt_percentage[which(count_plt_percentage$Var1!="Outlier HSC"),], aes(Var1,percentage))+
+  geom_bar(aes(fill=Var2),stat="identity", color="black")+
+  fillscale_agecondition+theme_bw()+
+  xlab("")+ylab("Percent of Cells")+guides(fill=guide_legend(ncol=3))+coord_flip()+
+  theme(legend.position="none")+scale_x_discrete(labels= c("HSC Population 1","HSC Population 2"))+
+  theme(
+    axis.text = element_text(size=12),
+    strip.text = element_text(size=15),
+    axis.title.y = element_text(size=15))
+count_percent
+save_plts(count_percent, "HSC_bar_plot", w=4,h=1)
+
+
+
 
 
 fancy_HSC<-fanciest_UMAP(d10x.combined_hsc, NA,F)
@@ -82,7 +110,7 @@ forlegned_plot<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
         legend.title = element_text(size=6))
 nice_legend<-get_leg(forlegned_plot)
 
-fanciest_UMAP<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
+fanciest_UMAP<-ggplot(plt_myeloid[sample(nrow(plt_myeloid)),], aes(UMAP_1,UMAP_2))+
   geom_point(size = 0.06, colour= "black", stroke = 1)+
   geom_point(aes(color=age_condition),size=0.05)+xlab("UMAP 1")+ylab("UMAP 2")+
   colscale_agecondition+
@@ -96,6 +124,8 @@ fanciest_UMAP<-ggplot(plt_myeloid, aes(UMAP_1,UMAP_2))+
                      legend.position = "none")+
   annotate("text",x = min(plt_myeloid$UMAP_1)+(0.95*len_x_bar)-1, y = min(plt_myeloid$UMAP_2)+(0.5*len_y_bar)-2, label=paste0("n = ",comma(ncol(d10x.combined_hsc))), size=2)
 save_plts(plot_grid(fanciest_UMAP,nice_legend, rel_widths = c(5,2)), "Healthy_and_IFALD_HSC_UMAP", w=3, h=2)
+
+save_plts(plot_grid(fanciest_UMAP,nice_legend, rel_widths = c(5,2)), "Healthy_and_IFALD_HSC_UMAP_bigger", w=10, h=8)
 
 
 ##############
@@ -113,6 +143,8 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+d10x$Sex[which(d10x$individual%in%c("C113","C115"))]<-"M"
+
 
 ##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
 # This is log(TP10K+1)
@@ -308,6 +340,8 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+d10x$Sex[which(d10x$individual%in%c("C113","C115"))]<-"M"
+
 
 ##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
 # This is log(TP10K+1)
@@ -352,6 +386,8 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+d10x$Sex[which(d10x$individual%in%c("C113","C115"))]<-"M"
+
 
 ##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
 # This is log(TP10K+1)

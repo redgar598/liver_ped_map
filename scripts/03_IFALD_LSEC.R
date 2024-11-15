@@ -69,6 +69,8 @@ cell_label<-cell_label[match(colnames(d10x), cell_label$index),]
 identical(colnames(d10x), cell_label$index)
 
 d10x <- AddMetaData(d10x, metadata = cell_label)
+d10x$Sex[which(d10x$individual%in%c("C113","C115"))]<-"M"
+
 
 ##LogNormalize: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor. This is then natural-log transformed using log1p.
 # This is log(TP10K+1)

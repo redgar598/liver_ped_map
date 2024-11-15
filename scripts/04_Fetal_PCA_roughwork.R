@@ -219,7 +219,7 @@ PC19_table <- ggdraw() +  draw_plot( plot = PC19_table, x = 0, y = 0, width = 1,
 PC19_title <- ggdraw() +draw_label("PC19 Top Genes", fontface='bold')
 
 PC2_table<-plot_grid(PC2_title, PC2_table, ncol=1, rel_heights=c(0.1, 1)) # rel_heights values control title margins
-PC19_table<-plot_grid(PC20_title, PC19_table, ncol=1, rel_heights=c(0.1, 1)) # rel_heights values control title margins
+PC19_table<-plot_grid(PC19_title, PC19_table, ncol=1, rel_heights=c(0.1, 1)) # rel_heights values control title margins
 PC2_table
 PC19_table
   
@@ -265,6 +265,63 @@ gene_tables<-plot_grid(PC2_table, PC19_table, ncol=2)
 fetal_ped<-plot_grid(plot_grid(scatters,gene_tables, ncol=2, rel_widths = c(2,1)),genes, gsea_PC2+theme(legend.position = "none"),nrow=3, rel_heights = c(2,1.2,1.2))
 
 save_fetal_plts(fetal_ped, "fetal_ped_varimax_PCA", w=9,h=12)
+
+##########
+## less points for high res pub
+##########
+
+plt_varimax_meta_mini<-rbind(plt_varimax_meta[order(plt_varimax_meta$X2),][1:10,],
+                             plt_varimax_meta[order(plt_varimax_meta$X19),][1:10,],
+                             plt_varimax_meta[rev(order(plt_varimax_meta$X2)),][1:10,],
+                             plt_varimax_meta[rev(order(plt_varimax_meta$X19)),][1:10,])
+
+pca_plt_mini<-ggplot()+
+  geom_point(aes(X2, X19, color=age_condition),plt_varimax_meta_mini,size=0.75)+
+  colscale_agecondition_fetal+xlim(-15,3.5)+ylim(-9,8.5)+
+  theme_bw()+xlab("Varimax PC2")+ylab("Varimax PC20")+
+  theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))+
+  guides(colour = guide_legend(override.aes = list(size=5)))
+scatters_mini<-plot_grid(ridge_plt_top, get_leg(pca_plt), pca_plt_mini+theme(legend.position = "none"), ridge_plt, align="hv", axis="lrtb", rel_widths = c(2,1), rel_heights = c(1,2))
+
+varimax_gene_plot_mini<-function(gene, percentile){
+  plt_varimax_meta$cell<-rownames(plt_varimax_meta)
+  DefaultAssay(d10x.combined_KC)<-"RNA"
+  gene_exp<-FetchData(d10x.combined_KC, vars=gene)
+  gene_exp$cell<-rownames(gene_exp)
+  plt_varimax_meta<-merge(plt_varimax_meta, gene_exp, by='cell')
+  
+  exp_limit<-quantile(plt_varimax_meta[, which(colnames(plt_varimax_meta)==gene)], percentile)
+  plt_varimax_meta$gene_exp_limited<-NA
+  over_limit<-which(plt_varimax_meta[, which(colnames(plt_varimax_meta)==gene)]>exp_limit)
+  plt_varimax_meta$gene_exp_limited[over_limit]<-plt_varimax_meta[over_limit, which(colnames(plt_varimax_meta)==gene)]
+  plt_varimax_meta<-plt_varimax_meta[rev(order(plt_varimax_meta$gene_exp_limited)),]
+  
+  plt_varimax_meta<-rbind(plt_varimax_meta[which(is.na(plt_varimax_meta$gene_exp_limited)),],
+                          plt_varimax_meta[which(!(is.na(plt_varimax_meta$gene_exp_limited))),][(order(plt_varimax_meta[which(!(is.na(plt_varimax_meta$gene_exp_limited))),]$gene_exp_limited)),])
+  
+  
+  order_df<-order(plt_varimax_meta[,which(colnames(plt_varimax_meta)==gene)])
+  order_df2<-order(plt_varimax_meta[,which(colnames(plt_varimax_meta)==gene)])
+  
+  plt_varimax_meta_mini<-rbind(plt_varimax_meta[order_df,][1:10,],
+                               plt_varimax_meta[rev(order_df),][1:10,],
+                               plt_varimax_meta[order(plt_varimax_meta$X2),][1:10,],
+                               plt_varimax_meta[order(plt_varimax_meta$X19),][1:10,],
+                               plt_varimax_meta[rev(order(plt_varimax_meta$X2)),][1:10,],
+                               plt_varimax_meta[rev(order(plt_varimax_meta$X19)),][1:10,])
+
+  ggplot(plt_varimax_meta_mini, aes(X2,X19))+
+    geom_point(aes(color=gene_exp_limited),size=0.75)+xlab("Varimax PC2")+ylab("Varimax PC20")+
+    scale_color_continuous_sequential(palette = "Blues 3", rev=T, 
+                                      name=paste(gene, "\nExpression)"),na.value = "grey80")+
+    theme_bw()}
+
+genes_mini<-plot_grid(varimax_gene_plot_mini("IL1B", 0.8), varimax_gene_plot_mini("HBA1", 0.8))
+
+
+fetal_ped_mini<-plot_grid(plot_grid(scatters_mini,gene_tables, ncol=2, rel_widths = c(2,1)),genes_mini, gsea_PC2+theme(legend.position = "none"),nrow=3, rel_heights = c(2,1.2,1.2))
+
+save_fetal_plts(fetal_ped_mini, "fetal_ped_varimax_PCA_lesspoints", w=9,h=12)
 
 
 ###################

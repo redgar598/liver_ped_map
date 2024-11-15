@@ -15,11 +15,11 @@ source("scripts/00_pretty_plots.R")
 source("scripts/00_fanciest_UMAP.R")
 source("scripts/00_plot_gene_exp.R")
 
-load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_integrated_healthy_only.rds"))
 
-umap_mat<-as.data.frame(Embeddings(object = d10x.combined, reduction = "umap"))#
+umap_mat<-as.data.frame(Embeddings(object = d10x.combined_healthy, reduction = "umap"))#
 umap_mat$cell<-rownames(umap_mat)
-meta<-d10x.combined@meta.data
+meta<-d10x.combined_healthy@meta.data
 meta$cell<-rownames(meta)
 plt<-merge(meta, umap_mat, by="cell")
 
@@ -192,13 +192,13 @@ save_plts(interacting_UMAP("CCL3_CCR1"), "CCL3_CCR1_cpdb_pedhealthy", w=5,h=5)
 ## Color by receptor ligand expression
 ###############
 #### with network as well as coloured by expression but not a blend
-save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CCR5","CCL4"),"CCL4_CCR5",0.9), "UMAP_CCL4_CCR5_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CCR5","CCL3"),"CCL3_CCR5",0.9), "UMAP_CCL3_CCR5_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("CCR1","CCL3"),"CCL3_CCR1",0.9), "UMAP_CCL3_CCR1_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined_healthy,c("CCR5","CCL4"),"CCL4_CCR5",0.9), "UMAP_CCL4_CCR5_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined_healthy,c("CCR5","CCL3"),"CCL3_CCR5",0.9), "UMAP_CCL3_CCR5_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined_healthy,c("CCR1","CCL3"),"CCL3_CCR1",0.9), "UMAP_CCL3_CCR1_map_celltype_network", w=9,h=6)
 
-save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("IL1B","IL1R2"),"IL1B_IL1_receptor_inhibitor",0.9), "UMAP_IL1B_IL1_receptor_inhibitor_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("IL1B","IL1RAP"),"IL1B_IL1_receptor_inhibitor",0.9), "UMAP_IL1B_IL1_receptor_inhibitorAP_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("IL1B","IL1R1"),"IL1B_IL1_receptor",0.9), "UMAP_IL1B_IL1_receptor_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined_healthy,c("IL1B","IL1R2"),"IL1B_IL1_receptor_inhibitor",0.9), "UMAP_IL1B_IL1_receptor_inhibitor_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined_healthy,c("IL1B","IL1RAP"),"IL1B_IL1_receptor_inhibitor",0.9), "UMAP_IL1B_IL1_receptor_inhibitorAP_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined_healthy,c("IL1B","IL1R1"),"IL1B_IL1_receptor",0.9), "UMAP_IL1B_IL1_receptor_map_celltype_network", w=9,h=6)
 
-save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("APOE","TREM2"),"APOE_TREM2_receptor",0.9), "UMAP_APOE_TREM2_receptor_map_celltype_network", w=9,h=6)
-save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined,c("THBS1","CD36"),"THBS1_CD36",0.9), "UMAP_THBS1_CD36_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined_healthy,c("APOE","TREM2"),"APOE_TREM2_receptor",0.9), "UMAP_APOE_TREM2_receptor_map_celltype_network", w=9,h=6)
+save_plts(plot_gene_UMAP_2gene_network_notblend(d10x.combined_healthy,c("THBS1","CD36"),"THBS1_CD36",0.9), "UMAP_THBS1_CD36_map_celltype_network", w=9,h=6)

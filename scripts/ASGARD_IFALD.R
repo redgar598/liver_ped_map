@@ -115,13 +115,25 @@ save(Gene.list, file="/media/redgar/Seagate Portable Drive/ped_map_update_feb202
 
 
 
+
+
+
+
+
+
+
+##############
+## load DEG
+##############
+load("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/DGE_for_ASGARD.RData")
+
 #############
 ## Mono-drug repurposing for every cell type
 #############
 #Load tissue specific drug reference produced by PrepareReference function as mentioned above. Please select proper tissue accroding to the disease.
-my_gene_info<-read.table(file="DrugReference/liver_gene_info.txt",sep="\t",header = T,quote = "")
-my_drug_info<-read.table(file="DrugReference/liver_drug_info.txt",sep="\t",header = T,quote = "")
-drug.ref.profiles = GetDrugRef(drug.response.path = 'DrugReference/liver_rankMatrix.txt',
+my_gene_info<-read.table(file="/media/redgar/Seagate Portable Drive/L1000/DrugReference/liver_gene_info.txt",sep="\t",header = T,quote = "")
+my_drug_info<-read.table(file="/media/redgar/Seagate Portable Drive/L1000/DrugReference/liver_drug_info.txt",sep="\t",header = T,quote = "")
+drug.ref.profiles = GetDrugRef(drug.response.path = '/media/redgar/Seagate Portable Drive/L1000/DrugReference/liver_rankMatrix.txt',
                                probe.to.genes = my_gene_info, 
                                drug.info = my_drug_info)
 
@@ -133,17 +145,41 @@ Drug.ident.res = GetDrug(gene.data = Gene.list,
                          drug.type = "FDA")
 
 
+head(Drug.ident.res[[which(names(Drug.ident.res)=="HSC")]])
+head(Drug.ident.res[[which(names(Drug.ident.res)=="KC Like")]])
+
+do.call(rbind, lapply(1:19, function(x){
+  sig_drug<-Drug.ident.res[[x]][which(Drug.ident.res[[x]]$FDR<0.1),]
+  if(nrow(sig_drug)>0){
+    sig_drug$celltype<-names(Drug.ident.res)[x]
+    sig_drug}
+}))
+
+
 ####################
 #Select mono-drug therapies
 ####################
+
+cell_metadata <- d10x_raw_IFALD_PED@meta.data
+cell_metadata$cluster <- d10x_raw_IFALD_PED@meta.data$CellType_refined
+cell_metadata$sample<-cell_metadata$individual
+
+Drug.score <- DrugScore(cell_metadata, cluster_degs = Gene.list, 
+                        cluster_drugs = Drug.ident.res, tissue = "liver", 
+                        case = c("IFALD030","IFALD073","IFALD006"), 
+                        gse92742_gctx_path = "/media/redgar/Seagate Portable Drive/L1000/GSE92742_Broad_LINCS_Level5_COMPZ.MODZ_n473647x12328.gctx", 
+                        gse70138_gctx_path = "/media/redgar/Seagate Portable Drive/L1000/GSE70138_Broad_LINCS_Level5_COMPZ_n118050x12328_2017-03-06.gctx")
+
+
 Final.drugs<-subset(Drug.score,Drug.therapeutic.score>quantile(Drug.score$Drug.therapeutic.score, 0.99,na.rm=T) & FDR <0.05)
 
 
 #Select drug for individual clusters
-Final.drugs<-TopDrug(SC.integrated=SC.integrated,
+d10x_raw_IFALD_PED@meta.data$cluster<-d10x_raw_IFALD_PED@meta.data$CellType_refined
+d10x_raw_IFALD_PED@meta.data$sample<-d10x_raw_IFALD_PED@meta.data$individual
+
+Final.drugs<-TopDrug(SC.integrated=d10x_raw_IFALD_PED,
                      Drug.data=Drug.ident.res,
                      Drug.FDR=0.1,
                      FDA.drug.only=TRUE,
-                     Case=Case.samples,
-                     DrugScore=FALSE
-)
+                     Case=c("IFALD030","IFALD073","IFALD006"))

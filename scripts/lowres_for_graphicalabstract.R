@@ -18,13 +18,13 @@ source("scripts/00_plot_gene_exp.R")
 
 
 
-load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
+load("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/IFALD_adult_ped_integrated_healthy_only.rds")
 
 
 
-  umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined, reduction = "umap"))#
+  umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_healthy, reduction = "umap"))#
   umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
-  meta_myeloid<-d10x.combined@meta.data
+  meta_myeloid<-d10x.combined_healthy@meta.data
   meta_myeloid$cell<-rownames(meta_myeloid)
   plt_myeloid<-merge(meta_myeloid, umap_mat_myeloid, by="cell")
   
@@ -44,7 +44,7 @@ load(here("/media/redgar/Seagate Portable Drive/ped_map_update_feb2024/","IFALD_
 
 
   
-save_plts(fanciest_UMAP, "IFALD_refined_cellType_umpa_fancy_lowres", w=2,h=2)
+save_plts(fanciest_UMAP, "Healthy_only_refined_cellType_umpa_fancy_lowres", w=2,h=2)
 
 
 

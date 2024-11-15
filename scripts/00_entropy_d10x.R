@@ -50,14 +50,54 @@ entropy_plt<-function(plt_entropy, covariate, d10x){
   entrophy_label<-plt_entropy[!duplicated(plt_entropy[,c("seurat_clusters",  "entropy")]), c("seurat_clusters",  "entropy")]
   entrophy_label<-merge(entrophy_label, max_count, by="seurat_clusters")
   
-  bar_individual<-ggplot() + 
-    geom_bar(aes(fill=rlang::parse_expr(covariate) %>% eval, y=n, x=seurat_clusters),plt_entropy, position="stack", stat="identity", color="black")+
-    theme_bw()+th+ylab("Cell Count")+xlab("Seurat Cluster")+
-    geom_text(aes(label=round(entropy,2), y=(total+(0.1*max(total))), x=seurat_clusters), entrophy_label)+
-    scale_fill_manual(values=sequential_hcl(length(unique(d10x@meta.data[,covariate])), "Batlow"), name=covariate)
-
-  individal_UMAP<-DimPlot(d10x, group.by = covariate,pt.size=1) + theme(legend.position = "none") +ggtitle("")+
-    scale_color_manual(values=sequential_hcl(length(unique(d10x@meta.data[,covariate])), "Batlow"))
-  cluster_UMAP<-DimPlot(d10x, pt.size=1, label=T) + theme(legend.position = "none") +ggtitle("")
+  if(covariate=="age_condition"){
+    bar_individual<-ggplot() + 
+      geom_bar(aes(fill=rlang::parse_expr(covariate) %>% eval, y=n, x=seurat_clusters),plt_entropy, position="stack", stat="identity", color="black")+
+      theme_bw()+th+ylab("Cell Count")+xlab("Seurat Cluster")+
+      geom_text(aes(label=round(entropy,2), y=(total+(0.1*max(total))), x=seurat_clusters), entrophy_label)+fillscale_agecondition
+    
+    individal_UMAP<-DimPlot(d10x, group.by = covariate,pt.size=1, shuffle=T) + theme(legend.position = "none") +ggtitle("")+
+      colscale_agecondition
+    cluster_UMAP<-DimPlot(d10x, pt.size=1, label=T) + theme(legend.position = "none") +ggtitle("")
+    
+    plot_grid(plot_grid(cluster_UMAP, individal_UMAP), bar_individual, ncol=1, rel_heights = c(1.5,1))
+  }else{
+    bar_individual<-ggplot() + 
+      geom_bar(aes(fill=rlang::parse_expr(covariate) %>% eval, y=n, x=seurat_clusters),plt_entropy, position="stack", stat="identity", color="black")+
+      theme_bw()+th+ylab("Cell Count")+xlab("Seurat Cluster")+
+      geom_text(aes(label=round(entropy,2), y=(total+(0.1*max(total))), x=seurat_clusters), entrophy_label)+
+      scale_fill_manual(values=sequential_hcl(length(unique(d10x@meta.data[,covariate])), "Batlow"), name=covariate)
+    
+    individal_UMAP<-DimPlot(d10x, group.by = covariate,pt.size=1, shuffle=T) + theme(legend.position = "none") +ggtitle("")+
+      scale_color_manual(values=sequential_hcl(length(unique(d10x@meta.data[,covariate])), "Batlow"))
+    cluster_UMAP<-DimPlot(d10x, pt.size=1, label=T) + theme(legend.position = "none") +ggtitle("")
+    
+    plot_grid(plot_grid(cluster_UMAP, individal_UMAP), bar_individual, ncol=1, rel_heights = c(1.5,1))
+  }
   
-  plot_grid(plot_grid(cluster_UMAP, individal_UMAP), bar_individual, ncol=1, rel_heights = c(1.5,1))}
+  }
+
+
+
+entropy_plt_bar_only<-function(plt_entropy, covariate, d10x){
+  max_count<-as.data.frame(plt_entropy %>% 
+                             group_by(seurat_clusters) %>% 
+                             summarise(total = sum(n)))
+  
+  entrophy_label<-plt_entropy[!duplicated(plt_entropy[,c("seurat_clusters",  "entropy")]), c("seurat_clusters",  "entropy")]
+  entrophy_label<-merge(entrophy_label, max_count, by="seurat_clusters")
+  
+  if(covariate=="age_condition"){
+    ggplot() + 
+      geom_bar(aes(fill=rlang::parse_expr(covariate) %>% eval, y=n, x=seurat_clusters),plt_entropy, position="stack", stat="identity", color="black")+
+      theme_bw()+th+ylab("Cell Count")+xlab("Seurat Cluster")+
+      geom_text(aes(label=round(entropy,2), y=(total+(0.1*max(total))), x=seurat_clusters), entrophy_label)+fillscale_agecondition
+  }else{
+    ggplot() + 
+      geom_bar(aes(fill=rlang::parse_expr(covariate) %>% eval, y=n, x=seurat_clusters),plt_entropy, position="stack", stat="identity", color="black")+
+      theme_bw()+th+ylab("Cell Count")+xlab("Seurat Cluster")+
+      geom_text(aes(label=round(entropy,2), y=(total+(0.1*max(total))), x=seurat_clusters), entrophy_label)+
+      scale_fill_manual(values=sequential_hcl(length(unique(d10x@meta.data[,covariate])), "Batlow"), name=covariate)
+  }
+  
+}
