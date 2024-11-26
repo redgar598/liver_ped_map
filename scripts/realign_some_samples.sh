@@ -8,7 +8,7 @@
 #SBATCH --output=%x.out
 
 
-#module load cellranger/3.1.0
+module load cellranger/3.1.0
 
 
 
@@ -108,6 +108,51 @@
 #     --transcriptome=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/reference/GRCh38
 
 
-module load R/4.2.1
+# module load R/4.2.1
 
-Rscript scripts/compare_after_realign.R
+# Rscript scripts/compare_after_realign.R
+
+
+##########
+## bamtofastq for all samples
+##########
+
+##########
+## remove identifying sample names
+##########
+
+
+# cd /cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/MacParland_Diana__C93_Frozen_Liver_220919_3pr_V3_1/outs
+# samtools view -H possorted_genome_bam.bam | grep '@RG'
+
+
+# samtools view -H possorted_genome_bam.bam > header.sam
+# nano header.sam
+# #@RG    ID:group1    SM:new_sample_name    ...
+
+# samtools reheader header.sam possorted_genome_bam.bam > updated.bam
+
+# samtools view -H updated.bam | grep '@RG'
+# rm header.sam
+
+
+# MacParland_Diana__C93_Frozen_Liver_220919_3pr_V3_1  
+# MacParland_Diana__C96_Frozen_Liver_220919_3pr_V3_1
+# MacParland_Sonya__SingleCell_iFALD073_Biopsy_25Jan21_3pr_v3
+# MacParland_Diana__SingleCell_C82_16Sept21    
+# MacParland_Sonya__SingleCell_iFALD073_PBMC_25Jan21_3pr_v3
+# MacParland_Sonya__SingleCell_iFALD073_Biopsy_25Jan21_3pr_v3
+# X210026__SingleCell_C88_14Oct21_3pr_V3_1
+
+
+## WILL NEED TO REALIGN THESE SO THE HTML HAS THE NEW SAMPLE NAME
+
+cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/MacParland_Diana__C93_Frozen_Liver_220919_3pr_V3_1/outs/updated.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/C93
+
+# cellranger count --id=C93_realign \
+#     --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C93/MacParland_Diana__C93_Frozen_Liver_3pr_V3_1 \
+#     --sample=bamtofastq \
+#     --chemistry=SC3Pv2 \
+#     --transcriptome=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/reference/GRCh38
+
+           

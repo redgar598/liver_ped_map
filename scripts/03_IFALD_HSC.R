@@ -53,8 +53,11 @@ save(d10x.combined_hsc, file=here("data/HSC_integrated.RData"))
 
 table(d10x.combined_hsc@meta.data$CellType_rough, d10x.combined_hsc$age_condition)
 table(d10x.combined_hsc@meta.data$CellType_rough)
-#Adult IFALD 70% Adult/IFLAD
+#Adult IFALD 70% Adult/IFLAD ()
 #Healthy Ped 92% healthy ped
+
+table(d10x.combined_hsc@meta.data$age_condition)
+
 
 count_plt<-as.data.frame(table(d10x.combined_hsc@meta.data$CellType_rough, d10x.combined_hsc$age_condition))
 ggplot(count_plt, aes(fill=Var2, y=Freq, x=Var1)) + 
@@ -91,8 +94,9 @@ save_plts(fancy_HSC, "IFALD_HSC_UMAP", w=4,h=3)
 fancy_HSC<-fanciest_UMAP(d10x.combined_hsc, NA,T)
 save_plts(fancy_HSC, "IFALD_HSC_UMAP_split", w=8,h=6)
 
-
+##############
 ## colored by age_condition
+#############
 umap_mat_myeloid<-as.data.frame(Embeddings(object = d10x.combined_hsc, reduction = "umap"))#
 umap_mat_myeloid$cell<-rownames(umap_mat_myeloid)
 meta_myeloid<-d10x.combined_hsc@meta.data
@@ -127,6 +131,26 @@ save_plts(plot_grid(fanciest_UMAP,nice_legend, rel_widths = c(5,2)), "Healthy_an
 
 save_plts(plot_grid(fanciest_UMAP,nice_legend, rel_widths = c(5,2)), "Healthy_and_IFALD_HSC_UMAP_bigger", w=10, h=8)
 
+#### split by age_condtion
+cell_num_all<-as.data.frame(table(d10x.combined_hsc@meta.data$age_condition))
+
+fanciest_UMAP<-ggplot(plt_myeloid[sample(nrow(plt_myeloid)),], aes(UMAP_1,UMAP_2))+
+  geom_point(size = 0.06, colour= "black", stroke = 1)+
+  geom_point(aes(color=age_condition),size=0.05)+xlab("UMAP 1")+ylab("UMAP 2")+
+  colscale_agecondition+
+  annotate("segment", 
+           x = arr$x, xend = arr$x + c(arr$x_len, 0), 
+           y = arr$y, yend = arr$y + c(0, arr$y_len), size=0.25,color="black",
+           arrow = arrow(type = "closed", length = unit(2, 'pt'))) +
+  theme_void()+theme(plot.margin = margin(0.25,0.25,0.25,0.25, "cm"),
+                     axis.title.x = element_text(size=5,hjust = 0.05),
+                     axis.title.y = element_text(size=5,hjust = 0.05,angle = 90),
+                     legend.position = "none")+
+  geom_text(aes(x = (min(plt_myeloid$UMAP_1)+(1.5*len_x_bar))-2, y = (min(plt_myeloid$UMAP_2)+(0.5*len_y_bar))-2, label=paste0("n = ",comma(CellCount))), cell_num_all, size=2)+
+  facet_wrap(~age_condition)
+
+
+save_plts(fanciest_UMAP, "Healthy_and_IFALD_HSC_UMAP_split", w=6, h=2)
 
 ##############
 ## markers
