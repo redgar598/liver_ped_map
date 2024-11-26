@@ -138,7 +138,6 @@ module load cellranger/3.1.0
 
 # MacParland_Diana__C93_Frozen_Liver_220919_3pr_V3_1  
 # MacParland_Diana__C96_Frozen_Liver_220919_3pr_V3_1
-# MacParland_Sonya__SingleCell_iFALD073_Biopsy_25Jan21_3pr_v3
 # MacParland_Diana__SingleCell_C82_16Sept21    
 # MacParland_Sonya__SingleCell_iFALD073_PBMC_25Jan21_3pr_v3
 # MacParland_Sonya__SingleCell_iFALD073_Biopsy_25Jan21_3pr_v3
@@ -147,7 +146,7 @@ module load cellranger/3.1.0
 
 ## WILL NEED TO REALIGN THESE SO THE HTML HAS THE NEW SAMPLE NAME
 
-cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/MacParland_Diana__C93_Frozen_Liver_220919_3pr_V3_1/outs/updated.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/C93
+cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/MacParland_Diana__C93_Frozen_Liver_220919_3pr_V3_1/outs/possorted_genome_bam.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/C93
 
 # cellranger count --id=C93_realign \
 #     --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C93/MacParland_Diana__C93_Frozen_Liver_3pr_V3_1 \

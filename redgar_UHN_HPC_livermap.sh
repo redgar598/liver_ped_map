@@ -20,7 +20,7 @@ module load R/4.2.1
 
 
 ## see project directory
-salloc -c 1 -t 1:0:0 --mem 1G
+salloc -c 1 -t 3:0:0 --mem 1G
 cd /cluster/projects/macparland/RE
 
 module load R/4.2.1
