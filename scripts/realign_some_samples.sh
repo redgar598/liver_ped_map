@@ -123,17 +123,7 @@ module load cellranger/3.1.0
 
 
 # cd /cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/MacParland_Diana__C93_Frozen_Liver_220919_3pr_V3_1/outs
-# samtools view -H possorted_genome_bam.bam | grep '@RG'
 
-
-# samtools view -H possorted_genome_bam.bam > header.sam
-# nano header.sam
-# #@RG    ID:group1    SM:new_sample_name    ...
-
-# samtools reheader header.sam possorted_genome_bam.bam > updated.bam
-
-# samtools view -H updated.bam | grep '@RG'
-# rm header.sam
 
 
 # MacParland_Diana__C93_Frozen_Liver_220919_3pr_V3_1  
@@ -146,12 +136,12 @@ module load cellranger/3.1.0
 
 ## WILL NEED TO REALIGN THESE SO THE HTML HAS THE NEW SAMPLE NAME
 
-cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/MacParland_Diana__C93_Frozen_Liver_220919_3pr_V3_1/outs/possorted_genome_bam.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/C93
+#cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/MacParland_Diana__C93_Frozen_Liver_220919_3pr_V3_1/outs/possorted_genome_bam.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/C93
 
-# cellranger count --id=C93_realign \
-#     --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C93/MacParland_Diana__C93_Frozen_Liver_3pr_V3_1 \
-#     --sample=bamtofastq \
-#     --chemistry=SC3Pv2 \
-#     --transcriptome=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/reference/GRCh38
+cellranger count --id=C93_realign \
+    --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C93/MacParland_Diana__C93_Frozen_Liver_3pr_V3_1 \
+    --sample=bamtofastq \
+    --chemistry=SC3Pv3 \
+    --transcriptome=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/reference/GRCh38
 
            
