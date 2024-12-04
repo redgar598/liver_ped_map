@@ -139,7 +139,7 @@ module load cellranger/3.1.0
 #cellranger bamtofastq --nthreads=8 /cluster/projects/macparland/RE/PediatricAdult/ped_liver_map_raw/MacParland_Diana__C93_Frozen_Liver_220919_3pr_V3_1/outs/possorted_genome_bam.bam  /cluster/projects/macparland/RE/PediatricAdult/realign_samples/C93
 
 cellranger count --id=C93_realign \
-    --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C93/MacParland_Diana__C93_Frozen_Liver_3pr_V3_1 \
+    --fastqs=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/C93/MacParland_Diana__C93_Frozen_Liver_220919_3pr_V3_1_0_1_H2WK3DSX5 \
     --sample=bamtofastq \
     --chemistry=SC3Pv3 \
     --transcriptome=/cluster/projects/macparland/RE/PediatricAdult/realign_samples/reference/GRCh38
