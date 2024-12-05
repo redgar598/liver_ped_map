@@ -20,8 +20,8 @@ library(tiff)
 library(sp)
 
 
-source("scripts/00_pretty_plots.R")
-source("scripts/00_long_functions.R")
+source("xenium_scripts/00_pretty_plots.R")
+source("xenium_scripts/00_long_functions.R")
 
 ## the panel comes with cell type labels
 load(file=here("data/cell_type_labels_BIDCell.RData"))

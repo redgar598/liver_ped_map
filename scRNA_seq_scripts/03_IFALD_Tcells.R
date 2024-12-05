@@ -11,9 +11,9 @@ library(colorspace)
 library(cowplot)
 
 
-source("scripts/00_pretty_plots.R")
-source("scripts/00_fanciest_UMAP.R")
-source("scripts/00_plot_gene_exp.R")
+source("scRNA_seq_scripts/00_pretty_plots.R")
+source("scRNA_seq_scripts/00_fanciest_UMAP.R")
+source("scRNA_seq_scripts/00_plot_gene_exp.R")
 
 load(here("data","IFALD_adult_ped_integrated_refinedlabels_withDropletQC.rds"))
 
@@ -111,7 +111,7 @@ DefaultAssay(d10x.combined_tcell) <- "integrated"
 #########
 ## pathway adult/IFALD versus healthy ped
 #########
-source("scripts/00_GSEA_function.R")
+source("scRNA_seq_scripts/00_GSEA_function.R")
 GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
 
 de_4_0$gene<-rownames(de_4_0)

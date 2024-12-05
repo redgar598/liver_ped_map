@@ -10,10 +10,10 @@ library(gtools)
 library(colorspace)
 library(ggridges)
 
-source("scripts/00_pretty_plots.R")
-source("scripts/00_Heat_scree_plot_generic.R")
-source("scripts/00_fanciest_UMAP.R")
-source("scripts/varimax_delaram.R")
+source("scRNA_seq_scripts/00_pretty_plots.R")
+source("scRNA_seq_scripts/00_Heat_scree_plot_generic.R")
+source("scRNA_seq_scripts/00_fanciest_UMAP.R")
+source("scRNA_seq_scripts/varimax_delaram.R")
 
 
 ##############
@@ -172,7 +172,7 @@ suppressWarnings(heat_scree_plot(df[[2]], Importance, 2, 2))
 #############
 ## GSEA of top genes in PC2
 #############
-source("scripts/00_GSEA_function.R")
+source("scRNA_seq_scripts/00_GSEA_function.R")
 #http://download.baderlab.org/EM_Genesets/current_release/Human/symbol/
 GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
 

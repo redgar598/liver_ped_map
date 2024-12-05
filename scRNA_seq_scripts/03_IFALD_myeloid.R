@@ -12,10 +12,10 @@ library(cowplot)
 library(RColorBrewer)
 
 
-source("scripts/00_pretty_plots.R")
-source("scripts/00_fanciest_UMAP.R")
-source("scripts/00_plot_gene_exp.R")
-source("scripts/00_entropy_d10x.R")
+source("scRNA_seq_scripts/00_pretty_plots.R")
+source("scRNA_seq_scripts/00_fanciest_UMAP.R")
+source("scRNA_seq_scripts/00_plot_gene_exp.R")
+source("scRNA_seq_scripts/00_entropy_d10x.R")
 
 
 
@@ -199,7 +199,7 @@ sig_de_IFALD[which(sig_de_IFALD$avg_log2FC<0),]
 ###
 ## pathway adult/IFALD versus healthy ped
 ###
-source("scripts/00_GSEA_function.R")
+source("scRNA_seq_scripts/00_GSEA_function.R")
 #http://download.baderlab.org/EM_Genesets/current_release/Human/symbol/
 GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
 
@@ -322,7 +322,7 @@ sig_de_IFALD[which(sig_de_IFALD$avg_log2FC<0),]
 ###
 ## pathway adult/IFALD versus healthy ped
 ###
-source("scripts/00_GSEA_function.R")
+source("scRNA_seq_scripts/00_GSEA_function.R")
 GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
 
 ### Age
@@ -430,7 +430,7 @@ sig_de_IFALD[which(sig_de_IFALD$avg_log2FC<0),]
 ###
 ## pathway adult/IFALD versus healthy ped
 ###
-source("scripts/00_GSEA_function.R")
+source("scRNA_seq_scripts/00_GSEA_function.R")
 GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
 
 ### Age
@@ -598,7 +598,7 @@ write.csv(sig_de_IFALD_MHCII, file=here("data","differential_IFLAD_MHCII.csv"))
 
 
 ## pathway adult/IFALD versus healthy ped
-source("scripts/00_GSEA_function.R")
+source("scRNA_seq_scripts/00_GSEA_function.R")
 GO_file = here("data/Human_GOBP_AllPathways_with_GO_iea_October_26_2022_symbol.gmt")
 
 ### Age

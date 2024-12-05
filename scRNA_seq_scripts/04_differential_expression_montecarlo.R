@@ -22,7 +22,7 @@
 #' 
 #' options(stringsAsFactors = FALSE)
 #' 
-#' source("scripts/00_pretty_plots.R")
+#' source("scRNA_seq_scripts/00_pretty_plots.R")
 #' 
 #' 
 #' 
@@ -185,7 +185,7 @@ library(gtools)
 
 options(stringsAsFactors = FALSE)
 
-source("scripts/00_pretty_plots.R")
+source("scRNA_seq_scripts/00_pretty_plots.R")
 
 
 

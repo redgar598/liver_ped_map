@@ -16,9 +16,9 @@ library(SCINA)
 
 
 
-source("scripts/00_pretty_plots.R")
-source("scripts/00_entropy_d10x.R")
-source("scripts/00_fanciest_UMAP.R")
+source("scRNA_seq_scripts/00_pretty_plots.R")
+source("scRNA_seq_scripts/00_entropy_d10x.R")
+source("scRNA_seq_scripts/00_fanciest_UMAP.R")
 
 
 #' #cellranger_out_loc <- here("/media/redgar/Seagate Portable Drive/ped_liver_map_raw")

@@ -20,8 +20,8 @@ library(lme4)
 library(tiff)
 
 
-source("scripts/00_pretty_plots.R")
-source("scripts/00_long_functions.R")
+source("xenium_scripts/00_pretty_plots.R")
+source("xenium_scripts/00_long_functions.R")
 
 
 

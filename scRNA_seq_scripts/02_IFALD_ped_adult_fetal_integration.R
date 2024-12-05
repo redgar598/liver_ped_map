@@ -14,8 +14,8 @@ library(DropletQC)
 library(anndata)
 library(RColorBrewer)
 
-source("scripts/00_pretty_plots.R")
-source("scripts/00_entropy_d10x.R")
+source("scRNA_seq_scripts/00_pretty_plots.R")
+source("scRNA_seq_scripts/00_entropy_d10x.R")
 
 # #################
 # ## Load raw QC'ed data

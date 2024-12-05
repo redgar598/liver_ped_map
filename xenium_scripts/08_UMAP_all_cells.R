@@ -16,7 +16,7 @@ library(sp)
 library(scales)
 library(gridExtra)
 
-source("scripts/00_pretty_plots.R")
+source("xenium_scripts/00_pretty_plots.R")
 
 
 ## the panel comes with cell type labels

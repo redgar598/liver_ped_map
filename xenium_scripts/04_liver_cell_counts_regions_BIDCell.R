@@ -16,7 +16,7 @@ library(rgeos)
 library(scales)
 library(viridis)
 
-source("scripts/00_pretty_plots.R")
+source("xenium_scripts/00_pretty_plots.R")
 
 ## the panel comes with cell type labels
 load(file=here("data/cell_type_labels_BIDCell.RData"))

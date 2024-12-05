@@ -15,10 +15,10 @@ library(DropletQC)
 
 
 
-source("scripts/00_pretty_plots.R")
-source("scripts/00_entropy_d10x.R")
-source("scripts/00_plot_gene_exp.R")
-source("scripts/00_fanciest_UMAP.R")
+source("scRNA_seq_scripts/00_pretty_plots.R")
+source("scRNA_seq_scripts/00_entropy_d10x.R")
+source("scRNA_seq_scripts/00_plot_gene_exp.R")
+source("scRNA_seq_scripts/00_fanciest_UMAP.R")
 
 
 

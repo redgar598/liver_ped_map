@@ -13,8 +13,8 @@ library(cowplot)
 library(DropletQC)
 library(anndata)
 
-source("scripts/00_pretty_plots.R")
-source("scripts/00_entropy_d10x.R")
+source("scRNA_seq_scripts/00_pretty_plots.R")
+source("scRNA_seq_scripts/00_entropy_d10x.R")
 
 #' 
 #' #############

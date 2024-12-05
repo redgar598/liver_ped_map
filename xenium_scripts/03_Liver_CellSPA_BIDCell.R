@@ -33,9 +33,9 @@ theme_set(theme_bw())
 #Then for seurat
 #remotes::install_version("Matrix", version = "1.6-3")
 
-source(here("scripts/00_Cell_SPA_functions.R"))
-source(here("scripts/00_cellshape_metrics.R"))
-source("scripts/00_pretty_plots.R")
+source(here("xenium_scripts/00_Cell_SPA_functions.R"))
+source(here("xenium_scripts/00_cellshape_metrics.R"))
+source("xenium_scripts/00_pretty_plots.R")
 
 
 ## the panel comes with cell type labels

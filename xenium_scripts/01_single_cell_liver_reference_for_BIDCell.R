@@ -16,7 +16,7 @@ library(scales)
 library(gridExtra)
 #library(rhdf5)
 
-source("scripts/00_pretty_plots.R")
+source("xenium_scripts/00_pretty_plots.R")
 options(future.globals.maxSize= 8000 * 1024^2)
 
 
