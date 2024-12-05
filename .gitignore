@@ -8,3 +8,8 @@ figures
 old_figures
 SCINA.log
 manuscript_prep
+scripts/deidentifying.R
+data_uploading.sh
+realign_some_samples.sh
+redgar_UHN_HPC_livermap.sh
+Fetal_IFALD_exploratory_run.sh
