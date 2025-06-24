@@ -8,7 +8,7 @@ figures
 old_figures
 SCINA.log
 manuscript_prep
-scripts/deidentifying.R
+scRNA_seq_scripts/deidentifying.R
 data_uploading.sh
 realign_some_samples.sh
 redgar_UHN_HPC_livermap.sh
@@ -16,3 +16,10 @@ Fetal_IFALD_exploratory_run.sh
 data_uploading.sh
 redgar_UHN_HPC_livermap.sh
 exploratory_run.sh
+scripts/C70_debugging.R
+HCA_data_portal_upload.sh
+scRNA_seq_scripts/C70_debugging.R
+scRNA_seq_scripts/mixed model_differential.R
+scRNA_seq_scripts/plot_for_teaching.R
+scRNA_seq_scripts/testing_flashMM.R
+scRNA_seq_scripts/venn_MAST_v_flashMM.R
