@@ -6,6 +6,7 @@
 data
 figures
 old_figures
+pipeline_running
 SCINA.log
 manuscript_prep
 scRNA_seq_scripts/deidentifying.R
