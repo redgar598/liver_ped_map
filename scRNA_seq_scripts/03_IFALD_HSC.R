@@ -185,7 +185,7 @@ d10x_raw_hsc <- AddMetaData(d10x_raw_hsc, metadata = d10x.combined_hsc@meta.data
 
 Idents(d10x_raw_hsc)<-d10x_raw_hsc$CellType_rough
 
-de_0<-FindMarkers(d10x_raw_hsc, ident.1 = "adult_IFALD_HSC", ident.2="healthy_ped_HSC", test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
+de_0<-FindMarkers(d10x_raw_hsc,  ident.1="healthy_ped_HSC",ident.2 = "adult_IFALD_HSC", test.use = "MAST",latent.vars="nFeature_RNA", verbose=F)
 de_0sig<-de_0[which(de_0$p_val_adj < 0.005 & abs(de_0$avg_log2FC) > 1),]
 head(de_0sig[which(de_0sig$avg_log2FC>0),], n=10)
 head(de_0sig[which(de_0sig$avg_log2FC<0),])
