@@ -10,17 +10,17 @@ The data folder referenced in the analysis is not on github. However, all data i
 # Data Links
 **Dissociated single cell map**
 
-CELLxGENE: https://cellxgene.cziscience.com/collections/ff69f0ee-fef6-4895-9f48-6c64a68c8289
+[CELLxGENE](https://cellxgene.cziscience.com/collections/ff69f0ee-fef6-4895-9f48-6c64a68c8289)
 
-Seurat objects: https://drive.google.com/drive/folders/1lk76_1P8Jo0TeaXy4hpoxEqTt1nxL9r_?usp=sharing
+[Seurat objects](https://drive.google.com/drive/folders/1lk76_1P8Jo0TeaXy4hpoxEqTt1nxL9r_?usp=sharing)
 
-Raw data: https://explore.data.humancellatlas.org/projects/febdaddd-ad3c-4f4a-820f-ade15c48545a
+[Raw data](https://explore.data.humancellatlas.org/projects/febdaddd-ad3c-4f4a-820f-ade15c48545a)
 
 
 
 
 **Xenium Spatial Transcriptomics**
 
-Shiny application: macparlandlab.shinyapps.io/pediatric_liver_spatial
+[Shiny application](https://macparlandlab.shinyapps.io/pediatric_liver_spatial/)
 
-Raw data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE286254
+[Raw data](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE286254)
