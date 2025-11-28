@@ -27,6 +27,6 @@ The data folder referenced in the analysis is not on github. However, all data i
 
 **Xenium Annotation**
 
-For the cell type annotation of the Xenium presented in the paper we used the output of BIDCell. The output of the BIDCell segmentation and the annotation of cell type and zonation (with segmentation centroids) are available [here](https://drive.google.com/file/d/1rARs4UAhtwmsFD2uGewnyLTbLtHI0ZmD/view?usp=sharing) whihc is 17Gb tar.xz
+For the cell type annotation of the Xenium presented in the paper we used the output of BIDCell. The output of the BIDCell segmentation and the annotation of cell type and zonation (with segmentation centroids) are available [here](https://drive.google.com/file/d/1rARs4UAhtwmsFD2uGewnyLTbLtHI0ZmD/view?usp=sharing) this is a 17Gb tar.xz
 
 To load this output as a Seurat object we have provided some sample [code](https://github.com/redgar598/liver_ped_map/blob/main/xenium_scripts/BIDCell_xenium_Seurat.R)
